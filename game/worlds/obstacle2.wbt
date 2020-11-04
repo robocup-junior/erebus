@@ -2194,6 +2194,9 @@ DEF MAINSUPERVISOR Robot {
     Receiver {
       channel 1
     }
+    Emitter {
+      channel 1
+    }
   ]
   supervisor TRUE
   controller "MainSupervisor"

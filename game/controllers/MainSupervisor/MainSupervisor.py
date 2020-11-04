@@ -441,6 +441,9 @@ def relocate(robotObj):
     # Set position of robot
     robotObj.position = [relocatePosition[0], -0.03, relocatePosition[2]]
     robotObj.rotation = [0,1,0,0]
+    
+    # Notify robot
+    emitter.send(struct.pack("c", bytes("L", "utf-8")))
 
     # Update history with event
     robotObj.history.enqueue("Lack of Progress - 5")
@@ -614,6 +617,8 @@ if __name__ == '__main__':
 
     receiver = supervisor.getReceiver('receiver')
     receiver.enable(32)
+    
+    emitter = supervisor.getEmitter('emitter')
 
     # Init robot as object to hold their info
     robot0Obj = Robot()
