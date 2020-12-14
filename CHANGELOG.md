@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added
 - Quit button to remove robot from the simulation
+- Proto node for obstacles, containing multiple shapes, physics and guide shape for manual placement distances
+- Obstacle position testing script with main supervisor
+
+### Changed
+- Main supervisor gathers information about obstacles and tiles and tests if obstacles are valid
+- Generator places obstacles by default again - currently with physics and to any shape except spheres as they are almost never placed
+
+### Removed
+- Debris group and generation removed
 
 ## [Release 7] - 2020-09-20
 
