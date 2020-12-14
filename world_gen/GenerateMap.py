@@ -1,4 +1,4 @@
-"""Map Generation Main Script Type 2 v4
+"""Map Generation Main Script Type 2 v5
    Written by Robbie Goldman and Alfred Roberts
 
 Changelog:
@@ -24,6 +24,10 @@ Changelog:
  - Added human generation
  V4:
  - Updated generation so start tile is within the main map section
+ V5:
+ - Updated obstacle placement to give minimum clearance of 20cm
+ - Updated generation to give minimum obstacle height of 15cm and max 20cm
+ - Removed debris - now just using one type of obstacle (the proto node) with physics and multiple possible shapes
 """
 
 import random
@@ -33,6 +37,9 @@ import WorldCreator
 import os
 import GUI
 dirname = os.path.dirname(__file__)
+
+#Allowed obstacle shapes (ensure that at least one is allowed or obstacles will not appear)
+obstacleShapes = [["rectangle", True], ["cylinder", True], ["cone", True], ["sphere", False]]
 
 #Object to contain information for a map tile
 class Tile ():
@@ -193,6 +200,10 @@ class Tile ():
                 return True
         #Otherwise
         return False
+
+    def getHasHuman (self) -> bool:
+        '''Returns the boolean value of the "has human" flag'''
+        return self.hasHuman
 
     def getHumanData (self) -> list:
         '''Returns the human type and the wall it is on'''
@@ -1083,35 +1094,53 @@ def generateWorld(x, y, checkpoints, traps, swamps, visual, thermal):
     return array, [startTile, startDir], humansAdded[0], humansAdded[1]
 
 
-def addObstacle(debris):
+def addObstacle():
     '''Generate random dimensions for an obstacle'''
     #Default height for static obstacle
-    height = 0.15
-    #Adjust height for debris
-    if debris:
-        height = 0.01
+    height = round(random.uniform(0.15, 0.20), 3)
     #Default size contstraints for static obstacle
     minSize = 5
-    maxSize = 15
-    #Adjust size constraints for debris
-    if debris:
-        minSize = 2
-        maxSize = 5
+    maxSize = 12
     #Generate random size
     width = float(random.randrange(minSize, maxSize)) / 100.0
     depth = float(random.randrange(minSize, maxSize)) / 100.0
+
+    #Name of shape of obstacle
+    shape = ""
+    #List of allowed shapes
+    availableShapes = []
+
+    #Iterate through possible shapes
+    for shapeType in obstacleShapes:
+        #If it is allowed
+        if shapeType[1]:
+            #Add to list of valid shapes
+            availableShapes.append(shapeType[0])
+
+    #If there are valid shapes
+    if len(availableShapes) > 0:
+        #Pick a shape at random
+        shape = availableShapes[random.randrange(0, len(availableShapes))]
+    
+    #Adjust width and depth if it is a sphere (so it is checked correctly and meets minimum height requirement)
+    if shape == "sphere":
+        width = height
+        depth = height
+
     #Create obstacle
-    obstacle = [width, height, depth, debris]
+    obstacle = [width, height, depth, shape]
     return obstacle
 
 
 def getTileAroundBlocking(array, xPos, yPos):
-    '''Returns a list of whether there is something blocking surrounding tiles [up, right, down, left]'''
+    '''Returns a list of whether there is something blocking surrounding tiles [up, right, down, left, upRight, downRight, downLeft upLeft]'''
     #Surrounding tile offsets
-    around = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+    around = [[0, -1], [1, 0], [0, 1], [-1, 0], [1, -1], [1, 1], [-1, 1], [-1, -1]]
 
     #Default values - nothing
-    wallBlocks = [False, False, False, False]
+    wallBlocks = [False, False, False, False, False, False, False, False]
+
+    diagWallToCheck = [[2, 3], [0, 3], [0, 1], [1, 2]]
 
     #Get the target tile
     tile = array[yPos][xPos]
@@ -1127,22 +1156,39 @@ def getTileAroundBlocking(array, xPos, yPos):
     #Iterate for four directions
     for d in range(0, len(around)):
         #If there is a wall
-        if walls[d]:
+        if d < len(walls) and walls[d]:
             #It is blocked
             wallBlocks[d] = True
         else:
             #If there isn't a wall
             #Get the tile that is adjacent in the current direction
-            otherTile = array[yPos + around[d][1]][xPos + around[d][0]]
-            #If there is not a tile there
-            if otherTile == None:
-                #That direction is blocked
-                wallBlocks[d] = True
+            otherTile = None
+            if yPos + around[d][1] < len(array) and xPos + around[d][0] < len(array[yPos + around[d][1]]):
+                otherTile = array[yPos + around[d][1]][xPos + around[d][0]]
+            if d < 4:
+                #If there is not a tile there
+                if otherTile == None:
+                    #That direction is blocked
+                    wallBlocks[d] = True
+                else:
+                    #If there is a checkpoint, trap or swamp in that direction
+                    if otherTile.getCheckpoint() or otherTile.getTrap() or otherTile.getSwamp():
+                        #It is blocked
+                        wallBlocks[d] = True
             else:
-                #If there is a checkpoint, trap or swamp in that direction
-                if otherTile.getCheckpoint() or otherTile.getTrap() or otherTile.getSwamp():
+                #If there is no tile
+                if otherTile == None:
                     #It is blocked
                     wallBlocks[d] = True
+                #If there is a checkpoint, trap or swamp in that direction
+                elif otherTile.getCheckpoint() or otherTile.getTrap() or otherTile.getSwamp():
+                    #It is blocked
+                    wallBlocks[d] = True
+                else:
+                    otherWalls = otherTile.getWalls()
+                    if otherWalls[diagWallToCheck[d - 4][0]] or otherWalls[diagWallToCheck[d - 4][1]]:
+                        wallBlocks[d] = True
+                    
 
     #return the blocked state of the directions
     return wallBlocks
@@ -1171,6 +1217,7 @@ def selectObstaclePositon(obstacle, array, x, y, obstacles, startPos):
     '''Select a valid position for the obstacle [x, y, z, rotation, radius]'''
     #Calculate radius of obstacle
     r = (((obstacle[0] / 2.0) ** 2) + ((obstacle[2] / 2.0) ** 2)) ** 0.50
+    #r = r + 0.2
     #Not selected a valid tile yet
     tSelected = None
 
@@ -1181,10 +1228,14 @@ def selectObstaclePositon(obstacle, array, x, y, obstacles, startPos):
     #The array position of the selected tile - none yet
     tPos = [0, 0]
     #100 attempts
-    att = 100
+    att = 200
 
     #Calculate the starting tile (so it is not obscured)
     startTile = getStartTileFromBay(startPos)
+
+    #Boundaries for obstacle placement
+    xBounds = [-0.15, 0.15]
+    zBounds = [-0.15, 0.15]
 
     #Repeat until a tile is found or all attempts exhausted
     while tSelected == None and att > 0:
@@ -1197,9 +1248,28 @@ def selectObstaclePositon(obstacle, array, x, y, obstacles, startPos):
         #If this is a tile and not the start point
         if tile != None and startTile != [tPos[0], tPos[1]]:
             #If it is not a special tile and does not contain an obstacle already
-            if not tile.getCheckpoint() and not tile.getTrap() and not tile.getSwamp() and not tile.getObstacle() and not tile.getGoal() and not tile.hasHuman:
-                #Target tile found
-                tSelected = tile
+            if not tile.getCheckpoint() and not tile.getTrap() and not tile.getSwamp() and not tile.getObstacle() and not tile.getGoal() and not tile.getHasHuman():
+                xBounds = [-0.15, 0.15]
+                zBounds = [-0.15, 0.15]
+                #Get the surrounding blocks
+                walls = getTileAroundBlocking(array, tPos[0], tPos[1])
+
+                #Get the centre position of the tile
+                tPos = [(tPos[0] * 0.3) + startX + 0.15, (tPos[1] * 0.3) + startZ + 0.15]
+
+                #Adjust away from present walls by the wall thickness and the radius
+                if walls[0] or walls[4] or walls[7]:
+                    zBounds[0] = zBounds[0] + 0.015 + r + 0.2
+                if walls[2] or walls[5] or walls[6]:
+                    zBounds[1] = zBounds[1] - 0.015 - r - 0.2
+                if walls[1] or walls[4] or walls[5]:
+                    xBounds[1] = xBounds[1] - 0.015 - r - 0.2
+                if walls[3] or walls[6] or walls[7]:
+                    xBounds[0] = xBounds[0] + 0.015 + r + 0.2
+                
+                #If there are valid places for the obstacle to be placed (must be checked as random.uniform works if first value is greater than second)
+                if xBounds[0] < xBounds[1] and zBounds[0] < zBounds[1]:
+                    tSelected = tile
 
     #If no tile was selected
     if tSelected == None:
@@ -1207,24 +1277,8 @@ def selectObstaclePositon(obstacle, array, x, y, obstacles, startPos):
         return [0, -1000, 0, 0, r]
 
     #Boundaries of tile to pick
-    xBounds = [-0.15 + r, 0.15 - r]
-    zBounds = [-0.15 + r, 0.15 - r]
-
-    #Get the surrounding blocks
-    #walls = getTileAroundBlocking(array, tPos[0], tPos[1])
-
-    #Get the centre position of the tile
-    tPos = [(tPos[0] * 0.3) + startX + 0.15, (tPos[1] * 0.3) + startZ + 0.15]
-
-    #Adjust away from present walls by the wall thickness and the radius
-    '''if walls[0]:
-        zBounds[0] = zBounds[0] + 0.015 + r
-    if walls[2]:
-        zBounds[1] = zBounds[1] - 0.015 - r
-    if walls[1]:
-        xBounds[1] = xBounds[1] - 0.015 - r
-    if walls[3]:
-        xBounds[0] = xBounds[0] + 0.015 + r'''
+    #xBounds = [-0.15 + r, 0.15 - r]
+    #zBounds = [-0.15 + r, 0.15 - r]
 
     #Selected position
     pos = [0, 0]
@@ -1276,41 +1330,34 @@ def selectObstaclePositon(obstacle, array, x, y, obstacles, startPos):
     return [pos[0], 0, pos[1], rot, r]
 
 
-def generateObstacles(bulky, debris, array, x, y, startPos):
+def generateObstacles(bulky, array, x, y, startPos):
     '''Generate a list of obstacles of length numObstacles'''
     #List to hold obstacle dimensions
     obstacles = []
     #How many obstacles have actually been placed
-    placedBulky = 0
-    placedDebris = 0
+    placed = 0
 
-    #Iterate for each static obstacle
+    #Iterate for each obstacle
     for i in range(0, bulky):
         #Create an obstacle and add it to the list
-        newObstacle = addObstacle(False)
+        newObstacle = addObstacle()
         newObstaclePos = selectObstaclePositon(newObstacle, array, x, y, obstacles, startPos)
+        #If a valid position was found
         if newObstaclePos[1] > -1:
-            placedBulky = placedBulky + 1
-        obstacles.append([newObstacle, newObstaclePos])
-        obstacles.append([newObstacle, [0, -1000, 0, 0, 0]])
-
-    #Iterate for each piece of debris
-    for i in range(0, debris):
-        #Create an obstacle and add it to the list
-        newObstacle = addObstacle(True)
-        obstacles.append([newObstacle, [0, -1000, 0, 0, 0]])
+            placed = placed + 1
+            obstacles.append([newObstacle, newObstaclePos])
 
     #Return the list of dimensions
-    return obstacles, placedBulky, placedDebris
+    return obstacles, placed
 
 
-def generatePlan (xSize, ySize, numCheckpoints, numTraps, bulkyObstacles, debris, numSwamps, numVisualHumans, numThermalHumans):
+def generatePlan (xSize, ySize, numCheckpoints, numTraps, bulkyObstacles, numSwamps, numVisualHumans, numThermalHumans):
     '''Perform a map generation up to png - does not update map file'''
     #Generate the world and tree
     world, startPos, numVisual, numThermal = generateWorld(xSize, ySize, numCheckpoints, numTraps, numSwamps, numVisualHumans, numThermalHumans)
 
     #Create a list of obstacles
-    obstacles, placedBulky, placedDebris = generateObstacles(bulkyObstacles, debris, world, xSize, ySize, startPos)
+    obstacles, placedObstacles = generateObstacles(bulkyObstacles, world, xSize, ySize, startPos)
 
     #Output the world as a picture
     printWorld(world)
@@ -1318,7 +1365,7 @@ def generatePlan (xSize, ySize, numCheckpoints, numTraps, bulkyObstacles, debris
     print("Generation Successful")
 
     #Return generated parts
-    return world, obstacles, startPos, numVisual, numThermal, placedBulky, placedDebris
+    return world, obstacles, startPos, numVisual, numThermal, placedObstacles
 
 
 def generateWorldFile (world, obstacles, startPos, window):
@@ -1376,8 +1423,7 @@ obstacles = None
 thermalHumans = None
 visualHumans = None
 startTilePos = None
-placedBulky = None
-placedDebris = None
+placedObstacles = None
 
 #Loop while the UI is active
 while guiActive:
@@ -1387,21 +1433,21 @@ while guiActive:
         #Cannot save now
         window.setSaveButton(False)
         #Get generation values as follows:
-        #[[xSize ySize], [thermal, visual], [bulky, debris], [checkpoints, traps, swamps]]
+        #[[xSize ySize], [thermal, visual], [bulky], [checkpoints, traps, swamps]]
         genValues = window.getValues()
         #A generation has started (resets flag so generation is not called again)
         window.generateStarted()
         #Unpack the human values
         thermalHumans, visualHumans = genValues[1][0], genValues[1][1]
         #Generate a plan with the values
-        world, obstacles, startTilePos, visualHumans, thermalHumans, placedBulky, placedDebris = generatePlan(genValues[0][0], genValues[0][1], genValues[3][0], genValues[3][1], genValues[2][0], genValues[2][1], genValues[3][2], visualHumans, thermalHumans)
-        #Unpack the used obstacle counts
-        bulkyObstacles, debris = genValues[2][0], genValues[2][1]
+        world, obstacles, startTilePos, visualHumans, thermalHumans, placedObstacles = generatePlan(genValues[0][0], genValues[0][1], genValues[3][0], genValues[3][1], genValues[2][0], genValues[3][2], visualHumans, thermalHumans)
+        #Unpack the used obstacle count
+        bulkyObstacles = genValues[2][0]
         #Update the UI image of the map
         window.updateImage()
 
         #Update the output fields of the window
-        window.setGeneratedInformation("Thermal: " + str(thermalHumans), "Visual: " + str(visualHumans), "Bulky: " + str(placedBulky) + "(" + str(bulkyObstacles) +")", "Debris: " + str(placedDebris) + "(" + str(debris) +")")
+        window.setGeneratedInformation("Thermal: " + str(thermalHumans), "Visual: " + str(visualHumans), str(placedObstacles) + "(" + str(bulkyObstacles) +")")
 
     #If a save file is being called for
     if window.saving:
@@ -1410,14 +1456,14 @@ while guiActive:
         #Saving has begin (resets flag so save is not called twice)
         window.saveStarted()
         #If all values that are needed are not None
-        if checkNoNones([world, obstacles, startTilePos, thermalHumans, visualHumans, placedBulky, placedDebris]):
+        if checkNoNones([world, obstacles, startTilePos, thermalHumans, visualHumans, placedObstacles]):
             #Generate and save a world
             generateWorldFile(world, obstacles, startTilePos, window)
 
     #Attempt update loops
     try:
         #Toggle the save button to the correct state
-        window.setSaveButton(checkNoNones([world, obstacles, thermalHumans, visualHumans, startTilePos, placedBulky, placedDebris]))
+        window.setSaveButton(checkNoNones([world, obstacles, thermalHumans, visualHumans, startTilePos, placedObstacles]))
         #Update loops for the UI - manually called to prevent blocking of this program
         window.update_idletasks()
         window.update()

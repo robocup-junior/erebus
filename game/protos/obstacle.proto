@@ -1,0 +1,184 @@
+PROTO obstacle[
+    field SFString id ""
+    field SFBool rectangular FALSE
+    field SFBool cylindrical FALSE
+    field SFBool conical FALSE
+    field SFBool spherical FALSE
+    field SFFloat width 0.1
+    field SFFloat depth 0.1
+    field SFFloat height 0.1
+    field SFFloat xPos 0
+    field SFFloat zPos 0
+    field SFFloat rotation 0
+    field SFBool physics FALSE
+    field SFBool displayClearance FALSE
+    hiddenField SFFloat clearanceSize 0.2
+    hiddenField SFFloat scale 0.4
+]
+
+{
+    DEF OBSTACLE Transform {
+
+        %{
+            x = fields.xPos.value
+            y = (fields.height.value / 2) - 0.03
+            z = fields.zPos.value
+            w = fields.width.value
+            h = fields.height.value
+            d = fields.depth.value
+            yRot = fields.rotation.value
+            r = (((d / 2) ^ 2) + ((w / 2) ^ 2)) ^ 0.5
+            id = fields.id.value
+            offset = fields.clearanceSize.value * fields.scale.value
+        }%
+
+        translation %{=x}% %{=y}% %{=z}%
+        scale 1 1 1
+        rotation 0 1 0 %{=yRot}% 
+
+        children[
+            %{if fields.rectangular.value == true then}%
+                DEF CUBE Solid {
+                    translation 0 0 0
+                    children[
+                        Shape {
+
+                            appearance Appearance {
+                                material Material {
+                                    diffuseColor 0.45 0.45 0.45
+                                }
+                            }
+
+                            geometry DEF CUBESHAPE Box {
+                                size %{=w}% %{=h}% %{=d}%
+                            }
+
+                        }
+                    ]
+
+                    %{if fields.physics.value == true then}%
+                        physics Physics {
+                
+                        }
+                    %{end}%
+
+                    name "rectangleObstacle%{=id}%"
+                    boundingObject USE CUBESHAPE
+                }
+            %{end}%
+            
+            %{if fields.cylindrical.value == true then}%
+                DEF CYLINDER Solid{
+                    translation 0 0 0
+                    children[
+                        Shape {
+
+                            appearance Appearance {
+                                material Material {
+                                    diffuseColor 0.45 0.45 0.45
+                                }
+                            }
+
+                            geometry DEF CYLINDERSHAPE Cylinder {
+                                height %{=h}%
+                                radius %{=r}%
+                            }
+
+                        }
+                    ]
+
+                    %{if fields.physics.value == true then}%
+                        physics Physics {
+                
+                        }
+                    %{end}%
+
+                    name "cylinderObstacle%{=id}%"
+                    boundingObject USE CYLINDERSHAPE
+                }
+            %{end}%
+
+            %{if fields.conical.value == true then}%
+                DEF CONE Solid{
+                    translation 0 0 0
+                    children[
+                        Shape {
+
+                            appearance Appearance {
+                                material Material {
+                                    diffuseColor 0.45 0.45 0.45
+                                }
+                            }
+
+                            geometry DEF CONESHAPE Cone {
+                                height %{=h}%
+                                bottomRadius %{=r}%
+                            }
+
+                        }
+                    ]
+
+                    %{if fields.physics.value == true then}%
+                        physics Physics {
+                
+                        }
+                    %{end}%
+
+                    name "coneObstacle%{=id}%"
+                    boundingObject DEF CYLINDERBOUNDS Cylinder {
+                        height %{=h}%
+                        radius %{=r}%
+                    }
+                }
+            %{end}%
+
+            %{if fields.spherical.value == true then}%
+                DEF SPHERE Solid{
+                    translation 0 0 0
+                    children[
+                        Shape {
+
+                            appearance Appearance {
+                                material Material {
+                                    diffuseColor 0.45 0.45 0.45
+                                }
+                            }
+
+                            geometry DEF SPHERESHAPE Sphere {
+                                radius %{=h/2}%
+                                subdivision 5
+                            }
+
+                        }
+                    ]
+
+                    %{if fields.physics.value == true then}%
+                        physics Physics {
+                
+                        }
+                    %{end}%
+
+                    name "obstacleSphere%{=id}%"
+                    boundingObject USE SPHERESHAPE
+                }
+            %{end}%
+
+            %{if fields.displayClearance.value == true and (fields.rectangular.value == true or fields.cylindrical.value == true or fields.conical.value == true or fields.spherical.value == true) then}%
+                DEF CLEARANCE Shape {
+                    appearance Appearance {
+                        material Material {
+                            diffuseColor 0.8 0 0
+                            transparency 0.5
+                        }
+                    }
+
+                    geometry DEF CYLINDERSHAPE Cylinder {
+                        height %{=h + 0.005}%
+                        radius %{=r + offset}%
+                    }
+                }
+            %{end}%
+        ]
+
+    }
+}

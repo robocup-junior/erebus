@@ -1,4 +1,4 @@
-"""Generation Graphical User Interface Script Type 2 v1
+"""Generation Graphical User Interface Script Type 2 v2
    Written by Alfred Robers and Robbie Goldman
    Based on Type 1 GUI but modified for maze
 
@@ -10,6 +10,8 @@ Changelog:
       - Bulky obstacles and debris
       - Checkpoints and traps
   - Reduced output section to display only necessary info
+ V2:
+  - Removed debris slider
 """
 
 import tkinter as tk
@@ -155,12 +157,12 @@ class GenerateWindow(tk.Tk):
                              [[9, 7], [8, 12], [2, 0], [3, 2, 3]],
                              [[11, 9], [8, 17], [3, 0], [3, 3, 3]],
                              [[15, 15], [10, 20], [4, 0], [4, 3, 4]]]'''
-        self.difficulties = [[[5, 5], [4, 7], [0, 0], [2, 1, 1]],
-                             [[6, 5], [5, 8], [0, 0], [2, 1, 1]],
-                             [[7, 7], [7, 10], [0, 0], [2, 2, 2]],
-                             [[9, 7], [8, 12], [0, 0], [3, 2, 3]],
-                             [[11, 9], [8, 17], [0, 0], [3, 3, 3]],
-                             [[15, 15], [10, 20], [0, 0], [4, 3, 4]]]
+        self.difficulties = [[[5, 5], [4, 7], [0], [2, 1, 1]],
+                             [[6, 5], [5, 8], [1], [2, 1, 1]],
+                             [[7, 7], [7, 10], [2], [2, 2, 2]],
+                             [[9, 7], [8, 12], [2], [3, 2, 3]],
+                             [[11, 9], [8, 17], [3], [3, 3, 3]],
+                             [[15, 15], [10, 20], [4], [4, 3, 4]]]
 
         #Setup the grid for the advanced page
         self.advancedSection.grid_columnconfigure(0, minsize=275)
@@ -189,7 +191,7 @@ class GenerateWindow(tk.Tk):
         #Add input sliders for rooms, humans, obstacles and bases
         self.inputsArray.append(self.createSliderSection(self.advRoom, 5, 15, "Rooms", "Vertical:", 5, 15, "Horizontal:"))
         self.inputsArray.append(self.createSliderSection(self.advHumans, 0, 25, "Humans", "Visual:", 0, 25, "Thermal:"))
-        self.inputsArray.append(self.createSliderSection(self.advObstacles, 0, 10, "Obstacles", "Debris:", 0, 20, "Bulky:"))
+        self.inputsArray.append(self.createSliderSection(self.advObstacles, 0, 10, "Obstacles", None, None, None, "Number:"))
         self.inputsArray.append(self.createSliderSection(self.advTiles, 2, 4, "Tiles", "Traps:", 0, 4, "Checkpoints:", "Swamps:", 0, 6))
 
         #Add a slider to choose the difficulty
@@ -476,10 +478,10 @@ class GenerateWindow(tk.Tk):
         return path
 
 
-    def setGeneratedInformation (self, thermal: str, visual: str, obstacles: str, debris: str) -> None:
+    def setGeneratedInformation (self, thermal: str, visual: str, obstacles: str) -> None:
         '''Update the generated numbers from the values given by the generation'''
         #Combine items in a list (so it can be iteratively added)
-        dataList = [[thermal, visual], [obstacles, debris]]
+        dataList = [[thermal, visual], [obstacles]]
         position = 0
         #Iterate across all output types
         while position < len(dataList) and position < len(self.outputBodies):

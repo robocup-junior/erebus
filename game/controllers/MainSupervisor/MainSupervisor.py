@@ -10,6 +10,7 @@ import math
 import datetime
 import threading
 import ControllerUploader
+import obstacleCheck
 import glob
 
 # Create the instance of the supervisor class
@@ -427,6 +428,123 @@ def getCheckpoints(checkpoints, numberOfCheckpoints):
         checkpointObj = Checkpoint([minPos[0], minPos[2]], [maxPos[0], maxPos[2]], centerPos)
         checkpoints.append(checkpointObj)
 
+
+def getObstacles():
+    '''Returns list containing all obstacle positions and dimensions'''
+    #Count the obstacles
+    numberObstacles = supervisor.getFromDef('OBSTACLES').getField("children").getCount()
+    #Get the node containing all the obstacles
+    obstacleNodes = supervisor.getFromDef('OBSTACLES').getField("children")
+
+    allObstaclesData = []
+
+    #Iterate through the obstacles
+    for i in range(0, numberObstacles):
+        try:
+            #Attempt to get the position and shape of the obstacle
+            obstacle = obstacleNodes.getMFNode(i)
+            xPos = obstacle.getField("xPos").getSFFloat()
+            zPos = obstacle.getField("zPos").getSFFloat()
+            width = obstacle.getField("width").getSFFloat()
+            depth = obstacle.getField("depth").getSFFloat()
+            obstacleData = [[xPos, zPos], [width, depth]]
+            allObstaclesData.append(obstacleData)
+        except:
+            #If an error occured then it was not a proto obstacle
+            print("Invalid obstacle found, it could not be tested")
+    
+    return allObstaclesData
+
+def deactivateObstacles(allowedObstacles):
+    '''Takes a list of bools if the value is false the obstacle will be removed from the simulation'''
+    #Count the obstacles
+    numberObstacles = supervisor.getFromDef('OBSTACLES').getField("children").getCount()
+    #Get the node containing all the obstacles
+    obstacleNodes = supervisor.getFromDef('OBSTACLES').getField("children")
+
+    currentObstacle = 0
+    nodesToDeactivate = []
+
+    #Iterate through the obstacles
+    for i in range(0, numberObstacles):
+        try:
+            #Attempt to get the obstacle (and check if it is a proto node)
+            obs = obstacleNodes.getMFNode(i)
+            obs.getField("rectangular").getSFBool()
+            #If there is a boolean value indicating if it is allowed
+            if currentObstacle < len(allowedObstacles):
+                #If it is not allowed
+                if not allowedObstacles[i]:
+                    #Add it to the list for deactivaing
+                    nodesToDeactivate.append([obs, currentObstacle])
+                
+                #Increment counter (used to give id of obstacle when deactivating)
+                currentObstacle = currentObstacle + 1
+        except:
+            pass
+    
+    #Iterate through the node, id pairs
+    for nodeData in nodesToDeactivate:
+        try:
+            node = nodeData[0]
+            #Switch off all shapes - removes obstacle from simulation but remains in place and hierachy
+            node.getField("rectangular").setSFBool(False)
+            node.getField("cylindrical").setSFBool(False)
+            node.getField("conical").setSFBool(False)
+            node.getField("spherical").setSFBool(False)
+            #Message to console that it has been removed
+            print("Obstacle {0} removed, insufficient clearance to walls.".format(nodeData[1]))
+        except:
+            #It was not a proto obstacle so it was ignored
+            print("Invalid obstacle found, could not remove.")     
+
+def getTiles():
+    '''Returns list containing all tile positions and which walls are present'''
+    #Count the number of tiles
+    numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
+    #Retrieve the node containing the tiles
+    tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
+
+    allTilesData = []
+
+    #Iterate through the tiles
+    for i in range(0, numberTiles):
+        tile = tileNodes.getMFNode(i)
+        #Get the width and height of the grid of tiles (dimensions of grid)
+        width = tile.getField("width").getSFFloat()
+        height = tile.getField("height").getSFFloat()
+        #Get the scale from the tile
+        scale = [tile.getField("xScale").getSFFloat(), tile.getField("yScale").getSFFloat(), tile.getField("zScale").getSFFloat()]
+        #Find the start position
+        xStart = -(width * (0.3 * scale[0]) / 2.0)
+        zStart = -(height * (0.3 * scale[2]) / 2.0)
+        #Get position of the tile in the grid
+        xPos = tile.getField("xPos").getSFInt32()
+        zPos = tile.getField("zPos").getSFInt32()
+        #Get the position of the tile in the world
+        x = xPos * (0.3 * scale[0]) + xStart
+        z = zPos * (0.3 * scale[2]) + zStart
+        #Create list of wall presence
+        walls = [tile.getField("topWall").getSFBool(), tile.getField("rightWall").getSFBool(), tile.getField("bottomWall").getSFBool(), tile.getField("leftWall").getSFBool()]
+        allTilesData.append([[x, z], walls])
+    
+    return allTilesData
+
+
+def checkObstacles():
+    '''Performs a test on each obstacle's placement and if it does not have sufficient clearance the obstacle is removed (only works on proto obstacles)'''
+    #Get the data for all the obstacles
+    obstacles = getObstacles()
+    #If there are obstacles (otherwise there is no point in checking)
+    if len(obstacles) > 0:
+        #Get the tiles
+        allTiles = getTiles()
+        #Perform the checks on the obstacles positions
+        results = obstacleCheck.performChecks(allTiles, obstacles)
+        #Deactivate the appropriate obstacles
+        deactivateObstacles(results)
+
+
 def resetVictimsTextures():
     # Iterate for each victim
     for i in range(numberOfHumans):
@@ -587,6 +705,9 @@ if __name__ == '__main__':
 
     #get humans in world
     getHumans(humans, numberOfHumans)
+
+    #Check the obstacles are valid and remove if necessary
+    checkObstacles()
 
     # Not currently running the match
     currentlyRunning = False
