@@ -1,4 +1,4 @@
-"""Map Generation World File Creator Type 2 v4
+"""Map Generation World File Creator Type 2 v5
    Written by Robbie Goldman and Alfred Roberts
 
 Changelog:
@@ -24,6 +24,8 @@ Changelog:
  - Removed robots from generation (commended out if needed)
  v4:
  - Updated to scale tiles
+ v5:
+ - Changed from obstacles and debris to new proto based obstacles
 """
 
 
@@ -34,6 +36,10 @@ dirname = os.path.dirname(__file__)
 
 #General scale for tiles - adjusts position and size of pieces and obstacles
 tileScale = [0.4, 0.4, 0.4]
+#Allowed obstacle shapes
+obstacleShapes = ["rectangle", "cylinder", "cone", "sphere"]
+#Whether or not obstacles should use physics
+obstaclePhysics = True
 #The vertical position of the floor
 floorPos = -0.075 * tileScale[1]
 
@@ -225,13 +231,6 @@ def createFileData (walls, obstacles, startPos):
     #Close template file
     obstacleTemplate.close()
 
-    #Open the file containing the template for the debris
-    debrisTemplate = open(os.path.join(dirname, "debrisTemplate.txt"), "r")
-    #Read template
-    debrisPart = debrisTemplate.read()
-    #Close template file
-    debrisTemplate.close()
-
     #Open the file containing the template for the supervisor
     supervisorTemplate = open(os.path.join(dirname, "supervisorTemplate.txt"), "r")
     #Read template
@@ -385,29 +384,44 @@ def createFileData (walls, obstacles, startPos):
 
     #String to hold all the data for the obstacles
     allObstacles = ""
-    allDebris = ""
 
     #Id to give a unique name to the obstacles
     obstacleId = 0
-    debrisId = 0
 
     #Iterate obstalces
     for obstacle in obstacles:
-        #If this is debris
-        if obstacle[0][3]:
-            #Add the debris object (scaled to world size)
-            allDebris = allDebris + debrisPart.format(debrisId, obstacle[0][0] * tileScale[0], obstacle[0][1] * tileScale[1], obstacle[0][2] * tileScale[2])
-            #Increment id counter
-            debrisId = debrisId + 1
-        else:
-            #Add the obstacle (scaled and positioned based on world scale)
-            allObstacles = allObstacles + obstaclePart.format(obstacleId, obstacle[0][0] * tileScale[0], obstacle[0][1] * tileScale[1], obstacle[0][2] * tileScale[2], obstacle[1][0] * tileScale[0], obstacle[1][1] * tileScale[1], obstacle[1][2] * tileScale[2], obstacle[1][3])
+        #Add the obstacle (scaled and positioned based on world scale)
+        #If there is an obstace shape
+        present = False
+        #The shape values
+        shapeValues = ["FALSE", "FALSE", "FALSE", "FALSE"]
+
+        #Iterate through possible shapes
+        for shapePos in range(0, len(obstacleShapes)):
+            #If the named shape is the same and not already set (prevents duplicates)
+            if obstacle[0][3] == obstacleShapes[shapePos] and not present:
+                #Set the value of that shape to true (causes proto node to configure correctly for the shape)
+                shapeValues[shapePos] = "TRUE"
+                #The obstacle will exist
+                present = True
+
+        #If the obstacle will exist
+        if present:
+            
+            #Whether or not to enable physics
+            physicsEnabled = "FALSE"
+            if obstaclePhysics:
+                physicsEnabled = "TRUE"
+            
+            #Add the obstacle to the list (id, rect, cyl, cone, sphere, width, height, depth, xpos, zpos, rotation, physics) (width, height, depth, xpos and zpos are adjusted by tile size scaling)
+            allObstacles = allObstacles + obstaclePart.format(obstacleId, shapeValues[0], shapeValues[1], shapeValues[2], shapeValues[3], obstacle[0][0] * tileScale[0], obstacle[0][1] * tileScale[1], obstacle[0][2] * tileScale[2], obstacle[1][0] * tileScale[0], obstacle[1][2] * tileScale[2], obstacle[1][3], physicsEnabled)
             #Increment id counter
             obstacleId = obstacleId + 1
 
     #Add obstacles and debris to the file
     fileData = fileData + groupPart.format(allObstacles, "OBSTACLES")
-    fileData = fileData + groupPart.format(allDebris, "DEBRIS")
+    #Removed debris as no longer necessary
+    #fileData = fileData + groupPart.format(allDebris, "DEBRIS")
 
     #String to hold all the data for the robots (removed - now performed by supervisor)
     '''robotData = ""
