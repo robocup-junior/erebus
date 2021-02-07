@@ -6,17 +6,27 @@
 		<br>
 		<table id="robotTable">
 		<tr>
-		<th class="halfRow">
-		<p id="robot0Name">Erebus Rescue Simulator<br>Release 7</p>
-		<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/robot0Controller/">
-			<input type="file" class="hidden" onchange="fileOpened('0')" id="robot0File" />
-		</form>
-		<button class="button buttonLoad" onclick="openLoadController('0')" style="display:inline-block;" id="load0">Load<br>Controller</button>
-		<button class="button buttonUnload" onclick="unloadPressed('0')" style="display:none;" id="unload0">Remove<br>Controller</button></th>
+			<th class="halfRow">
+				<p id="robot0Name">Erebus Rescue Simulator<br>Release 7</p>
+				<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/">
+					<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
+				</form>
+				<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load<br>Controller</button>
+				<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove<br>Controller</button>
+			</th>
+		</tr>
+		<tr>
+			<th class="halfRow">
+				<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/protos/">
+					<input type="file" class="hidden" onchange="fileOpened('robot1Controller', '[\'proto\']', 'protos', 1)" id="robot1Controller" />
+				</form>
+				<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot</button>
+				<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot</button>
+			</th>
 		</tr>
 		<!-- <th class="halfRow">Robot 1
 		<p id="robot1Name">None</p>
-		<input type="file" class="hidden" accept=".py" onchange="fileOpened('1')" id="robot1File" />
+		<input type="file" class="hidden" accept=".py" onchange="fileOpened()" id="robot1File" />
 		<button class="button buttonLoad" onclick="openLoadController('1')" style="display:inline-block;" id="load1">Load<br>Controller</button>
 		<button class="button buttonUnload" onclick="unloadPressed('1')" style="display:none;" id="unload1">Remove<br>Controller</button></th> -->
 		<tr>

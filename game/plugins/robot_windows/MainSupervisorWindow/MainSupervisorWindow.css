@@ -115,7 +115,7 @@ body{
   background: #eeeeee;
 }
 
-#load0:disabled,#unload0:disabled, #relocate0:disabled, #detectionApi:disabled{
+#load0:disabled,#unload0:disabled, #load1:disabled,#unload1:disabled, #relocate0:disabled, #detectionApi:disabled{
   border-color: #9e9e9e;
   color: #9e9e9e;
   fill: none;

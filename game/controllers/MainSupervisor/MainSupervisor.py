@@ -1,4 +1,4 @@
-"""Supervisor Controller Prototype v1
+"""Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
 
@@ -310,9 +310,6 @@ class Human():
 
         return False
 
-
-
-
 class Tile():
     '''Tile object holding the boundaries'''
 
@@ -357,20 +354,38 @@ class StartTile(Tile):
         self.wb_node = wb_node
 
 
-
-def resetControllerFile(number: int) -> None:
+def resetControllerFile() -> None:
     '''Remove the controller'''
     path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(path, "robot"+str(number)+"Controller")
-    path = os.path.join(path, "robot"+str(number)+"Controller.*")
+    path = os.path.join(path, "controllers/robot0Controller")
+    path = os.path.join(path, "robot0Controller.*")
+    print(path)
 
     for file in glob.glob(path):
         os.remove(file)
 
 def resetController(num: int) -> None:
     '''Send message to robot window to say that controller has been unloaded'''
-    resetControllerFile(num)
+    resetControllerFile()
     supervisor.wwiSendText("unloaded"+str(num))
+
+def resetRobotProto() -> None:
+    '''
+    - Send message to robot window to say that robot has been reset
+    - Reset robot proto file back to default
+    '''
+    path = os.path.dirname(os.path.abspath(__file__))
+    default_robot_proto = os.path.join(path, 'protos/E-puck-custom-default.proto')
+    robot_proto = os.path.join(path,'protos/protos.proto')
+    try:
+        with open(default_robot_proto) as drp:
+            with open(robot_proto, "w") as rp:
+                for line in drp:
+                    rp.write(line)
+
+        supervisor.wwiSendText("unloaded1")
+    except:
+        print('Error resetting robot proto')
 
 def updateHistory():
     supervisor.wwiSendText("historyUpdate" + "," + ",".join(robot0Obj.history.queue))
@@ -597,12 +612,12 @@ def add_robot():
         root = supervisor.getRoot()
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
-        root_children_field.importMFNode(12,filePath + '/../nodes/robot0.wbo')
+        root_children_field.importMFNode(12,filePath + '/nodes/robot0.wbo')
         # Update robot0 variable
         robot0 = supervisor.getFromDef("ROBOT0")
         # Update robot window to say robot is in simulation
         supervisor.wwiSendText("robotInSimulation0")
-
+        # Set using_detection_api to whether the team is using the detection API or not
         robot0.getField("using_detection_api").setSFBool(robotApiDetection)
 
 
@@ -611,14 +626,11 @@ def create_log_str():
     # Get robot events
     r0_str = robot0Obj.get_log_str()
 
-    # Create log text
-    log_str = ""
-    log_str += "MAX_GAME_DURATION: "+str(maxTimeMinute)+":00\n"
-    log_str += "ROBOT_0_SCORE: "+str(robot0Obj.getScore())+"\n"
-    log_str += "\n"
-    log_str += "ROBOT_0: "+str(robot0Obj.name)+"\n"
-    log_str += r0_str
-    log_str += "\n"
+    log_str = f"""MAX_GAME_DURATION: {str(maxTimeMinute)}:00
+ROBOT_0_SCORE: {str(robot0Obj.getScore())}
+
+ROBOT_0: {str(robot0Obj.name)}
+{r0_str}"""
 
     return log_str
 
@@ -724,7 +736,7 @@ if __name__ == '__main__':
     finished = False
 
     # Reset the controllers
-    resetControllerFile(0)
+    resetControllerFile()
 
     # How long the game has been running for
     timeElapsed = 0
@@ -965,8 +977,9 @@ if __name__ == '__main__':
                 if parts[0] == "reset":
                     robot_quit(robot0Obj, 0, False)
                     # Reset both controller files
-                    resetControllerFile(0)
+                    resetControllerFile()
                     resetVictimsTextures()
+                    resetRobotProto()
 
                     # Reset the simulation
                     supervisor.simulationReset()
@@ -979,10 +992,20 @@ if __name__ == '__main__':
                         #Show start tile
                         robot0Obj.startingTile.wb_node.getField("start").setSFBool(True)
 
+                    # Must restart world - to reload to .wbo file for the robot which only seems to be read and interpreted
+                    # once per game, so if we load a new robot file, the new changes won't come into place until the world
+                    # is reset!
+                    supervisor.worldReload()
+
                 if parts[0] == "robot0Unload":
                     # Unload the robot 0 controller
                     if not gameStarted:
                         resetController(0)
+                
+                if parts[0] == "robot1Unload":
+                    # Remove the robot proto
+                    if not gameStarted:
+                        resetRobotProto()
 
                 if parts[0] == 'relocate':
                     data = message.split(",", 1)
