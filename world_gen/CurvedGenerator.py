@@ -5,7 +5,7 @@ def f(x):
 
 resolution = 20
 wallThickness = 0.01
-wallHeight = 0.3
+wallHeight = 0.15
 pi = 3.14
 
 file = open('../game/worlds/curved.wbt', 'w')

@@ -4,7 +4,7 @@
         }
         Viewpoint {
           orientation -1 0 0 0.85
-          position -0.08 0.2 0.17
+          position -0.08 0.4 0.34
         }
         TexturedBackground {
         }
@@ -27,8 +27,8 @@
             bottomRightCorner FALSE
             topRightCorner FALSE
             topExternal TRUE
-            rightExternal TRUE
-            bottomExternal TRUE
+            rightExternal FALSE
+            bottomExternal FALSE
             leftExternal TRUE
             notch ""
             notchRotation 0
@@ -36,13 +36,106 @@
             trap FALSE
             checkpoint FALSE
             swamp FALSE
-            width 1
-            height 1
+            width 2
+            height 2
             id "0"
             xScale 0.4
             yScale 0.4
             zScale 0.4
             curveDir 4
+          }
+        
+        DEF TILE worldTile {
+            xPos 0
+            zPos 1
+            floor TRUE
+            topWall FALSE
+            rightWall FALSE
+            bottomWall FALSE
+            leftWall FALSE
+            topLeftCorner FALSE
+            bottomLeftCorner FALSE
+            bottomRightCorner FALSE
+            topRightCorner FALSE
+            topExternal FALSE
+            rightExternal FALSE
+            bottomExternal TRUE
+            leftExternal TRUE
+            notch ""
+            notchRotation 0
+            start FALSE
+            trap FALSE
+            checkpoint FALSE
+            swamp FALSE
+            width 2
+            height 2
+            id "1"
+            xScale 0.4
+            yScale 0.4
+            zScale 0.4
+            curveDir 3
+          }
+        
+        DEF TILE worldTile {
+            xPos 1
+            zPos 0
+            floor TRUE
+            topWall FALSE
+            rightWall FALSE
+            bottomWall FALSE
+            leftWall FALSE
+            topLeftCorner FALSE
+            bottomLeftCorner FALSE
+            bottomRightCorner FALSE
+            topRightCorner FALSE
+            topExternal TRUE
+            rightExternal TRUE
+            bottomExternal FALSE
+            leftExternal FALSE
+            notch ""
+            notchRotation 0
+            start FALSE
+            trap FALSE
+            checkpoint FALSE
+            swamp FALSE
+            width 2
+            height 2
+            id "2"
+            xScale 0.4
+            yScale 0.4
+            zScale 0.4
+            curveDir 1
+          }
+        
+        DEF TILE worldTile {
+            xPos 1
+            zPos 1
+            floor TRUE
+            topWall FALSE
+            rightWall FALSE
+            bottomWall FALSE
+            leftWall FALSE
+            topLeftCorner FALSE
+            bottomLeftCorner FALSE
+            bottomRightCorner FALSE
+            topRightCorner FALSE
+            topExternal FALSE
+            rightExternal TRUE
+            bottomExternal TRUE
+            leftExternal FALSE
+            notch ""
+            notchRotation 0
+            start FALSE
+            trap FALSE
+            checkpoint FALSE
+            swamp FALSE
+            width 2
+            height 2
+            id "3"
+            xScale 0.4
+            yScale 0.4
+            zScale 0.4
+            curveDir 2
           }
         
             ]
@@ -66,10 +159,10 @@
         DEF boundary Group {
             children [
               DEF start0min Transform {
-                    translation -0.12 -0.03 -0.12
+                    translation -0.18 -0.03 -0.18
               }
               DEF start0max Transform {
-                    translation 0 -0.03 0
+                    translation -0.06 -0.03 -0.06
               }
             ]
           }
