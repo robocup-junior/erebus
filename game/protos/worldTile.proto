@@ -29,7 +29,7 @@ PROTO worldTile [
 		field SFInt32 curveDir 0
 ]
 {
-      DEF TILE Transform {
+      DEF TILE Solid {
 
 	  %{
 	  scaleX = fields.xScale.value
@@ -44,9 +44,12 @@ PROTO worldTile [
 	  translation %{=x}% 0 %{=z}%
 	  scale %{=scaleX}% %{=scaleY}% %{=scaleZ}%
 
-            children[
+      children[
+		  DEF TILE_SHAPES_GROUP Group {
+			  children [
+
 				%{if fields.floor.value == true then}%
-					DEF FLOOR Solid {
+					DEF FLOOR Transform {
 						translation 0 -0.085 0
 						children [
 							Shape {
@@ -60,12 +63,10 @@ PROTO worldTile [
 								}
 							}
 						]
-						name "floorBlock%{=fields.id.value}%"
-						boundingObject USE FLOORBOX
 					}
 				%{end}%
 				%{if fields.topWall.value == true then}%
-					DEF BACKWALL Solid {
+					DEF BACKWALL Transform {
 						translation 0 0 -0.14375
 						children [
 							Shape {
@@ -79,12 +80,10 @@ PROTO worldTile [
 								}
 							}
 						]
-						name "backWallBlock%{=fields.id.value}%"
-						boundingObject USE BACKWALLBOX
 					}
 				%{end}%
 				%{if fields.rightWall.value == true then}%
-					DEF RIGHTWALL Solid {
+					DEF RIGHTWALL Transform {
 						translation 0.14375 0 0
 						children [
 							Shape {
@@ -98,12 +97,10 @@ PROTO worldTile [
 								}
 							}
 						]
-						name "rightWallBlock%{=fields.id.value}%"
-						boundingObject USE BACKWALLBOX
 					}
 				%{end}%
 				%{if fields.bottomWall.value == true then}%
-					DEF FRONTWALL Solid {
+					DEF FRONTWALL Transform {
 						translation 0 0 0.14375
 						children [
 							Shape {
@@ -117,12 +114,10 @@ PROTO worldTile [
 								}
 							}
 						]
-						name "frontWallBlock%{=fields.id.value}%"
-						boundingObject USE BACKWALLBOX
 					}
 				%{end}%
 				%{if fields.leftWall.value == true then}%
-					DEF LEFTWALL Solid {
+					DEF LEFTWALL Transform {
 						translation -0.14375 0 0
 						children [
 							Shape {
@@ -136,40 +131,30 @@ PROTO worldTile [
 								}
 							}
 						]
-						name "leftWallBlock%{=fields.id.value}%"
-						boundingObject USE BACKWALLBOX
 					}
 				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == false and fields.bottomExternal.value == false and fields.leftExternal.value == false then}%
+				%{if fields.topExternal.value == true then}%
 					Transform {
+						translation 0 -0.01 -0.15625
 						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
+								Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0.2 0.466667 0.521569
 										}
-									geometry DEF BACKWALLBOX Box {
-										size 0.3 0.17 0.0125
 									}
-									}
-								]
-								name "externalWallTop%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
+								geometry DEF BACKWALLBOX Box {
+									size 0.3 0.17 0.0125
+								}
+								}
+							]
 					}
 				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == true and fields.bottomExternal.value == false and fields.leftExternal.value == false then}%
+				%{if fields.rightExternal.value == true then}%
 					Transform {
+						translation 0.15625 -0.01 0
 						rotation 0 1 0 -1.570796
 						children [
-							DEF RIGHTWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -181,19 +166,13 @@ PROTO worldTile [
 									}
 									}
 								]
-								name "externalWallRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
+						}
 				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == false and fields.bottomExternal.value == true and fields.leftExternal.value == false then}%
+				%{if fields.bottomExternal.value == true then}%
 					Transform {
+						translation 0 -0.01 0.15625
 						rotation 0 1 0 3.141593
 						children [
-							DEF BOTTOMWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -205,19 +184,13 @@ PROTO worldTile [
 									}
 									}
 								]
-								name "externalWallBottom%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == false and fields.bottomExternal.value == false and fields.leftExternal.value == true then}%
+				%{if fields.leftExternal.value == true then}%
 					Transform {
+						translation -0.15625 -0.01 0
 						rotation 0 1 0 1.570796
 						children [
-							DEF LEFTWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -229,365 +202,12 @@ PROTO worldTile [
 									}
 									}
 								]
-								name "externalWallLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == false and fields.bottomExternal.value == false and fields.leftExternal.value == true then}%
-					Transform {
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALLEXTERNAL Solid {
-								translation -0.15625 -0.01 -0.00625
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-										size 0.0125 0.17 0.3125
-									}
-									}
-								]
-								name "externalWallLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == true and fields.bottomExternal.value == false and fields.leftExternal.value == false then}%
-					Transform {
-						rotation 0 1 0 -1.570796
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWall0Back%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALLEXTERNAL Solid {
-								translation -0.15625 -0.01 -0.00625
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-										size 0.0125 0.17 0.3125
-									}
-									}
-								]
-								name "externalWall1Left%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == true and fields.bottomExternal.value == true and fields.leftExternal.value == false then}%
-					Transform {
-						rotation 0 1 0 3.141593
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALLEXTERNAL Solid {
-								translation -0.15625 -0.01 -0.00625
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-										size 0.0125 0.17 0.3125
-									}
-									}
-								]
-								name "externalWallLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == false and fields.bottomExternal.value == true and fields.leftExternal.value == true then}%
-					Transform {
-						rotation 0 1 0 1.570796
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALLEXTERNAL Solid {
-								translation -0.15625 -0.01 -0.00625
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-										size 0.0125 0.17 0.3125
-									}
-									}
-								]
-								name "externalWallLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == true and fields.bottomExternal.value == false and fields.leftExternal.value == true then}%
-					Transform {
-						rotation 0 1 0 0
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALL Solid {
-								translation -0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWall1Left%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF RIGHTWALL Solid {
-								translation 0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWallRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == true and fields.bottomExternal.value == true and fields.leftExternal.value == false then}%
-					Transform {
-						rotation 0 1 0 -1.570796
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALL Solid {
-								translation -0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWall1Left%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF RIGHTWALL Solid {
-								translation 0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWallRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == false and fields.rightExternal.value == true and fields.bottomExternal.value == true and fields.leftExternal.value == true then}%
-					Transform {
-						rotation 0 1 0 3.141593
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALL Solid {
-								translation -0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWall1Left%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF RIGHTWALL Solid {
-								translation 0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWallRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true and fields.rightExternal.value == false and fields.bottomExternal.value == true and fields.leftExternal.value == true then}%
-					Transform {
-						rotation 0 1 0 1.570796
-						children [
-							DEF BACKWALLEXTERNAL Solid {
-								translation 0 -0.01 -0.15625
-								children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.3 0.17 0.0125
-										}
-									}
-								]
-								name "externalWallBack%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF LEFTWALL Solid {
-								translation -0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWall1Left%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-							DEF RIGHTWALL Solid {
-								translation 0.15625 -0.01 -0.0125
-								children [
-									Shape {
-										appearance USE WALLAPPEARANCE
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.3
-										}
-									}
-								]
-								name "externalWallRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
 					}
 				%{end}%
 				%{if fields.topLeftCorner.value == true or ((fields.topWall.value == true or fields.leftWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
 					Transform {
+							translation -0.14375 0 -0.14375
 						children [
-							DEF TOPLEFTCORNER Solid {
-								translation -0.14375 0 -0.14375
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -599,18 +219,12 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "pillarBlockTopLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.topRightCorner.value == true or ((fields.topWall.value == true or fields.rightWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
 					Transform {
+						translation 0.14375 0 -0.14375
 						children [
-							DEF BACKRIGHTCORNER Solid {
-								translation 0.14375 0 -0.14375
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -622,18 +236,12 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "pillarBlockTopRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.bottomLeftCorner.value == true or ((fields.bottomWall.value == true or fields.leftWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
 					Transform{
+						translation -0.14375 0 0.14375
 						children[
-							DEF FRONTLEFTCORNER Solid {
-								translation -0.14375 0 0.14375
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -645,18 +253,12 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "pillarBlock2BottomLeft%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.bottomRightCorner.value == true or ((fields.bottomWall.value == true or fields.rightWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
 					Transform {
+						translation 0.14375 0 0.14375
 						children [
-							DEF FRONTRIGHTCORNER Solid {
-								translation 0.14375 0 0.14375
-								children [
 									Shape {
 										appearance Appearance {
 											material Material {
@@ -668,19 +270,13 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "pillarBlockBottomRight%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
-							}
-						]
 					}
 				%{end}%
 				%{if fields.notch.value == "left" then}%
 					DEF externalWallNotchLeft Transform {
 						rotation 0 1 0 %{=fields.notchRotation.value}%
+						translation -0.15625 -0.01 0.14375
 						children [
-							DEF LEFTNOTCH Solid {
-								translation -0.15625 -0.01 0.14375
-								children [
 									Shape {
 										appearance DEF WALLAPPEARANCE Appearance {
 											material Material {
@@ -692,19 +288,13 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "leftNotch%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.notch.value == "right" then}%
 					DEF externalWallNotchRight Transform {
+						translation 0.15625 -0.01 0.14375
 						rotation 0 1 0 %{=fields.notchRotation.value}%
 						children [
-							DEF RIGHTNOTCH Solid {
-								translation 0.15625 -0.01 0.14375
-								children [
 									Shape {
 										appearance DEF WALLAPPEARANCE Appearance {
 											material Material {
@@ -716,17 +306,11 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "rightNotch%{=fields.id.value}%"
-								boundingObject USE BACKWALLBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.trap.value == true then}%
-					DEF TRAP Transform {
-						children [
 
-							DEF FLOOR Solid {
+							DEF FLOOR Transform {
 								translation 0 -0.205 0
 								children [
 									Shape {
@@ -740,10 +324,8 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "trapFloor%{=fields.id.value}%"
-								boundingObject USE FLOORBOX
 							}
-							Solid {
+							Transform {
 							  translation -2.8549e-07 -0.135 -0.13
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
@@ -759,10 +341,8 @@ PROTO worldTile [
 								  }
 								}
 							  ]
-							  name "trapFrontEdge%{=fields.id.value}%"
-							  boundingObject USE TRAPEDGEBOX
 							}
-							Solid {
+							Transform {
 							  translation -2.03924e-08 -0.135 0.13
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
@@ -773,10 +353,8 @@ PROTO worldTile [
 								  }
 								}
 							  ]
-							  name "trapBackEdge%{=fields.id.value}%"
-							  boundingObject USE TRAPEDGEBOX
 							}
-							Solid {
+							Transform {
 							  translation -0.13 -0.135 2.06647e-15
 							  rotation 0 1 0 3.14159
 							  children [
@@ -787,10 +365,8 @@ PROTO worldTile [
 								  }
 								}
 							  ]
-							  name "trapRightEdge%{=fields.id.value}%"
-							  boundingObject USE TRAPEDGEBOX
 							}
-							Solid {
+							Transform {
 							  translation 0.13 -0.135 6.89936e-07
 							  rotation 0 1 0 3.14159
 							  children [
@@ -801,17 +377,11 @@ PROTO worldTile [
 								  }
 								}
 							  ]
-							  name "trapLeftEdge%{=fields.id.value}%"
-							  boundingObject USE TRAPEDGEBOX
 							}
-						]
-					}
 				%{end}%
 				%{if fields.checkpoint.value == true then}%
 					DEF CHECKPOINT Transform {
-						children [
-							Solid {
-								translation 0 -0.075 0
+						translation 0 -0.075 0
 								children [
 									Shape {
 										appearance CorrodedMetal  {
@@ -821,16 +391,11 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "checkpointBlock%{=fields.id.value}%"
-							}
-						]
 					}
 				%{end}%
 				%{if fields.start.value == true then}%
 					DEF START Transform {
-						children [
-							Solid {
-								translation 0 -0.075 0
+						translation 0 -0.075 0
 								children [
 									Shape {
 										appearance Appearance {
@@ -845,16 +410,11 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "startBlock%{=fields.id.value}%"
-							}
-						]
 					}
 				%{end}%
 				%{if fields.swamp.value == true then}%
 					DEF START Transform {
-						children [
-							Solid {
-								translation 0 -0.075 0
+						translation 0 -0.075 0
 								children [
 									Shape {
 										appearance Appearance {
@@ -867,11 +427,10 @@ PROTO worldTile [
 										}
 									}
 								]
-								name "swampBlock%{=fields.id.value}%"
-							}
-						]
 					}
 				%{end}%
+			  ]
+		  }
 				%{if not(fields.curveDir.value == 0) then}%
 					Solid {
 						translation 0 -0.075 0
@@ -919,6 +478,7 @@ PROTO worldTile [
 					}
 				%{end}%
 	        ]
+			boundingObject USE TILE_SHAPES_GROUP
 
       }
 }
