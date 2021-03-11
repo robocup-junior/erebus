@@ -1,5 +1,5 @@
 #VRML_OBJ R2020a utf8
-DEF ROBOT0 protos {
+DEF ROBOT0 custom_robot {
   translation 1000 1000 1000
   rotation 0 1 0 0
   name "e-puck 0"

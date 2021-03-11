@@ -341,6 +341,48 @@ function fileOpened(filesId, acceptTypes, location, id){
 	}
 }
 
+function openJsonFile(){
+	//When file 0 value is changed
+	//Get the files
+	var files = document.getElementById("robot1Controller").files;
+	
+	//If there are files
+	if (files.length > 0){
+		//Get the first file only
+		var file = files.item(0);
+		//Split at the .
+		var nameParts = file.name.split(".");
+		
+		//If there are parts to the name
+		if (nameParts.length > 1){
+			//If the last part is "json" - a json file
+			if(nameParts[nameParts.length - 1] == "json"){
+				//Create a file reader
+				var reader = new FileReader();
+				
+				//Set the function of the reader when it finishes loading
+				reader.onload = (function(reader){
+					return function(){
+						//Send the signal to the supervisor with the data from the file
+						window.robotWindow.send("robotJson," + reader.result);
+						loadedController(1)
+					}
+				})(reader);
+				
+				//Read the file as udf-8 text
+				reader.readAsText(file);
+			}else{
+				//Tell the user to select a json file
+				alert("Please select a json file.");
+			}
+		}else{
+			//Tell the user to select a json file
+			alert("Please select a json file.");
+		}
+		
+	}
+}
+
 function hide_winning_screen(){
 	//Disable winner screen
 	document.getElementById("winning-screen").style.display = "none";

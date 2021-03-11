@@ -1,4 +1,8 @@
 from controller import Robot
+from PIL import Image
+import numpy as np
+import time
+
 
 timeStep = 32            # Set the time step for the simulation
 max_velocity = 6.28      # Set a maximum velocity time constant
@@ -74,9 +78,26 @@ def numToBlock(num):
         return '█'
 
 
+start = robot.getTime()
 while robot.step(timeStep) != -1:
     # print(numToBlock(s5.getValue()),numToBlock(s4.getValue()),numToBlock(s3.getValue()),numToBlock(s2.getValue()),numToBlock(s1.getValue()), gps.getValues())
     # print(left_heat_sensor.getValue(),right_heat_sensor.getValue())
     # print(acc.getValues(),gyro.getValues())
-    print(lidar.getRangeImage())
-    pass
+    print(robot.getTime() - start)
+    # if (robot.getTime() - start) > 6:
+    #     print("\n\n\n")
+    #     print(lidar.getHorizontalResolution(), lidar.getNumberOfLayers())
+    #     arr = lidar.getRangeImageArray ()
+    #     # for row in arr:
+    #     #     print([round(x, 2) for x in row])
+    #     arr = np.rot90(np.array(arr),k=1,axes=(1,0))
+    #     arr = arr[::,:64]
+    #     print(arr)
+    #     # for row in arr:
+    #     #     print(row)
+
+    #     img = Image.fromarray(arr, 'L')
+    #     img.save('my.png')
+    #     img.show()
+    #     break
+    

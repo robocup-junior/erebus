@@ -17,11 +17,9 @@
 		</tr>
 		<tr>
 			<th class="halfRow">
-				<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/protos/">
-					<input type="file" class="hidden" onchange="fileOpened('robot1Controller', '[\'proto\']', 'protos', 1)" id="robot1Controller" />
-				</form>
-				<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot</button>
-				<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot</button>
+				<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
+				<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot JSON</button>
+				<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot JSON</button>
 			</th>
 		</tr>
 		<!-- <th class="halfRow">Robot 1
