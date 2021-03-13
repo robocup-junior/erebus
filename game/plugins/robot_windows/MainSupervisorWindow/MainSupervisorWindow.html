@@ -1,64 +1,64 @@
 <html>
 	<head>
 		<script src="MainSupervisorWindow.js"></script>
+		<link rel="stylesheet" type="text/css" href="MainSupervisorWindow.css">
 	</head>
 	<body>
 		<div id="winning-screen" onclick="hide_winning_screen()"><h1 id="winning-team">DRAW</h1></div>
 		<div style="width:100%; height:100%">
-			<link rel="stylesheet" type="text/css" href="MainSupervisorWindow.css">
 			<div class = "smallSection rowType1">
 				<br>
 				<table id="robotTable">
-				<tr>
-					<th class="halfRow">
-						<p id="robot0Name">Erebus Rescue Simulator<br>Release 7</p>
-						<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/">
-							<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
-						</form>
-						<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load<br>Controller</button>
-						<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove<br>Controller</button>
-					</th>
-				</tr>
-				<tr>
-					<th class="halfRow">
-						<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
-						<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot JSON</button>
-						<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot JSON</button>
-					</th>
-				</tr>
-				<!-- <th class="halfRow">Robot 1
-				<p id="robot1Name">None</p>
-				<input type="file" class="hidden" accept=".py" onchange="fileOpened()" id="robot1File" />
-				<button class="button buttonLoad" onclick="openLoadController('1')" style="display:inline-block;" id="load1">Load<br>Controller</button>
-				<button class="button buttonUnload" onclick="unloadPressed('1')" style="display:none;" id="unload1">Remove<br>Controller</button></th> -->
-				<tr>
-					<th class="halfRow">
-						<button class="button buttonRelocate" onclick="relocate('0')" style="display:inline-block;" id="relocate0">Relocate</button>
-					</th>
-					<!-- <th class="halfRow">
-						<button class="button buttonRelocate" onclick="relocate('1')" style="display:inline-block;" id="relocate1">Relocate</button>
-					</th> -->
-				</tr>
-				<tr>
-					<th class="halfRow">
-						<button class="button buttonAPI" onclick="switchDetectionApiSelected()" style="display:inline-block;" id="detectionApi">No Detection API</button>
-					</th>
-					<!-- <th class="halfRow">
-						<button class="button buttonRelocate" onclick="relocate('1')" style="display:inline-block;" id="relocate1">Relocate</button>
-					</th> -->
-				</tr>
-				<!-- <tr>
-					<th class="halfRow">
-						<button class="button buttonQuit" onclick="quit('0')" style="display:inline-block;" id="quit0">Quit</button>
-					</th>
-					<th class="halfRow">
-						<button class="button buttonQuit" onclick="quit('1')" style="display:inline-block;" id="quit1">Quit</button>
-					</th>
-				</tr> -->
+					<tr>
+						<th class="halfRow">
+							<p id="robot0Name">Erebus Rescue Simulator<br>Release 7</p>
+							<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/">
+								<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
+							</form>
+							<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load<br>Controller</button>
+							<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove<br>Controller</button>
+						</th>
+					</tr>
+					<tr>
+						<th class="halfRow">
+							<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
+							<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot JSON</button>
+							<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot JSON</button>
+						</th>
+					</tr>
+					<!-- <th class="halfRow">Robot 1
+					<p id="robot1Name">None</p>
+					<input type="file" class="hidden" accept=".py" onchange="fileOpened()" id="robot1File" />
+					<button class="button buttonLoad" onclick="openLoadController('1')" style="display:inline-block;" id="load1">Load<br>Controller</button>
+					<button class="button buttonUnload" onclick="unloadPressed('1')" style="display:none;" id="unload1">Remove<br>Controller</button></th> -->
+					<tr>
+						<th class="halfRow">
+							<button class="button buttonRelocate" onclick="relocate('0')" style="display:inline-block;" id="relocate0">Relocate</button>
+						</th>
+						<!-- <th class="halfRow">
+							<button class="button buttonRelocate" onclick="relocate('1')" style="display:inline-block;" id="relocate1">Relocate</button>
+						</th> -->
+					</tr>
+					<tr>
+						<th class="halfRow">
+							<button class="button buttonAPI" onclick="switchDetectionApiSelected()" style="display:inline-block;" id="detectionApi">No Detection API</button>
+						</th>
+						<!-- <th class="halfRow">
+							<button class="button buttonRelocate" onclick="relocate('1')" style="display:inline-block;" id="relocate1">Relocate</button>
+						</th> -->
+					</tr>
+					<!-- <tr>
+						<th class="halfRow">
+							<button class="button buttonQuit" onclick="quit('0')" style="display:inline-block;" id="quit0">Quit</button>
+						</th>
+						<th class="halfRow">
+							<button class="button buttonQuit" onclick="quit('1')" style="display:inline-block;" id="quit1">Quit</button>
+						</th>
+					</tr> -->
 				</table>
 				<br>
 			</div>
-			<div class = "smallSection  rowType2">
+			<div class = "smallSection rowType2">
 				<br>
 				<table id="controlTable">
 				<tr>
@@ -106,8 +106,7 @@
 			</div>
 			<img src="drip.png" width="100%" style="position: absolute;">
 			<div>
-				<table style="height:100%;width:100%;" id="history">
-
+				<table id="history">
 				</table>
 			</div>
 		</div>
