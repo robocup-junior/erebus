@@ -1714,10 +1714,10 @@ if __name__ == '__main__':
     # For checking the first update with the game running
     first = True
 
-    receiver = supervisor.getReceiver('receiver')
+    receiver = supervisor.getDevice('receiver')
     receiver.enable(32)
     
-    emitter = supervisor.getEmitter('emitter')
+    emitter = supervisor.getDevice('emitter')
 
     # Init robot as object to hold their info
     robot0Obj = Robot()
