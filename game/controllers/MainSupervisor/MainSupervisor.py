@@ -10,9 +10,11 @@ import math
 import datetime
 import threading
 import ControllerUploader
+import MapScorer
 import obstacleCheck
 import glob
 import json
+import numpy as np
 
 # Create the instance of the supervisor class
 supervisor = Supervisor()
@@ -99,6 +101,9 @@ class Robot:
         self.stoppedTime = None
 
         self.message = []
+        self.map_data = np.array([])
+        self.maps_submitted = 0
+        self.sent_maps = 0
 
         self.lastVisitedCheckPointPosition = []
 
@@ -1806,21 +1811,49 @@ if __name__ == '__main__':
             if receiver.getQueueLength() > 0:
                 # Get receiver data
                 receivedData = receiver.getData()
+                # Get length of bytes
+                rDataLen = len(receivedData)
                 try:
-                    # Unpack data
-                    tup = struct.unpack('i i c', receivedData)
+                    # Victim identification bytes data should be of length = 9
+                    if rDataLen == 9:
+                        # Unpack data
+                        tup = struct.unpack('i i c', receivedData)
 
-                    # Get data in format (est. x position, est. z position, est. victim type)
-                    x = tup[0]
-                    z = tup[1]
+                        # Get data in format (est. x position, est. z position, est. victim type)
+                        x = tup[0]
+                        z = tup[1]
 
-                    estimated_victim_position = (x / 100, 0, z / 100)
+                        estimated_victim_position = (x / 100, 0, z / 100)
 
-                    victimType = tup[2].decode("utf-8")
+                        victimType = tup[2].decode("utf-8")
 
+                        # Store data recieved
+                        robot0Obj.message = [estimated_victim_position, victimType]
+                    else:
+                        """
+                         For map data, the format sent should be:
+                        
+                         receivedData = b'_____ _________________'
+                                            ^          ^
+                                          shape     map data
+                        """
+                        # Only allow the robot to input 3 maps
+                        if robot0Obj.sent_maps < 3:
+                            # Shape data should be two bytes (2 integers)
+                            shape_bytes = receivedData[:8] # Get shape of matrix
+                            data_bytes = receivedData[8::] # Get data of matrix
 
-                    # Store data recieved
-                    robot0Obj.message = [estimated_victim_position, victimType]
+                            # Get shape data
+                            shape = struct.unpack('2i',shape_bytes)
+                            # Size of flattened 2d array
+                            shape_size = shape[0] * shape[1]
+                            # Get map data
+                            map_data = struct.unpack(f'{shape_size}i',data_bytes)
+                            # Reshape data using the shape data given
+                            reshaped_data = np.array(map_data).reshape(shape, order='f')
+                            
+                            robot0Obj.map_data = reshaped_data
+                            robot0Obj.sent_maps += 1
                 except:
                     print("Incorrect data format sent")
 
@@ -1850,7 +1883,29 @@ if __name__ == '__main__':
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
                         updateHistory()
+                        
+                elif r0_exitmessage == 'M':
+                    # If map_data submitted
+                    if robot0Obj.map_data.size != 0:
+                        # Only allow the robot to send and get scored for 3 maps
+                        if robot0Obj.sent_maps < 3:     
+                            robot0Obj.history.enqueue("Map entry successfull")
+                            # Test map scorer
+                            map_score = MapScorer.calculateScore([0,1,2], robot0Obj.map_data)
+                                                    
+                            robot0Obj.history.enqueue("Map Score Percentage "+str(round(map_score * 100,1)) +"%")
+                            
+                            score = robot0Obj.getScore()
+                            score_change = score * (1-map_score)
+                            robot0Obj.increaseScore(-score_change)
+                            
+                            if score_change > 0:
+                                robot0Obj.history.enqueue("Map Score Penalty -" + str(round(score_change,1)))
+                                
 
+                            robot0Obj.map_data = np.array([])
+                            updateHistory()
+                            # Do something...
 
             # If robot stopped for 3 seconds
             if robot0Obj.timeStopped() >= 3:
