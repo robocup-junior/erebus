@@ -206,10 +206,8 @@ class Robot:
 
         self.rotation = [0,1,0,direction]
 
-
-
-class Human():
-    '''Human object holding the boundaries'''
+class VictimObject():
+    '''Victim object holding the boundaries'''
 
     def __init__(self, node, ap: int, vtype: str, score: int):
         '''Initialises the radius and position of the human'''
@@ -228,7 +226,7 @@ class Human():
         self.radius = 0.09
         self._victim_type = vtype
 
-        self.simple_victim_type = self.get_simple_victim_type()
+        self.simple_victim_type = self.get_simple_type()
 
     @property
     def position(self) -> list:
@@ -261,19 +259,10 @@ class Human():
     @identified.setter
     def identified(self, idfy: int):
         self.wb_foundField.setSFBool(idfy)
-
-    def get_simple_victim_type(self):
-        # Get victim type via proto node
-        if self._victim_type == 'harmed':
-            return 'H'
-        elif self._victim_type == 'unharmed':
-            return 'U'
-        elif self._victim_type == 'stable':
-            return 'S'
-        elif self._victim_type == 'Heat': # Temperature victim
-            return 'T'
-        else:
-            return self._victim_type
+        
+    def get_simple_type(self):
+        # Will be overloaded
+        pass
 
     def checkPosition(self, pos: list) -> bool:
         '''Check if a position is near an object, based on the min_dist value'''
@@ -316,6 +305,29 @@ class Human():
 
         return False
 
+class Victim(VictimObject):
+    '''Human object holding the boundaries'''
+    
+    HARMED = 'harmed'
+    UNHARMED = 'unharmed'
+    STABLE = 'stable'
+    HEAT = 'Heat'
+
+    def get_simple_type(self):
+      # Get victim type via proto node
+      if self._victim_type == Victim.HARMED:
+          return 'H'
+      elif self._victim_type == Victim.UNHARMED:
+          return 'U'
+      elif self._victim_type == Victim.STABLE:
+          return 'S'
+      elif self._victim_type == Victim.HEAT: # Temperature victim
+          return 'T'
+      else:
+          return self._victim_type
+
+class HazardMap(VictimObject):
+    pass
 class Tile():
     '''Tile object holding the boundaries'''
 
@@ -407,8 +419,8 @@ def getHumans(humans, numberOfHumans):
         victimType = human.getField('type').getSFString()
         scoreWorth = human.getField('scoreWorth').getSFInt32()
 
-        # Create Human Object from human position
-        humanObj = Human(human, i, victimType, scoreWorth)
+        # Create victim Object from victim position
+        humanObj = Victim(human, i, victimType, scoreWorth)
         humans.append(humanObj)
 
 def getSwamps(swamps, numberOfSwamps):
@@ -1896,11 +1908,11 @@ if __name__ == '__main__':
                             robot0Obj.history.enqueue("Map Score Percentage "+str(round(map_score * 100,1)) +"%")
                             
                             score = robot0Obj.getScore()
-                            score_change = score * (1-map_score)
-                            robot0Obj.increaseScore(-score_change)
+                            score_change = score * (1 + map_score)
+                            robot0Obj.increaseScore(score_change)
                             
                             if score_change > 0:
-                                robot0Obj.history.enqueue("Map Score Penalty -" + str(round(score_change,1)))
+                                robot0Obj.history.enqueue("Map Score Bonus +" + str(round(score_change,1)))
                                 
 
                             robot0Obj.map_data = np.array([])
