@@ -1,0 +1,149 @@
+PROTO halfTile [
+      field SFInt32 xPos 0
+      field SFInt32 zPos 0
+	  field SFString id ""
+	  field SFFloat xScale 1.0
+	  field SFFloat zScale 1.0
+	  field SFFloat yScale 1.0
+		field SFInt32 rightWall 0
+		field SFInt32 bottomWall 0
+		field SFInt32 topWall 0
+		field SFInt32 leftWall 0
+      field MFInt32 tile1Walls [0, 0, 0, 0]
+      field MFInt32 tile2Walls [0, 0, 0, 0]
+      field MFInt32 tile3Walls [0, 0, 0, 0]
+      field MFInt32 tile4Walls [0, 0, 0, 0]
+      
+      field MFBool tile1External [FALSE, FALSE, FALSE, FALSE]
+      field MFBool tile2External [FALSE, FALSE, FALSE, FALSE]
+      field MFBool tile3External [FALSE, FALSE, FALSE, FALSE]
+      field MFBool tile4External [FALSE, FALSE, FALSE, FALSE]
+      field SFFloat width 0.0
+	  field SFFloat height 0.0 
+      field SFBool floor FALSE
+      field SFBool start FALSE
+	  field SFBool trap FALSE
+	  field SFBool checkpoint FALSE
+	  field SFBool swamp FALSE
+    field MFInt32 curve [0, 0, 0, 0]
+    field SFColor tileColor 0 0 0
+		field SFInt32 room 0
+]
+{
+      DEF TILE Transform {
+
+	  %{
+	  scaleX = fields.xScale.value
+	  scaleY = fields.yScale.value
+	  scaleZ = fields.zScale.value
+	  xStart = -(fields.width.value * (0.3 * scaleX) / 2.0)
+	  zStart = -(fields.height.value * (0.3 * scaleZ) / 2.0)
+	  x = fields.xPos.value * (0.3 * scaleX) + xStart
+	  z = fields.zPos.value * (0.3 * scaleZ) + zStart
+	  }%
+
+	  translation %{=x}% 0 %{=z}%
+	  scale %{=scaleX}% %{=scaleY}% %{=scaleZ}%
+
+      children[
+          DEF TILE worldTile {
+            xPos 0 
+            zPos 0  
+            topWall IS topWall
+						rightWall IS rightWall
+						bottomWall IS bottomWall
+						leftWall IS leftWall
+            floor %{=fields.floor.value and "TRUE" or "FALSE"}% # ternary operator!
+            trap %{=fields.trap.value and "TRUE" or "FALSE" }%
+            start %{=fields.start.value and "TRUE" or "FALSE" }%
+            checkpoint %{=fields.checkpoint.value and "TRUE" or "FALSE" }%
+            swamp %{=fields.swamp.value and "TRUE" or "FALSE" }%
+            id %{= "\"" .. fields.id.value .. ".0" .. "\"" }%
+            tileColor IS tileColor
+          }
+          DEF TILE worldTile {
+            xPos 0 
+            zPos 0 
+            xScale .5 
+            yScale .5 
+            zScale .5 
+            width 1 
+            height 1
+            topWall %{= fields.tile1Walls.value[1] }%
+            rightWall %{= fields.tile1Walls.value[2] }%
+            bottomWall %{= fields.tile1Walls.value[3] }%
+            leftWall %{= fields.tile1Walls.value[4] }%
+            topExternal %{= fields.tile1External.value[1] and "TRUE" or "FALSE" }%
+            rightExternal %{= fields.tile1External.value[2] and "TRUE" or "FALSE" }%
+            bottomExternal %{= fields.tile1External.value[3] and "TRUE" or "FALSE" }%
+            leftExternal %{= fields.tile1External.value[4] and "TRUE" or "FALSE"}%
+            id %{= "\"" .. fields.id.value .. ".1" .. "\"" }%
+            isHalf TRUE
+            curveDir %{= fields.curve.value[1]}% 
+          }
+          DEF TILE worldTile {
+            xPos 1
+            zPos 0
+            xScale .5 
+            yScale .5 
+            zScale .5  
+            width 1
+            height 1
+            topWall %{= fields.tile2Walls.value[1] }%
+            rightWall %{= fields.tile2Walls.value[2] }%
+            bottomWall %{= fields.tile2Walls.value[3] }%
+            leftWall %{= fields.tile2Walls.value[4] }%
+            topExternal %{= fields.tile2External.value[1] and "TRUE" or "FALSE" }%
+            rightExternal %{= fields.tile2External.value[2] and "TRUE" or "FALSE" }%
+            bottomExternal %{= fields.tile2External.value[3] and "TRUE" or "FALSE" }%
+            leftExternal %{= fields.tile2External.value[4] and "TRUE" or "FALSE"}%
+            id %{= "\"" .. fields.id.value .. ".2" .. "\"" }%
+            isHalf TRUE
+            curveDir %{= fields.curve.value[2]}% 
+              
+          }
+          DEF TILE worldTile {
+            xPos 0 
+            zPos 1
+            xScale .5  
+            yScale .5  
+            zScale .5  
+            width 1
+            height 1
+            topWall %{= fields.tile3Walls.value[1] }%
+            rightWall %{= fields.tile3Walls.value[2] }%
+            bottomWall %{= fields.tile3Walls.value[3] }%
+            leftWall %{= fields.tile3Walls.value[4] }%
+            topExternal %{= fields.tile3External.value[1] and "TRUE" or "FALSE" }%
+            rightExternal %{= fields.tile3External.value[2] and "TRUE" or "FALSE" }%
+            bottomExternal %{= fields.tile3External.value[3] and "TRUE" or "FALSE" }%
+            leftExternal %{= fields.tile3External.value[4] and "TRUE" or "FALSE"}%
+            id %{= "\"" .. fields.id.value .. ".3" .. "\"" }%
+            isHalf TRUE
+            curveDir %{= fields.curve.value[3]}% 
+              
+          }
+          DEF TILE worldTile {
+            xPos 1
+            zPos 1
+            xScale .5  
+            yScale .5  
+            zScale .5  
+            width 1
+            height 1
+            topWall %{= fields.tile4Walls.value[1] }%
+            rightWall %{= fields.tile4Walls.value[2] }%
+            bottomWall %{= fields.tile4Walls.value[3] }%
+            leftWall %{= fields.tile4Walls.value[4] }%
+            topExternal %{= fields.tile4External.value[1] and "TRUE" or "FALSE" }%
+            rightExternal %{= fields.tile4External.value[2] and "TRUE" or "FALSE" }%
+            bottomExternal %{= fields.tile4External.value[3] and "TRUE" or "FALSE" }%
+            leftExternal %{= fields.tile4External.value[4] and "TRUE" or "FALSE"}%
+            id %{= "\"" .. fields.id.value .. ".4" .. "\"" }%
+            isHalf TRUE
+            curveDir %{= fields.curve.value[4]}% 
+              
+          }
+      ]
+      }
+}

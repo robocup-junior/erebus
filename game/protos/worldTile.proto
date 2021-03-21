@@ -2,20 +2,14 @@ PROTO worldTile [
       field SFInt32 xPos 0
       field SFInt32 zPos 0
       field SFBool floor FALSE
-      field SFBool topWall FALSE
-      field SFBool rightWall FALSE
-      field SFBool bottomWall FALSE
-      field SFBool leftWall FALSE
-      field SFBool topLeftCorner FALSE
-      field SFBool bottomLeftCorner FALSE
-      field SFBool bottomRightCorner FALSE
-      field SFBool topRightCorner FALSE
+      field SFInt32 rightWall 0 # divisible by 2 means shortened on north end, divisble by 3 means shortened on south end 
+      field SFInt32 bottomWall 0 # divisible by 2 means shortened, divisible by 3 means extended, possible vals 0, 1, 2, 3, 6
+	  field SFInt32 topWall 0 
+	  field SFInt32 leftWall 0
 	  field SFBool topExternal FALSE
+	  field SFBool leftExternal FALSE
 	  field SFBool rightExternal FALSE
 	  field SFBool bottomExternal FALSE
-	  field SFBool leftExternal FALSE
-	  field SFString notch ""
-	  field SFFloat notchRotation 0.0
 	  field SFBool start FALSE
 	  field SFBool trap FALSE
 	  field SFBool checkpoint FALSE
@@ -26,14 +20,14 @@ PROTO worldTile [
 	  field SFFloat xScale 1.0
 	  field SFFloat zScale 1.0
 	  field SFFloat yScale 1.0
-		field MFInt32 halfWallOut [0, 0, 0, 0]
-		field MFInt32 halfWallIn [0, 0, 0, 0]
-		field MFInt32 curveWall [0, 0, 0, 0]
-		field SFColor tileColor 0.635 0.635 0.635
+	 field SFColor tileColor 0 0 0 #Blue: 0.1 0.1 0.9; Purple: 0.3 0.1 0.6; Red: 0.9 0.1 0.1
+	 field SFBool isHalf FALSE
+	 field SFInt32 curveDir 0
+	 field SFInt32 room 0
 ]
 {
       DEF TILE Solid {
-
+	name "solid%{=fields.id.value}%"
 	  %{
 	  scaleX = fields.xScale.value
 	  scaleY = fields.yScale.value
@@ -42,6 +36,17 @@ PROTO worldTile [
 	  zStart = -(fields.height.value * (0.3 * scaleZ) / 2.0)
 	  x = fields.xPos.value * (0.3 * scaleX) + xStart
 	  z = fields.zPos.value * (0.3 * scaleZ) + zStart
+
+	  wallThickness = .025
+	  wallHeight = .15
+	  tileThickness = .02
+
+	  if fields.isHalf.value == true then -- half tiles are halved in scale, so must double wall thickness to make it match regular
+	  	wallThickness = wallThickness * 2
+		wallHeight = wallHeight * 2
+		tileThickness = tileThickness * 2
+      end
+	  
 	  }%
 
 	  translation %{=x}% 0 %{=z}%
@@ -51,9 +56,33 @@ PROTO worldTile [
 		  DEF TILE_SHAPES_GROUP Group {
 			  children [
 
-				%{if fields.floor.value == true then}%
+				%{if fields.floor.value == true then
+					x_shift = 0
+					z_shift = 0
+					x_size = .3
+					z_size = .3
+
+					if fields.topExternal.value == true then
+						z_shift = z_shift + wallThickness/2/2
+						z_size = z_size -wallThickness/2
+					end
+					if fields.bottomExternal.value == true then
+						z_shift = z_shift - wallThickness/2/2
+						z_size = z_size -wallThickness/2
+					end
+					if fields.leftExternal.value == true then
+						x_shift = x_shift + wallThickness/2/2
+						x_size = x_size -wallThickness/2
+					end
+					if fields.rightExternal.value == true then
+						x_shift = x_shift - wallThickness/2/2
+						x_size = x_size -wallThickness/2
+					end
+
+				
+				}%
 					DEF FLOOR Transform {
-						translation 0 -0.085 0
+						translation %{=x_shift}% -0.085 %{=z_shift}%
 						children [
 							Shape {
 								appearance Appearance {
@@ -62,49 +91,34 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF FLOORBOX Box {
-									size 0.3 0.02 0.3
+									size %{=x_size}% %{=tileThickness}% %{=z_size}%
 								}
 							}
 						]
 					}
 				%{end}%
-				%{if fields.topWall.value == true or fields.halfWallOut.value[1] > 0 then}%
-					DEF BACKWALL Transform {
-						%{if fields.halfWallOut.value[1] == 1 then}%
-							translation -0.071875 0 -0.14375
-						%{elseif fields.halfWallOut.value[1] == 2 then}%
-							translation 0.071875 0 -0.14375
-						%{else}%
-							translation 0 0 -0.14375
-						%{end}%
-						children [
-							Shape {
-								appearance Appearance {
-									material Material {
-										diffuseColor 0.2 0.47 0.52
-									}
-								}
-								geometry DEF BACKWALLBOX Box {
-									%{if fields.halfWallOut.value[1] > 0 then}%
-										size 0.1375 0.15 0.0125
-									%{else}%
-										size 0.275 0.15 0.0125
-									%{end}%
-								size 0.275 0.15 0.0125
-								}
-							}
-						]
-					}
-				%{end}%
-				%{if fields.rightWall.value == true or fields.halfWallOut.value[2] > 0 then}%
+				%{if fields.rightWall.value > 0 then
+					z_size = .3
+					z_shift = 0
+					y_size = wallHeight 
+					y_shift = 0
+
+					if fields.rightWall.value % 2 == 0 then
+						z_size = z_size - wallThickness/2
+						z_shift = z_shift + wallThickness/2/2 
+					end 
+					if fields.rightWall.value % 3 == 0 then
+						z_size = z_size - wallThickness/2
+						z_shift = z_shift - wallThickness/2/2 
+					end					
+					if fields.rightExternal.value == true then
+						y_size = wallHeight + tileThickness
+						y_shift = -tileThickness/2
+					end
+				
+				}%
 					DEF RIGHTWALL Transform {
-						%{if fields.halfWallOut.value[2] == 1 then}%
-							translation 0.14375 0 0.071875
-						%{elseif fields.halfWallOut.value[2] == 2 then}%
-							translation 0.14375 0 -0.071875
-						%{else}%
-							translation 0.14375 0 0
-						%{end}%
+						translation .15 %{=y_shift}% %{=z_shift}%
 						children [
 							Shape {
 								appearance Appearance {
@@ -113,25 +127,39 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF BACKWALLBOX Box {
-									%{if fields.halfWallOut.value[2] > 0 then}%
-										size 0.0125 0.15 0.1375
-									%{else}%
-										size 0.0125 0.15 0.275
-									%{end}%
+								size %{=wallThickness}% %{=y_size}% %{=z_size}%
 								}
 							}
 						]
 					}
 				%{end}%
-				%{if fields.bottomWall.value == true or fields.halfWallOut.value[3] > 0 then}%
+				%{if fields.bottomWall.value > 0 then
+					x_size = .3
+					x_shift = 0
+					y_size = wallHeight
+					y_shift = 0
+
+					if fields.bottomWall.value % 2 == 0 then
+						x_size = x_size - wallThickness/2
+						x_shift = x_shift + wallThickness/2/2 
+					end 
+					if fields.bottomWall.value % 3 == 0 then
+						x_size = x_size + wallThickness/2
+						x_shift = x_shift + wallThickness/2/2 
+					end					
+					if fields.bottomExternal.value == true then
+						y_size = wallHeight + tileThickness
+						y_shift = -tileThickness/2
+					end
+					
+					if fields.bottomWall.value % 5 == 0 then
+						x_size = x_size + wallThickness/2
+						x_shift = x_shift - wallThickness/2/2
+					end
+				
+				}%
 					DEF FRONTWALL Transform {
-						%{if fields.halfWallOut.value[3] == 1 then}%
-							translation -0.071875 0 0.14375
-						%{elseif fields.halfWallOut.value[3] == 2 then}%
-							translation 0.071875 0 0.14375
-						%{else}%
-							translation 0 0 0.14375
-						%{end}%
+						translation %{=x_shift}% %{=y_shift}% .15
 						children [
 							Shape {
 								appearance Appearance {
@@ -140,46 +168,38 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF BACKWALLBOX Box {
-									%{if fields.halfWallOut.value[3] > 0 then}%
-										size 0.1375 0.15 0.0125
-									%{else}%
-										size 0.275 0.15 0.0125
-									%{end}%
+								size %{=x_size}% %{=y_size}% %{=wallThickness}%
 								}
 							}
 						]
 					}
 				%{end}%
-				%{if fields.leftWall.value == true or fields.halfWallOut.value[4] > 0 then}%
-					DEF LEFTWALL Transform {
-						%{if fields.halfWallOut.value[4] == 1 then}%
-							translation -0.14375 0 0.071875
-						%{elseif fields.halfWallOut.value[4] == 2 then}%
-							translation 0.14375 0 0.071875
-						%{else}%
-							translation -0.14375 0 0
-						%{end}%
-						children [
-							Shape {
-								appearance Appearance {
-									material Material {
-										diffuseColor 0.2 0.47 0.52
-									}
-								}
-								geometry DEF BACKWALLBOX Box {
-									%{if fields.halfWallOut.value[4] > 0 then}%
-										size 0.0125 0.15 0.1375
-									%{else}%
-										size 0.0125 0.15 0.275
-									%{end}%
-								}
-							}
-						]
-					}
-				%{end}%
-				%{if fields.topExternal.value == true then}%
+				%{if fields.topWall.value > 0 then
+
+					x_size = .3
+					x_shift = 0
+					y_size = wallHeight
+					y_shift = 0
+
+					if fields.topWall.value % 2 == 0 then
+						x_size = x_size - wallThickness/2
+						x_shift = x_shift + wallThickness/2/2 
+					end 
+					if fields.topWall.value % 3 == 0 then
+						x_size = x_size + wallThickness/2
+						x_shift = x_shift + wallThickness/2/2 
+					end				
+					if fields.leftWall.value == 1  or fields.leftWall.value == 3 then --special case for top left corner
+						x_size = x_size + wallThickness/2
+						x_shift = x_shift - wallThickness/2/2	
+					end
+					if fields.topExternal.value == true then
+						y_size = wallHeight + tileThickness
+						y_shift = -tileThickness/2
+					end
+				}%
 					Transform {
-						translation 0 -0.01 -0.15625
+						translation %{=x_shift}% %{=y_shift}% -.15
 						children [
 								Shape {
 									appearance Appearance {
@@ -188,51 +208,38 @@ PROTO worldTile [
 										}
 									}
 								geometry DEF BACKWALLBOX Box {
-									size 0.3 0.17 0.0125
+									size %{=x_size}% %{=y_size}% %{=wallThickness}%
 								}
 								}
 							]
 					}
 				%{end}%
-				%{if fields.rightExternal.value == true then}%
+				%{if fields.leftWall.value > 0 then
+				
+					z_size = .3
+					z_shift = 0
+					y_size = wallHeight
+					y_shift = 0
+
+					if fields.leftWall.value % 2 == 0 then
+						z_size = z_size - wallThickness/2
+						z_shift = z_shift + wallThickness/2/2 
+					end 
+					if fields.leftWall.value % 3 == 0 then
+						z_size = z_size + wallThickness/2
+						z_shift = z_shift + wallThickness/2/2 
+					end					
+					if fields.topWall.value == 1 or fields.topWall.value == 3 then --special case for top left corner
+						z_size = z_size - wallThickness/2
+						z_shift = z_shift + wallThickness/2/2	
+					end
+					if fields.leftExternal.value == true then
+						y_size = wallHeight + tileThickness
+						y_shift = -tileThickness/2
+					end
+				}%
 					Transform {
-						translation 0.15625 -0.01 0
-						rotation 0 1 0 -1.570796
-						children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-									geometry DEF BACKWALLBOX Box {
-										size 0.3 0.17 0.0125
-									}
-									}
-								]
-						}
-				%{end}%
-				%{if fields.bottomExternal.value == true then}%
-					Transform {
-						translation 0 -0.01 0.15625
-						rotation 0 1 0 3.141593
-						children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-									geometry DEF BACKWALLBOX Box {
-										size 0.3 0.17 0.0125
-									}
-									}
-								]
-							}
-				%{end}%
-				%{if fields.leftExternal.value == true then}%
-					Transform {
-						translation -0.15625 -0.01 0
+						translation -.15 %{=y_shift}% %{=z_shift}%
 						rotation 0 1 0 1.570796
 						children [
 									Shape {
@@ -242,115 +249,11 @@ PROTO worldTile [
 											}
 										}
 									geometry DEF BACKWALLBOX Box {
-										size 0.3 0.17 0.0125
+										size %{=z_size}% %{=y_size}% %{=wallThickness}%
 									}
 									}
 								]
 					}
-				%{end}%
-				%{if fields.topLeftCorner.value == true or ((fields.topWall.value == true or fields.leftWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
-					Transform {
-							translation -0.14375 0 -0.14375
-						children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.15 0.0125
-										}
-									}
-								]
-							}
-				%{end}%
-				%{if fields.topRightCorner.value == true or ((fields.topWall.value == true or fields.rightWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
-					Transform {
-						translation 0.14375 0 -0.14375
-						children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.15 0.0125
-										}
-									}
-								]
-							}
-				%{end}%
-				%{if fields.bottomLeftCorner.value == true or ((fields.bottomWall.value == true or fields.leftWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
-					Transform{
-						translation -0.14375 0 0.14375
-						children[
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.15 0.0125
-										}
-									}
-								]
-							}
-				%{end}%
-				%{if fields.bottomRightCorner.value == true or ((fields.bottomWall.value == true or fields.rightWall.value == true) and (fields.floor.value == true or fields.trap.value == true)) then}%
-					Transform {
-						translation 0.14375 0 0.14375
-						children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.15 0.0125
-										}
-									}
-								]
-					}
-				%{end}%
-				%{if fields.notch.value == "left" then}%
-					DEF externalWallNotchLeft Transform {
-						rotation 0 1 0 %{=fields.notchRotation.value}%
-						translation -0.15625 -0.01 0.14375
-						children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.0125
-										}
-									}
-								]
-							}
-				%{end}%
-				%{if fields.notch.value == "right" then}%
-					DEF externalWallNotchRight Transform {
-						translation 0.15625 -0.01 0.14375
-						rotation 0 1 0 %{=fields.notchRotation.value}%
-						children [
-									Shape {
-										appearance DEF WALLAPPEARANCE Appearance {
-											material Material {
-												diffuseColor 0.2 0.466667 0.521569
-											}
-										}
-										geometry DEF BACKWALLBOX Box {
-											size 0.0125 0.17 0.0125
-										}
-									}
-								]
-							}
 				%{end}%
 				%{if fields.trap.value == true then}%
 
@@ -473,20 +376,17 @@ PROTO worldTile [
 								]
 					}
 				%{end}%
+				%{if fields.curveDir.value > 0 then}%
+					DEF CURVED curvedWall {
+						rot %{= fields.curveDir.value}%
+						isHalf %{= fields.isHalf.value and "TRUE" or "FALSE"}%
+					}
+				%{end}%
 			  ]
 		  }
-				%{
-					local full = 7
-					for i=1, 4 do
-						if (fields.curveWall.value[i] > 0) then}%
-							DEF CWALL curvedWall {
-								pos %{= i}%
-								rot %{= fields.curveWall.value[i]}%
-							}
-						%{end}%
-					%{end}%
 	        ]
-			boundingObject USE TILE_SHAPES_GROUP
-
+				%{if not(fields.topWall.value == 0) then}%
+					boundingObject USE TILE_SHAPES_GROUP
+				%{end}%
       }
 }

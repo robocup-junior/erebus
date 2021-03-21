@@ -4,7 +4,7 @@ def f(x):
     return math.sqrt(0.09 - (math.cos(x) * 0.3) ** 2)
 
 resolution = 20
-wallThickness = 0.01
+wallThickness = 0.05
 wallHeight = 0.15
 pi = 3.14
 
