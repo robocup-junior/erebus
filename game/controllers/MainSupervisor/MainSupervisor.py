@@ -1661,9 +1661,7 @@ def generate_robot_proto(robot_json):
     
     with open(path, 'w') as robot_file:
         robot_file.write(proto_code)
-        
-    
-    
+            
 
 def process_robot_json(json_data):
     '''Process json file to generate robot file'''
@@ -1674,6 +1672,11 @@ def process_robot_json(json_data):
 # CODED LOADED BEFORE GAME STARTS
 
 if __name__ == '__main__':
+
+    if supervisor.getCustomData() != '':
+        maxTimeMinute = int(supervisor.getCustomData())
+        # Maximum time for a match
+        maxTime = maxTimeMinute * 60
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
@@ -2072,7 +2075,7 @@ if __name__ == '__main__':
         # Send the update information to the robot window
         nowScore = robot0Obj.getScore()
         if lastSentScore != nowScore or lastSentTime != timeElapsed:
-            supervisor.wwiSendText("update," + str(nowScore) + "," + str(timeElapsed))
+            supervisor.wwiSendText("update," + str(nowScore) + "," + str(timeElapsed) + "," + str(maxTime))
             lastSentScore = nowScore
             lastSentTime = timeElapsed
 

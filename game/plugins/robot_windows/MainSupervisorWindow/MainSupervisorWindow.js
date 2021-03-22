@@ -192,6 +192,7 @@ function update (data){
 
 	scores = [data[0],0]
 
+	maxTime = data[2]
 	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1]);
 }
 
@@ -279,7 +280,7 @@ window.onload = function(){
 	//Set which function handles the recieved messages
 	window.robotWindow.receive = receive;
 	//Set timer to inital time value
-	document.getElementById("timer").innerHTML = calculateTimeRemaining(0);
+	document.getElementById("timer").innerHTML = '--:--'
 };
 
 function endGame(){
