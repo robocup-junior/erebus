@@ -1674,9 +1674,7 @@ def process_robot_json(json_data):
 if __name__ == '__main__':
 
     if supervisor.getCustomData() != '':
-        maxTimeMinute = int(supervisor.getCustomData())
-        # Maximum time for a match
-        maxTime = maxTimeMinute * 60
+        maxTime = int(supervisor.getCustomData())
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
