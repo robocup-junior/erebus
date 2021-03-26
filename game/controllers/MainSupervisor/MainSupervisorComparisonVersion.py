@@ -10,8 +10,8 @@ import math
 import datetime
 import threading
 import ControllerUploader
-import glob
 import obstacleCheck
+import glob
 import mapSolutionCalculator
 
 # Create the instance of the supervisor class
@@ -540,53 +540,8 @@ def getTiles(grid=False):
         #Get the position of the tile in the world
         x = xPos * (0.3 * scale[0]) + xStart
         z = zPos * (0.3 * scale[2]) + zStart
-
-        #Array to hold the wall information
-        walls = []
-        #Add the normal wall data to the array
-        walls.append([tile.getField("topWall").getSFInt32() > 0, tile.getField("rightWall").getSFInt32() > 0, tile.getField("bottomWall").getSFInt32() > 0, tile.getField("leftWall").getSFInt32() > 0])
-        #If this is a half sized tile
-        if tile.getField("tile1Walls") != None:
-            #Get the four sections of walls
-            tile1Node = tile.getField("tile1Walls")
-            tile2Node = tile.getField("tile2Walls")
-            tile3Node = tile.getField("tile3Walls")
-            tile4Node = tile.getField("tile4Walls")
-            #Convert to array of booleans for each of the four sections (if the top, right, bottom and left walls are present)
-            topLeftSmall = [tile1Node.getMFInt32(0) > 0, tile1Node.getMFInt32(1) > 0, tile1Node.getMFInt32(2) > 0, tile1Node.getMFInt32(3) > 0]
-            topRightSmall = [tile2Node.getMFInt32(0) > 0, tile2Node.getMFInt32(1) > 0, tile2Node.getMFInt32(2) > 0, tile2Node.getMFInt32(3) > 0]
-            bottomLeftSmall = [tile3Node.getMFInt32(0) > 0, tile3Node.getMFInt32(1) > 0, tile3Node.getMFInt32(2) > 0, tile3Node.getMFInt32(3) > 0]
-            bottomRightSmall = [tile4Node.getMFInt32(0) > 0, tile4Node.getMFInt32(1) > 0, tile4Node.getMFInt32(2) > 0, tile4Node.getMFInt32(3) > 0]
-            #Combine data into 2d array
-            smallData = [topLeftSmall, topRightSmall, bottomLeftSmall, bottomRightSmall]
-            #Collect the information about the curve into a list
-            curveNode = tile.getField("curve")
-            curveData = [curveNode.getMFInt32(0), curveNode.getMFInt32(1), curveNode.getMFInt32(2), curveNode.getMFInt32(3)]
-            #Iterate through the four sections
-            for index in range(0, 3):
-                #If there is a curve activate the appropriate small walls
-                if curveData[index] == 1:
-                    smallData[index][0] = True
-                    smallData[index][1] = True
-                if curveData[index] == 2:
-                    smallData[index][1] = True
-                    smallData[index][2] = True
-                if curveData[index] == 3:
-                    smallData[index][2] = True
-                    smallData[index][3] = True
-                if curveData[index] == 4:
-                    smallData[index][3] = True
-                    smallData[index][0] = True
-            
-            #Add the information regarding the smaller walls
-            walls.append(smallData)
-        else:
-            #Add nothing for the small walls
-            walls.append([[False, False, False, False], [False, False, False, False], [False, False, False, False], [False, False, False, False]])
-        #Get transition data
-        colour = tile.getField("tileColor").getSFColor()
-        #Add whether or not this tile is a transition between two of the regions to the wall data
-        walls.append(colour == [0.1, 0.1, 0.9] or colour == [0.3, 0.1, 0.6] or colour == [0.9, 0.1, 0.1])
+        #Create list of wall presence
+        walls = [tile.getField("topWall").getSFBool(), tile.getField("rightWall").getSFBool(), tile.getField("bottomWall").getSFBool(), tile.getField("leftWall").getSFBool()]
         #Add the tile data to the list
         allTilesData.append([[x, z], walls])
         #Add the tile data to the correct position in the array
@@ -627,9 +582,6 @@ def relocate(robotObj):
     # Set position of robot
     robotObj.position = [relocatePosition[0], -0.03, relocatePosition[2]]
     robotObj.rotation = [0,1,0,0]
-    
-    # Notify robot
-    emitter.send(struct.pack("c", bytes("L", "utf-8")))
 
     # Update history with event
     robotObj.history.enqueue("Lack of Progress - 5")
@@ -778,8 +730,7 @@ if __name__ == '__main__':
     getHumans(humans, numberOfHumans)
 
     #Check the obstacles are valid and remove if necessary
-    #NOT WORKING DUE TO NEW TILES - do not use yet
-    #checkObstacles()
+    checkObstacles()
 
     # Not currently running the match
     currentlyRunning = False
@@ -807,8 +758,6 @@ if __name__ == '__main__':
 
     receiver = supervisor.getReceiver('receiver')
     receiver.enable(32)
-    
-    emitter = supervisor.getEmitter('emitter')
 
     # Init robot as object to hold their info
     robot0Obj = Robot()
