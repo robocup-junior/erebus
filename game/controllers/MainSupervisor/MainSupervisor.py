@@ -1815,7 +1815,7 @@ if __name__ == '__main__':
     #Calculate the solution array for the map layout
     #Can be moved to another location - only here for testing
     mapSolution = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
-
+    mapSolutionCalculator.arrayToImage(mapSolution)
     # -------------------------------
 
     # Until the match ends (also while paused)
