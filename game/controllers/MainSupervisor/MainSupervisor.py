@@ -187,10 +187,10 @@ class Robot:
     def set_starting_orientation(self):
         '''Gets starting orientation for robot using wall data from starting tile'''
         # Get starting tile walls
-        top = self.startingTile.wb_node.getField("topWall").getSFBool()
-        right = self.startingTile.wb_node.getField("rightWall").getSFBool()
-        bottom = self.startingTile.wb_node.getField("bottomWall").getSFBool()
-        left = self.startingTile.wb_node.getField("leftWall").getSFBool()
+        top = self.startingTile.wb_node.getField("topWall").getSFInt32()
+        right = self.startingTile.wb_node.getField("rightWall").getSFInt32()
+        bottom = self.startingTile.wb_node.getField("bottomWall").getSFInt32()
+        left = self.startingTile.wb_node.getField("leftWall").getSFInt32()
 
         # top: 0
         # left: pi/2
