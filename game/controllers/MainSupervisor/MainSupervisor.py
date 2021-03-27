@@ -314,6 +314,8 @@ class Victim(VictimObject):
     UNHARMED = 'unharmed'
     STABLE = 'stable'
     HEAT = 'Heat'
+    
+    VICTIM_TYPES = [HARMED,UNHARMED,STABLE,HEAT]
 
     def get_simple_type(self):
       # Get victim type via proto node
@@ -329,7 +331,12 @@ class Victim(VictimObject):
           return self._victim_type
 
 class HazardMap(VictimObject):
-    pass
+    
+    HAZARD_TYPES = ['F','P','C','O']
+    
+    def get_simple_type(self):
+        return self._victim_type
+  
 class Tile():
     '''Tile object holding the boundaries'''
 
@@ -424,6 +431,21 @@ def getHumans(humans, numberOfHumans):
         # Create victim Object from victim position
         humanObj = Victim(human, i, victimType, scoreWorth)
         humans.append(humanObj)
+        
+def getHazards(hazards, numberOfHazards):
+    '''Get humans in simulation'''
+    hazardNodes = supervisor.getFromDef('HAZARDGROUP').getField("children")
+    # Iterate for each hazard
+    for i in range(numberOfHazards):
+        # Get each hazard from children field in the hazard root node HAZARDGROUP
+        human = hazardNodes.getMFNode(i)
+
+        hazardType = human.getField('type').getSFString()
+        scoreWorth = human.getField('scoreWorth').getSFInt32()
+
+        # Create hazard Object from hazard position
+        hazardObj = HazardMap(human, i, hazardType, scoreWorth)
+        hazards.append(hazardObj)
 
 def getSwamps(swamps, numberOfSwamps):
     '''Get swamps in simulation'''
@@ -1755,6 +1777,8 @@ if __name__ == '__main__':
     swamps = []
     # Global empty list to contain human objects
     humans = []
+    # Global empty list to contain hazard objects
+    hazards = []
 
     # Get number of humans in map
     numberOfHumans = supervisor.getFromDef('HUMANGROUP').getField("children").getCount()
@@ -1764,6 +1788,9 @@ if __name__ == '__main__':
 
     # Get number of swamps in map
     numberOfSwamps = supervisor.getFromDef('SWAMPBOUNDS').getField('children').getCount()
+    
+    # Get number of hazards in map
+    numberOfHazards = supervisor.getFromDef('HAZARDGROUP').getField('children').getCount()
 
     #get swamps in world
     getSwamps(swamps, numberOfSwamps)
@@ -1773,6 +1800,9 @@ if __name__ == '__main__':
 
     #get humans in world
     getHumans(humans, numberOfHumans)
+    
+    #get hazards in world
+    getHazards(hazards, numberOfHazards)
 
     #NOT WORKING DUE TO NEW TILES - do not use yet
     #checkObstacles()
@@ -1959,12 +1989,8 @@ if __name__ == '__main__':
                     if robot0Obj.startingTile.checkPosition(robot0Obj.position):
                         finished = True
                         supervisor.wwiSendText("ended")
-                        addScore = 10
-                        for i, h in enumerate(humans):
-                            if h.identified:
-                                addScore += int(robot0Obj.getScore() * 0.1)
-                                break
-                        robot0Obj.increaseScore(addScore)
+                        addScore = robot0Obj.getScore() * 0.1
+                        robot0Obj.increaseScore(int(addScore))
                         robot0Obj.history.enqueue("Exit bonus +" + str(addScore))
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
@@ -2006,9 +2032,21 @@ if __name__ == '__main__':
 
                     # For each human
                     # TODO optimise
+                    
+                    def toLower(s):
+                        return s.lower()
+                    
+                    iterator = humans
+                    name = 'Victim'
+                    
+                    if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
+                        iterator = hazards
+                        name = 'Hazard'
+                        
+                    print(r0_est_vic_type.lower() , HazardMap.HAZARD_TYPES)
 
                     misidentification = True
-                    for i, h in enumerate(humans):
+                    for i, h in enumerate(iterator):
                         # Check if in range
                         if h.checkPosition(robot0Obj.position):
                             # Check if estimated position is in range
@@ -2023,18 +2061,18 @@ if __name__ == '__main__':
 
                                         # Update score and history
                                         if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                            robot0Obj.history.enqueue("Successful Victim Type Correct Bonus  +" + str(int(10*pointsMultiplier)))
+                                            robot0Obj.history.enqueue(f"Successful {name} Type Correct Bonus  +  {str(int(10*pointsMultiplier))}")
                                             robot0Obj.increaseScore(10, pointsMultiplier)
                                             #pointsScored += 10
 
-                                        robot0Obj.history.enqueue("Successful Victim Identification " + " +" + str(int(h.scoreWorth*pointsMultiplier)))
+                                        robot0Obj.history.enqueue(f"Successful {name} Identification + {str(int(h.scoreWorth*pointsMultiplier))}")
                                         robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier)
 
                                         h.identified = True
                                         updateHistory()
 
                     if misidentification:
-                        robot0Obj.history.enqueue("Misidentification of victim  - 5")
+                        robot0Obj.history.enqueue(f"Misidentification of {name}  - 5")
                         robot0Obj.increaseScore(-5)
                         updateHistory()
 
@@ -2046,6 +2084,7 @@ if __name__ == '__main__':
                 robot0Obj.stoppedTime = None
 
             if robot0Obj.position[1] < -0.035 and currentlyRunning:
+                print(robot0Obj.position[1],'asdjlkhaslkdjalksdjlakjsd')
                 relocate(robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
