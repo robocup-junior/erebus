@@ -15,6 +15,8 @@ import obstacleCheck
 import glob
 import json
 import numpy as np
+import obstacleCheck
+import mapSolutionCalculator
 
 # Create the instance of the supervisor class
 supervisor = Supervisor()
@@ -531,14 +533,15 @@ def deactivateObstacles(allowedObstacles):
             #It was not a proto obstacle so it was ignored
             print("Invalid obstacle found, could not remove.")     
 
-def getTiles():
-    '''Returns list containing all tile positions and which walls are present'''
+def getTiles(grid=False):
+    '''Returns list containing all tile positions and which walls are present, if grid is true it will be arranged as a 2d array not a list'''
     #Count the number of tiles
     numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
     #Retrieve the node containing the tiles
     tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
 
     allTilesData = []
+    allTilesGrid = []
 
     #Iterate through the tiles
     for i in range(0, numberTiles):
@@ -546,6 +549,20 @@ def getTiles():
         #Get the width and height of the grid of tiles (dimensions of grid)
         width = tile.getField("width").getSFFloat()
         height = tile.getField("height").getSFFloat()
+
+        #If the grid has not been set up
+        if len(allTilesGrid) < 1:
+            #Iterate for each row
+            for row in range(0, int(height)):
+                #Create a row
+                dataRow = []
+                #Iterate for each column
+                for column in range(0, int(width)):
+                    #Add an empty tile
+                    dataRow.append(None)
+                #Add the row to the 2d array
+                allTilesGrid.append(dataRow)
+        
         #Get the scale from the tile
         scale = [tile.getField("xScale").getSFFloat(), tile.getField("yScale").getSFFloat(), tile.getField("zScale").getSFFloat()]
         #Find the start position
@@ -557,11 +574,63 @@ def getTiles():
         #Get the position of the tile in the world
         x = xPos * (0.3 * scale[0]) + xStart
         z = zPos * (0.3 * scale[2]) + zStart
-        #Create list of wall presence
-        walls = [tile.getField("topWall").getSFBool(), tile.getField("rightWall").getSFBool(), tile.getField("bottomWall").getSFBool(), tile.getField("leftWall").getSFBool()]
+
+        #Array to hold the wall information
+        walls = []
+        #Add the normal wall data to the array
+        walls.append([tile.getField("topWall").getSFInt32() > 0, tile.getField("rightWall").getSFInt32() > 0, tile.getField("bottomWall").getSFInt32() > 0, tile.getField("leftWall").getSFInt32() > 0])
+        #If this is a half sized tile
+        if tile.getField("tile1Walls") != None:
+            #Get the four sections of walls
+            tile1Node = tile.getField("tile1Walls")
+            tile2Node = tile.getField("tile2Walls")
+            tile3Node = tile.getField("tile3Walls")
+            tile4Node = tile.getField("tile4Walls")
+            #Convert to array of booleans for each of the four sections (if the top, right, bottom and left walls are present)
+            topLeftSmall = [tile1Node.getMFInt32(0) > 0, tile1Node.getMFInt32(1) > 0, tile1Node.getMFInt32(2) > 0, tile1Node.getMFInt32(3) > 0]
+            topRightSmall = [tile2Node.getMFInt32(0) > 0, tile2Node.getMFInt32(1) > 0, tile2Node.getMFInt32(2) > 0, tile2Node.getMFInt32(3) > 0]
+            bottomLeftSmall = [tile3Node.getMFInt32(0) > 0, tile3Node.getMFInt32(1) > 0, tile3Node.getMFInt32(2) > 0, tile3Node.getMFInt32(3) > 0]
+            bottomRightSmall = [tile4Node.getMFInt32(0) > 0, tile4Node.getMFInt32(1) > 0, tile4Node.getMFInt32(2) > 0, tile4Node.getMFInt32(3) > 0]
+            #Combine data into 2d array
+            smallData = [topLeftSmall, topRightSmall, bottomLeftSmall, bottomRightSmall]
+            #Collect the information about the curve into a list
+            curveNode = tile.getField("curve")
+            curveData = [curveNode.getMFInt32(0), curveNode.getMFInt32(1), curveNode.getMFInt32(2), curveNode.getMFInt32(3)]
+            #Iterate through the four sections
+            for index in range(0, 3):
+                #If there is a curve activate the appropriate small walls
+                if curveData[index] == 1:
+                    smallData[index][0] = True
+                    smallData[index][1] = True
+                if curveData[index] == 2:
+                    smallData[index][1] = True
+                    smallData[index][2] = True
+                if curveData[index] == 3:
+                    smallData[index][2] = True
+                    smallData[index][3] = True
+                if curveData[index] == 4:
+                    smallData[index][3] = True
+                    smallData[index][0] = True
+            
+            #Add the information regarding the smaller walls
+            walls.append(smallData)
+        else:
+            #Add nothing for the small walls
+            walls.append([[False, False, False, False], [False, False, False, False], [False, False, False, False], [False, False, False, False]])
+        #Get transition data
+        colour = tile.getField("tileColor").getSFColor()
+        #Add whether or not this tile is a transition between two of the regions to the wall data
+        walls.append(colour == [0.1, 0.1, 0.9] or colour == [0.3, 0.1, 0.6] or colour == [0.9, 0.1, 0.1])
+        #Add the tile data to the list
         allTilesData.append([[x, z], walls])
+        #Add the tile data to the correct position in the array
+        allTilesGrid[zPos][xPos] = [[x, z], walls]
     
-    return allTilesData
+    #Return the correct arrangement
+    if not grid:
+        return allTilesData
+    else:
+        return allTilesGrid
 
 
 def checkObstacles():
@@ -1705,8 +1774,8 @@ if __name__ == '__main__':
     #get humans in world
     getHumans(humans, numberOfHumans)
 
-    #Check the obstacles are valid and remove if necessary
-    checkObstacles()
+    #NOT WORKING DUE TO NEW TILES - do not use yet
+    #checkObstacles()
 
     # Not currently running the match
     currentlyRunning = False
@@ -1742,6 +1811,10 @@ if __name__ == '__main__':
 
     lastSentScore = 0
     lastSentTime = 0
+
+    #Calculate the solution array for the map layout
+    #Can be moved to another location - only here for testing
+    mapSolution = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
 
     # -------------------------------
 
