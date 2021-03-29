@@ -785,7 +785,7 @@ if __name__ == '__main__':
 
     #Check the obstacles are valid and remove if necessary
     #NOT WORKING DUE TO NEW TILES - do not use yet
-    #checkObstacles()
+    checkObstacles()
 
     # Not currently running the match
     currentlyRunning = False
