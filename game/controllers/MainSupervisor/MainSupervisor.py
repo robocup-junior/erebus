@@ -599,6 +599,7 @@ def getTiles(grid=False):
 
         #Array to hold the wall information
         walls = []
+        curved = False
         #Add the normal wall data to the array
         walls.append([tile.getField("topWall").getSFInt32() > 0, tile.getField("rightWall").getSFInt32() > 0, tile.getField("bottomWall").getSFInt32() > 0, tile.getField("leftWall").getSFInt32() > 0])
         #If this is a half sized tile
@@ -624,15 +625,19 @@ def getTiles(grid=False):
                 if curveData[index] == 1:
                     smallData[index][0] = True
                     smallData[index][1] = True
+                    curved = True
                 if curveData[index] == 2:
                     smallData[index][1] = True
                     smallData[index][2] = True
+                    curved = True
                 if curveData[index] == 3:
                     smallData[index][2] = True
                     smallData[index][3] = True
+                    curved = True
                 if curveData[index] == 4:
                     smallData[index][3] = True
                     smallData[index][0] = True
+                    curved = True
             
             #Add the information regarding the smaller walls
             walls.append(smallData)
@@ -643,6 +648,7 @@ def getTiles(grid=False):
         colour = tile.getField("tileColor").getSFColor()
         #Add whether or not this tile is a transition between two of the regions to the wall data
         walls.append(colour == [0.1, 0.1, 0.9] or colour == [0.3, 0.1, 0.6] or colour == [0.9, 0.1, 0.1])
+        walls.append(curved)
         #Add the tile data to the list
         allTilesData.append([[x, z], walls])
         #Add the tile data to the correct position in the array
@@ -1842,10 +1848,10 @@ if __name__ == '__main__':
     lastSentScore = 0
     lastSentTime = 0
 
-    #Calculate the solution array for the map layout
-    #Can be moved to another location - only here for testing
-    mapSolution = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
-    mapSolutionCalculator.arrayToImage(mapSolution)
+    #Calculate the solution arrays for the map layout
+    #Can be moved to another location - only here for testingwe
+    mapSolutionNormal, mapSolutionSmall, mapSolutionCurved = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
+
     # -------------------------------
 
     # Until the match ends (also while paused)
