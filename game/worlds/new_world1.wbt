@@ -1,11 +1,11 @@
-#VRML_SIM R2020b utf8
+#VRML_SIM R2021a utf8
 WorldInfo {
   basicTimeStep 16
   coordinateSystem "NUE"
 }
 Viewpoint {
   orientation -1 0 0 0.85
-  position 0.1639339325781392 1.5894832014900175 1.3719716157823454
+  position -0.08 1.6 1.36
 }
 TexturedBackground {
 }
@@ -1195,6 +1195,7 @@ DEF HAZARDGROUP Group {
 DEF MAINSUPERVISOR Robot {
   children [
     Emitter {
+      channel 1
     }
     Receiver {
       channel 1
@@ -1204,11 +1205,4 @@ DEF MAINSUPERVISOR Robot {
   supervisor TRUE
   showWindow TRUE
   window "MainSupervisorWindow"
-}
-Solid {
-  translation -0.6 0 -0.6
-  boundingObject ElevationGrid {
-    xDimension 2
-    zDimension 2
-  }
 }
