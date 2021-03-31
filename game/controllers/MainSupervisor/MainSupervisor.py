@@ -819,12 +819,16 @@ if __name__ == '__main__':
 
                                         # Update score and history
                                         if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                            robot0Obj.history.enqueue("Successful Victim Type Correct Bonus  +" + str(int(10*pointsMultiplier*roomMult[roomNum])))
-                                            robot0Obj.increaseScore(10, pointsMultiplier*roomMult[roomNum])
+                                            if r0_est_vic_type.lower() == 'f' or r0_est_vic_type.lower() == 'c' or r0_est_vic_type.lower() == 'p' or r0_est_vic_type.lower() == 'o':
+                                                robot0Obj.history.enqueue("Successful Hazard Type Correct Bonus  +" + str(int(20*pointsMultiplier*roomMult[roomNum])))
+                                                robot0Obj.increaseScore(20, pointsMultiplier*roomMult[roomNum])
+                                                robot0Obj.history.enqueue("Successful Hazard Identification " + " +" + str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum])))
+                                            else:
+                                                robot0Obj.history.enqueue("Successful Victim Type Correct Bonus  +" + str(int(10*pointsMultiplier*roomMult[roomNum])))
+                                                robot0Obj.increaseScore(10, pointsMultiplier*roomMult[roomNum])
+                                                robot0Obj.history.enqueue("Successful Victim Identification " + " +" + str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum])))
                                             #pointsScored += 10
-
-                                        robot0Obj.history.enqueue("Successful Victim Identification " + " +" + str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum])))
-                                        robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier*roomMult[roomNum])
+                                            robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier*roomMult[roomNum])
 
                                         h.identified = True
                                         updateHistory()

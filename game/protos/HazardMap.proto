@@ -43,7 +43,6 @@ PROTO HazardMap [
                     }
                 ]
                 name IS name
-                boundingObject USE VICTIMPLANE
                 recognitionColors [
                     %{ if fields.found.value then }%
                         0 0 0
