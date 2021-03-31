@@ -2041,7 +2041,7 @@ if __name__ == '__main__':
                     if robot0Obj.map_data.size != 0:
                         # Only allow the robot to send and get scored for 3 maps
                         if robot0Obj.sent_maps < 3:     
-                            robot0Obj.history.enqueue("Map entry successfull")
+                            robot0Obj.history.enqueue("Map entry successful")
                             # Test map scorer
                             map_score = MapScorer.calculateScore([mapSolution0,mapSolution1,mapSolution2], robot0Obj.map_data)
                                                     
@@ -2102,6 +2102,9 @@ if __name__ == '__main__':
                                             robot0Obj.history.enqueue(f"Successful {name} Type Correct Bonus  +  {str(int(10*bonus*pointsMultiplier*roomMult[roomNum]))}")
                                             robot0Obj.increaseScore(10*bonus, pointsMultiplier)
                                             #pointsScored += 10
+
+                                        robot0Obj.history.enqueue(f"Successful {name} Identification + {str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum]))}")
+                                        robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier*roomMult[roomNum])
 
                                         h.identified = True
                                         updateHistory()
