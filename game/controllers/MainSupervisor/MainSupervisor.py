@@ -1850,7 +1850,11 @@ if __name__ == '__main__':
 
     #Calculate the solution arrays for the map layout
     #Can be moved to another location - only here for testingwe
-    mapSolutionNormal, mapSolutionSmall, mapSolutionCurved = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
+    mapSolution0, mapSolution1, mapSolution2 = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
+    
+    print(mapSolution0)
+    print(mapSolution1)
+    print(mapSolution2)
 
     # -------------------------------
 
@@ -2009,12 +2013,12 @@ if __name__ == '__main__':
                         if robot0Obj.sent_maps < 3:     
                             robot0Obj.history.enqueue("Map entry successfull")
                             # Test map scorer
-                            map_score = MapScorer.calculateScore([0,1,2], robot0Obj.map_data)
+                            map_score = MapScorer.calculateScore([mapSolution0,mapSolution1,mapSolution2], robot0Obj.map_data)
                                                     
                             robot0Obj.history.enqueue("Map Score Percentage "+str(round(map_score * 100,1)) +"%")
                             
                             score = robot0Obj.getScore()
-                            score_change = score * (1 + map_score)
+                            score_change = score * (1 + (map_score / 3))
                             robot0Obj.increaseScore(score_change)
                             
                             if score_change > 0:

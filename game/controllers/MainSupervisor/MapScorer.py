@@ -10,25 +10,6 @@
 
 import numpy as np
 
-def _get_answer_matrix(map: int) -> np.array:
-    """
-    Get answer matrix from map
-
-    For now, I'm just returning a constant matrix
-    """
-    answer_matrix = np.array([
-        [0,0,1,5,1,0,0,0,1,5,1],
-        [0,0,1,5,1,0,0,0,1,5,1],
-        [0,0,1,5,1,1,1,1,1,5,1],
-        [0,0,1,3,3,3,3,3,3,3,1],
-        [1,1,1,3,1,1,1,3,3,3,1],
-        [1,3,1,3,1,3,1,3,3,3,1],
-        [1,3,1,3,1,3,1,1,1,3,1],
-        [1,3,3,3,3,3,2,2,2,3,1],
-        [1,1,1,1,1,1,1,1,1,1,1]
-    ])
-    return answer_matrix
-
 def _get_first_connector_instance(matrix: np.array) -> np.array:
     n,m = matrix.shape
     for y in range(n):
@@ -110,7 +91,7 @@ def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> floa
 
     return completeness
 
-def _calculate_map_completeness(map: int, subMatrix: np.array) -> float:
+def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> float:
     """
     Calculate completeness of submitted map area matrix
 
@@ -118,8 +99,6 @@ def _calculate_map_completeness(map: int, subMatrix: np.array) -> float:
         map (int): specifies which map to score
         subMatrix (np array): team submitted array
     """
-    answerMatrix = _get_answer_matrix(map) 
-
     completeness_list = []
 
     for i in range(0,4):
@@ -130,23 +109,29 @@ def _calculate_map_completeness(map: int, subMatrix: np.array) -> float:
         # Calculate score for matrix
         completeness = _calculate_completeness(answerMatrix, aSubMatrix)
         completeness_list.append(completeness)
+    print(completeness_list)
     # Return the highest score
     return max(completeness_list)
 
     
 
-def calculateScore(answerMatrices: list, subMatrix: np.array) -> float:
+def calculateScore(answerMatrices: list, subMatrix: list) -> float:
     subMatrix = np.rot90(subMatrix,k=0,axes=(1,0))
-
-    score = 0
+    print(np.array(answerMatrices[0]))
+    print('\n')
+    print(np.array(answerMatrices[1]))
+    print('\n')
+    print(np.array(answerMatrices[2]))
+    print('\n')
+    print(np.array(subMatrix))
+    print('\n')
     # Map 1
-    score += _calculate_map_completeness(answerMatrices[0],subMatrix)
+    score1 = _calculate_map_completeness(np.array(answerMatrices[0]),np.array(subMatrix))
     # Map 2
-    score += _calculate_map_completeness(answerMatrices[1],subMatrix)
+    score2 = _calculate_map_completeness(np.array(answerMatrices[1]),np.array(subMatrix))
     # Map 3
-    score += _calculate_map_completeness(answerMatrices[2],subMatrix)
-    # Score as an average of the completeness of all the maps
-    return score / 3
+    score3 = _calculate_map_completeness(np.array(answerMatrices[2]),np.array(subMatrix))
+    return max([score1,score2,score3])
 
 if __name__ == "__main__":
     subMatrix = np.array([
