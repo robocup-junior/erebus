@@ -5,7 +5,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -1 0 0 0.85
-  position -0.08 1.235298049333094 1.0396174383563392
+  position -0.08 1.6 1.36
 }
 TexturedBackground {
 }
@@ -1194,10 +1194,10 @@ DEF HAZARDGROUP Group {
 }
 DEF MAINSUPERVISOR Robot {
   children [
-    Receiver {
+    Emitter {
       channel 1
     }
-    Emitter {
+    Receiver {
       channel 1
     }
   ]

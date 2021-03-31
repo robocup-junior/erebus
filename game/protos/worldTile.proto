@@ -385,7 +385,7 @@ PROTO worldTile [
 			  ]
 		  }
 	        ]
-				%{if not(fields.topWall.value == 0) or not(fields.rightWall.value == 0) or not(fields.bottomWall.value==0) or not(fields.leftWall.value==0) or not(fields.floor.value==0) then}%
+				%{if not(fields.topWall.value == 0) or not(fields.rightWall.value == 0) or not(fields.bottomWall.value==0) or not(fields.leftWall.value==0) or not(fields.floor.value==false) then}%
 					boundingObject USE TILE_SHAPES_GROUP
 				%{end}%
       }
