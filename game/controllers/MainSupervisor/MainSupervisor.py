@@ -1811,7 +1811,7 @@ if __name__ == '__main__':
     getHazards(hazards, numberOfHazards)
 
     #NOT WORKING DUE TO NEW TILES - do not use yet
-    #checkObstacles()
+    checkObstacles()
 
     # Not currently running the match
     currentlyRunning = False
