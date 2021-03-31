@@ -109,7 +109,6 @@ def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> 
         # Calculate score for matrix
         completeness = _calculate_completeness(answerMatrix, aSubMatrix)
         completeness_list.append(completeness)
-    print(completeness_list)
     # Return the highest score
     return max(completeness_list)
 
@@ -117,14 +116,6 @@ def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> 
 
 def calculateScore(answerMatrices: list, subMatrix: list) -> float:
     subMatrix = np.rot90(subMatrix,k=0,axes=(1,0))
-    print(np.array(answerMatrices[0]))
-    print('\n')
-    print(np.array(answerMatrices[1]))
-    print('\n')
-    print(np.array(answerMatrices[2]))
-    print('\n')
-    print(np.array(subMatrix))
-    print('\n')
     # Map 1
     score1 = _calculate_map_completeness(np.array(answerMatrices[0]),np.array(subMatrix))
     # Map 2

@@ -1205,4 +1205,5 @@ DEF MAINSUPERVISOR Robot {
   supervisor TRUE
   showWindow TRUE
   window "MainSupervisorWindow"
+  customData "480"
 }

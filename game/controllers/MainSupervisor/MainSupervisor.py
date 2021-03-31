@@ -106,6 +106,7 @@ class Robot:
         self.map_data = np.array([])
         self.maps_submitted = 0
         self.sent_maps = 0
+        self.map_score_percent = 0
 
         self.lastVisitedCheckPointPosition = []
 
@@ -805,7 +806,16 @@ def set_robot_start_pos():
 def clamp(n, minn, maxn):
     '''Simple clamp function that limits a number between a specified range'''
     return max(min(maxn, n), minn)
-   
+  
+def add_map_multiplier():  
+    score_change = robot0Obj.getScore() * robot0Obj.map_score_percent
+    robot0Obj.increaseScore(score_change)
+                            
+    if score_change > 0:
+        robot0Obj.history.enqueue("Map Score Bonus +" + str(round(score_change,1)))
+        
+    updateHistory()
+
 def generate_robot_proto(robot_json):
     
     # Hard coded, values from website
@@ -1823,6 +1833,7 @@ if __name__ == '__main__':
     # The simulation is running
     simulationRunning = True
     finished = False
+    last = False
 
     # Reset the controllers
     resetControllerFile()
@@ -1852,14 +1863,15 @@ if __name__ == '__main__':
     #Can be moved to another location - only here for testingwe
     mapSolution0, mapSolution1, mapSolution2 = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
     
-    print(mapSolution0)
-    print(mapSolution1)
-    print(mapSolution2)
-
     # -------------------------------
 
     # Until the match ends (also while paused)
-    while simulationRunning:
+    while simulationRunning or last == True:
+        
+        if last == True:
+            last = -1
+            finished = True
+        
         r0 = False
         r0s = False
 
@@ -2017,14 +2029,9 @@ if __name__ == '__main__':
                                                     
                             robot0Obj.history.enqueue("Map Score Percentage "+str(round(map_score * 100,1)) +"%")
                             
-                            score = robot0Obj.getScore()
-                            score_change = score * (1 + (map_score / 3))
-                            robot0Obj.increaseScore(score_change)
+                            # Add percent
+                            robot0Obj.map_score_percent += map_score / 3
                             
-                            if score_change > 0:
-                                robot0Obj.history.enqueue("Map Score Bonus +" + str(round(score_change,1)))
-                                
-
                             robot0Obj.map_data = np.array([])
                             updateHistory()
                             # Do something...
@@ -2053,8 +2060,6 @@ if __name__ == '__main__':
                         iterator = hazards
                         name = 'Hazard'
                         
-                    print(r0_est_vic_type.lower() , HazardMap.HAZARD_TYPES)
-
                     misidentification = True
                     for i, h in enumerate(iterator):
                         # Check if in range
@@ -2081,7 +2086,7 @@ if __name__ == '__main__':
                                         h.identified = True
                                         updateHistory()
 
-                    if misidentification:
+                    if misidentification and r0_est_vic_type.lower() != 'm':
                         robot0Obj.history.enqueue(f"Misidentification of {name}  - 5")
                         robot0Obj.increaseScore(-5)
                         updateHistory()
@@ -2094,7 +2099,6 @@ if __name__ == '__main__':
                 robot0Obj.stoppedTime = None
 
             if robot0Obj.position[1] < -0.035 and currentlyRunning:
-                print(robot0Obj.position[1],'asdjlkhaslkdjalksdjlakjsd')
                 relocate(robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
@@ -2200,8 +2204,10 @@ if __name__ == '__main__':
             lastSentTime = timeElapsed
 
         # If the time is up
-        if timeElapsed >= maxTime:
+        if timeElapsed >= maxTime and last != -1:
+            add_map_multiplier()
             finished = True
+            last = True
             supervisor.wwiSendText("ended")
 
         # If the match is running
@@ -2219,7 +2225,7 @@ if __name__ == '__main__':
                 # Stop simulating
                 simulationRunning = False
                 finished = True
-        elif first:
+        elif first or last:
             supervisor.step(32)
 
         if not simulationRunning and timeElapsed > 0:
