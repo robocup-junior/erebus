@@ -34,6 +34,8 @@ robotApiDetection = False
 
 pointsMultiplier = 1
 
+#Room multipliers
+roomMult = [1, 1.25, 1.5]
 
 class Queue:
     #Simple queue data structure
@@ -466,6 +468,12 @@ def getSwamps(swamps, numberOfSwamps):
         # Create a swamp object using the min and max (x,z)
         swampObj = Checkpoint([minPos[0], minPos[2]], [maxPos[0], maxPos[2]], centerPos)
         swamps.append(swampObj)
+
+def coord2grid(xzCoord):
+    side = 0.3 * supervisor.getFromDef("START_TILE").getField("xScale").getSFFloat()
+    height = supervisor.getFromDef("START_TILE").getField("height").getSFFloat()
+    width = supervisor.getFromDef("START_TILE").getField("width").getSFFloat()
+    return int(round((xzCoord[0] + (width / 2 * side)) / side, 0) * height + round((xzCoord[2] + (height / 2 * side)) / side, 0))
 
 def getCheckpoints(checkpoints, numberOfCheckpoints):
     '''Get checkpoints in simulation'''
@@ -1799,6 +1807,9 @@ if __name__ == '__main__':
     # Get number of humans in map
     numberOfHumans = supervisor.getFromDef('HUMANGROUP').getField("children").getCount()
 
+    # Get number of humans in map
+    numberOfHazards = supervisor.getFromDef('HAZARDGROUP').getField("children").getCount()
+
     # Get number of checkpoints in map
     numberOfCheckpoints = supervisor.getFromDef('CHECKPOINTBOUNDS').getField('children').getCount()
 
@@ -1822,6 +1833,9 @@ if __name__ == '__main__':
 
     #NOT WORKING DUE TO NEW TILES - do not use yet
     checkObstacles()
+
+    #get hazards in world
+    getHazards(humans, numberOfHazards)
 
     # Not currently running the match
     currentlyRunning = False
@@ -1894,6 +1908,7 @@ if __name__ == '__main__':
 
         if robot0Obj.inSimulation:
             # Test if the robots are in checkpoints
+            cpNum = 0
             for checkpoint in checkpoints:
                 # Check position of checkpoint with the robots position
                 if checkpoint.checkPosition(robot0Obj.position):
@@ -1913,9 +1928,12 @@ if __name__ == '__main__':
                     # Update robot's points and history
                     if not alreadyVisited:
                         robot0Obj.visitedCheckpoints.append(checkpoint.center)
-                        robot0Obj.increaseScore(10)
+                        grid = coord2grid(checkpoint.center)
+                        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                        robot0Obj.increaseScore(10, roomMult[roomNum])
                         robot0Obj.history.enqueue("Found checkpoint  +10")
                         updateHistory()
+                cpNum = cpNum + 1
 
             # Print when robot0 enters or exits a checkpoint
             # Not really needed
@@ -2074,14 +2092,17 @@ if __name__ == '__main__':
                                         # Get points scored depending on the type of victim
                                         #pointsScored = h.scoreWorth
 
+                                        grid = coord2grid(h.wb_translationField.getSFVec3f())
+                                        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+
                                         # Update score and history
                                         if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                            robot0Obj.history.enqueue(f"Successful {name} Type Correct Bonus  +  {str(int(10*pointsMultiplier))}")
-                                            robot0Obj.increaseScore(10, pointsMultiplier)
+                                            robot0Obj.history.enqueue(f"Successful {name} Type Correct Bonus  +  {str(int(10*pointsMultiplier*roomMult[roomNum]))}")
+                                            robot0Obj.increaseScore(10, pointsMultiplier*roomMult[roomNum])
                                             #pointsScored += 10
 
-                                        robot0Obj.history.enqueue(f"Successful {name} Identification + {str(int(h.scoreWorth*pointsMultiplier))}")
-                                        robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier)
+                                        robot0Obj.history.enqueue(f"Successful {name} Identification + {str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum]))}")
+                                        robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier*roomMult[roomNum])
 
                                         h.identified = True
                                         updateHistory()
