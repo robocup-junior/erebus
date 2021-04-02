@@ -1162,24 +1162,26 @@ DEF HUMANGROUP Group {
       translation -0.5344 0 0.22
       rotation 0 1 0 -1.57
       name "HeatVictim0"
+      scoreWorth 5
     }
     Victim {
       translation -0.20099999999999998 0 0.1750000000000001
       name "Victim1"
-      scoreWorth 30
+      scoreWorth 15
     }
     Victim {
       translation 0.0650000000000001 0 0.13100000000000012
       rotation 0 1 0 -1.57
       name "Victim2"
       type "unharmed"
-      scoreWorth 30
+      scoreWorth 15
     }
     Victim {
       translation 0.4150000000000001 0 -0.37
       rotation 0 1 0 1.57
       name "Victim3"
       type "stable"
+      scoreWorth 5
     }
   ]
 }
@@ -1202,8 +1204,8 @@ DEF MAINSUPERVISOR Robot {
     }
   ]
   controller "MainSupervisor"
+  customData "480"
   supervisor TRUE
   showWindow TRUE
   window "MainSupervisorWindow"
-  customData "480"
 }

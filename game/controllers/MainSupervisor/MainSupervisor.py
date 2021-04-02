@@ -2041,7 +2041,7 @@ if __name__ == '__main__':
                     if robot0Obj.map_data.size != 0:
                         # Only allow the robot to send and get scored for 3 maps
                         if robot0Obj.sent_maps < 3:     
-                            robot0Obj.history.enqueue("Map entry successfull")
+                            robot0Obj.history.enqueue("Map entry successful")
                             # Test map scorer
                             map_score = MapScorer.calculateScore([mapSolution0,mapSolution1,mapSolution2], robot0Obj.map_data)
                                                     
@@ -2073,10 +2073,12 @@ if __name__ == '__main__':
                     
                     iterator = humans
                     name = 'Victim'
+                    bonus = 1
                     
                     if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
                         iterator = hazards
                         name = 'Hazard'
+                        bonus = 2
                         
                     misidentification = True
                     for i, h in enumerate(iterator):
