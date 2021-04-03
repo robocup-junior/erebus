@@ -1750,4 +1750,5 @@ DEF MAINSUPERVISOR Robot {
   controller "MainSupervisor"
   window "MainSupervisorWindow"
   showWindow TRUE
+  customData "360"
 }

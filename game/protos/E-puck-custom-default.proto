@@ -7,7 +7,7 @@
 # The e-puck is powered by a dsPIC processor and features a very large number of sensors in its basic configuration.
 # More info here: http://www.e-puck.org.
 
-PROTO E-puck-custom [
+PROTO custom_robot [
   field SFVec3f            translation                  0 0 0                    # Is `Transform.translation`.
   field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
   field SFString           name                         "e-puck"                 # Is `Solid.name`.

@@ -291,11 +291,12 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         '.py': 'text/plain',
         '.c': 'text/plain',
         '.h': 'text/plain',
+        '.proto': 'text/plain',
         })
 
 
 def start(HandlerClass = SimpleHTTPRequestHandler, ServerClass = http.server.ThreadingHTTPServer):
-    os.chdir('../')
+    os.chdir('../../')
     server_address = ('', 60520)
     httpd = ServerClass(server_address, HandlerClass)
     httpd.serve_forever()

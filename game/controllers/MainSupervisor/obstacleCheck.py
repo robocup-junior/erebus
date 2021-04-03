@@ -32,7 +32,7 @@ def dimensionsToCircle(dimensions:list) -> float:
     return radius
 
 
-def getWallsFromTilePosition(position:list, walls:list, scale:float) -> list:
+def getWallsFromTilePosition(position:list, walls:list, smallWalls:list, scale:float) -> list:
     '''Convert tile position and list of if walls are present to list of wall positions and dimensions, properly scaled'''
     wallsPresent = []
 
@@ -56,6 +56,34 @@ def getWallsFromTilePosition(position:list, walls:list, scale:float) -> list:
     if walls[3]:
         wall = [[position[0] - (sideLength / 2) + (wallWidth / 2), position[1]], [wallWidth, sideLength]]
         wallsPresent.append(wall)
+
+    #Half the side length for the walls
+    smallSideLength = sideLength / 2
+    #Offset of centres of tiles
+    sideChange = sideLength / 4
+    #Centre positions of all four sub tiles - top left, top right, bottom left, bottom right
+    smallCentres = [[position[0] - sideChange, position[1] - sideChange], [position[0] + sideChange, position[1] - sideChange], [position[0] - sideChange, position[1] + sideChange], [position[0] + sideChange, position[1] + sideChange]]
+
+    #Iterate through sub tiles
+    for smallIndex in range(0, 4):
+        #Get the data for the sub tile
+        smallWallData = smallWalls[smallIndex]
+        #Upper wall
+        if smallWallData[0]:
+            wall = [[smallCentres[smallIndex][0], smallCentres[smallIndex][1] - (smallSideLength / 2) + (wallWidth / 2)], [smallSideLength, wallWidth]]
+            wallsPresent.append(wall)
+        #Right wall
+        if smallWallData[1]:
+            wall = [[smallCentres[smallIndex][0] + (smallSideLength / 2) - (wallWidth / 2), smallCentres[smallIndex][1]], [wallWidth, smallSideLength]]
+            wallsPresent.append(wall)
+        #Bottom wall
+        if smallWallData[2]:
+            wall = [[smallCentres[smallIndex][0], smallCentres[smallIndex][1] + (smallSideLength / 2) - (wallWidth / 2)], [smallSideLength, wallWidth]]
+            wallsPresent.append(wall)
+        #Left wall
+        if smallWallData[3]:
+            wall = [[smallCentres[smallIndex][0] - (smallSideLength / 2) + (wallWidth / 2), smallCentres[smallIndex][1]], [wallWidth, smallSideLength]]
+            wallsPresent.append(wall)
     
     return wallsPresent
 
@@ -126,7 +154,7 @@ def performChecks(tileData:list, obstacles:list) -> list:
     #Iterate through the tiles
     for tile in tileData:
         #Get the walls for this tile
-        walls = getWallsFromTilePosition(tile[0], tile[1], scale)
+        walls = getWallsFromTilePosition(tile[0], tile[1][0], tile[1][1], scale)
         #Add walls to list
         for w in walls:
             allWalls.append(w)
@@ -141,7 +169,7 @@ def performChecks(tileData:list, obstacles:list) -> list:
         allowed.append(allow)
 
     #Used for debugging purposes only, useful if supervisor is removing or leaving obstacles incorrectly
-    #drawLayout(allWalls, obstacles, offset, contactedWalls)
+    #drawLayout(allWalls, obstacles, offset)
     
     #List of booleans indicating if the obstacles are correctly placed
     return allowed

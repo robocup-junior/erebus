@@ -96,13 +96,13 @@ function receive (message){
 }
 
 function robotQuitColour(id){
-	//setEnableButton('quit'+id, true)
+	// setEnableButton('quit'+id, true)
 	// setEnableButton('relocate'+id, true)
 	// setEnableButton('load'+id, true)
 	// setEnableButton('unload'+id, true)
 }
 function robotQuitUnavailableColour(id){
-	//setEnableButton('quit'+id, false)
+	// setEnableButton('quit'+id, false)
 	// setEnableButton('relocate'+id, false)
 	// setEnableButton('load'+id, false)
 	// setEnableButton('unload'+id, false)
@@ -167,7 +167,7 @@ function loadedController(id){
 function unloadedController(id){
 	//A controller has been unloaded for robot of the given id
 	//Reset name and toggle to load button for robot 0
-	document.getElementById("robot"+ id +"File").value = "";
+	document.getElementById("robot"+ id +"Controller").value = "";
 	document.getElementById("unload"+ id).style.display = "none";
 	document.getElementById("load"+ id).style.display = "inline-block";
 }
@@ -192,6 +192,7 @@ function update (data){
 
 	scores = [data[0],0]
 
+	maxTime = data[2]
 	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1]);
 }
 
@@ -226,6 +227,9 @@ function runPressed(){
 	//Disable all the loading buttons (cannot change loaded controllers once simulation starts)
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
+	
+	setEnableButton("load1", false);
+	setEnableButton("unload1", false);
 	//When the run button is pressed
 	//Disable the run button
 	setEnableButton("runButton", false);
@@ -257,9 +261,9 @@ function resetPressed(){
 	window.robotWindow.send("reset");
 }
 
-function openLoadController(robotNumber){
+function openLoadController(id){
 	//When a load button is pressed - opens the file explorer window
-	document.getElementById("robot" + robotNumber + "File").click();
+	document.getElementById("robot"+id+"Controller").click();
 }
 
 function setEnableButton(name, state){
@@ -276,7 +280,7 @@ window.onload = function(){
 	//Set which function handles the recieved messages
 	window.robotWindow.receive = receive;
 	//Set timer to inital time value
-	document.getElementById("timer").innerHTML = calculateTimeRemaining(0);
+	document.getElementById("timer").innerHTML = '--:--'
 };
 
 function endGame(){
@@ -291,10 +295,10 @@ function unloadPressed(id){
 	window.robotWindow.send("robot"+id+"Unload");
 }
 
-function fileOpened(id){
+function fileOpened(filesId, acceptTypes, location, id){
 	//When file 0 value is changed
 	//Get the files
-	var files = document.getElementById("robot"+id+"File").files;
+	var files = document.getElementById(filesId).files;
 
 	//If there are files
 	if (files.length > 0){
@@ -306,35 +310,77 @@ function fileOpened(id){
 		//If there are parts to the name
 		if (nameParts.length > 1){
 			//If the last part is "py" - a python file
-			let acceptTypes = ["py", "exe", "class", "jar", "bsg", "m"]
 			if(acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
 				const fd = new FormData();
 				for (let i = 0; i < files.length; i++) {
-            const f = files[i];
-            fd.append(`file${(i+1)}`, f, f.name);
-        }
+					const f = files[i];
+					fd.append(`file${(i+1)}`, f, f.name);
+				}
 
-	      let xmlhttp = new XMLHttpRequest();
-	      xmlhttp.onreadystatechange = function () {
-	        if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
-	          alert(xmlhttp.responseText);
-	        }
+				let xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function () {
+					if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
+						console.log(xmlhttp.status);
+						alert(xmlhttp.responseText);
+					}
 					if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-	          loadedController(0);
-	        }
-	      };
-	      xmlhttp.open("POST", "http://127.0.0.1:60520/robot"+ id +"Controller/", true);
-	      xmlhttp.send(fd);
+						loadedController(id);
+					}
+				};
+				xmlhttp.open("POST", "http://127.0.0.1:60520/"+location+"/", true);
+				xmlhttp.send(fd);
 
 			}else{
 				//Tell the user to select a program
-				alert("Please select your controller program.");
+				alert("Please select your controller program.1");
 			}
 		}else{
 			//Tell the user to select a program
 			alert("Please select your controller program.");
 		}
 
+	}
+}
+
+function openJsonFile(){
+	//When file 0 value is changed
+	//Get the files
+	var files = document.getElementById("robot1Controller").files;
+	
+	//If there are files
+	if (files.length > 0){
+		//Get the first file only
+		var file = files.item(0);
+		//Split at the .
+		var nameParts = file.name.split(".");
+		
+		//If there are parts to the name
+		if (nameParts.length > 1){
+			//If the last part is "json" - a json file
+			if(nameParts[nameParts.length - 1] == "json"){
+				//Create a file reader
+				var reader = new FileReader();
+				
+				//Set the function of the reader when it finishes loading
+				reader.onload = (function(reader){
+					return function(){
+						//Send the signal to the supervisor with the data from the file
+						window.robotWindow.send("robotJson," + reader.result);
+						loadedController(1)
+					}
+				})(reader);
+				
+				//Read the file as udf-8 text
+				reader.readAsText(file);
+			}else{
+				//Tell the user to select a json file
+				alert("Please select a json file.");
+			}
+		}else{
+			//Tell the user to select a json file
+			alert("Please select a json file.");
+		}
+		
 	}
 }
 
