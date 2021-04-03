@@ -79,7 +79,7 @@ body{
   border: none;
   border-radius: 9999999px;
 }
-#runButton:disabled, #pauseButton:disabled, #resetButton:disabled{
+#runButton:disabled, #pauseButton:disabled, #relocate0:disabled{
   background-color: #9e9e9e;
 }
 
@@ -115,7 +115,7 @@ body{
   background: #eeeeee;
 }
 
-#load0:disabled,#unload0:disabled, #load1:disabled,#unload1:disabled, #relocate0:disabled, #detectionApi:disabled{
+#load0:disabled,#unload0:disabled, #load1:disabled,#unload1:disabled, #resetButton:disabled, #detectionApi:disabled{
   border-color: #9e9e9e;
   color: #9e9e9e;
   fill: none;
