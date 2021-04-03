@@ -690,7 +690,7 @@ def resetVictimsTextures():
         humans[i].identified = False
 
 
-def relocate(robotObj):
+def relocate(robot, robotObj):
     '''Relocate robot to last visited checkpoint'''
     # Get last checkpoint visited
     relocatePosition = robotObj.lastVisitedCheckPointPosition
@@ -698,7 +698,10 @@ def relocate(robotObj):
     # Set position of robot
     robotObj.position = [relocatePosition[0], -0.03, relocatePosition[2]]
     robotObj.rotation = [0,1,0,0]
-    
+
+    # Reset physics
+    robot.resetPhysics()
+
     # Notify robot
     emitter.send(struct.pack("c", bytes("L", "utf-8")))
 
@@ -1901,6 +1904,9 @@ if __name__ == '__main__':
             set_robot_start_pos()
             robot0Obj.inSimulation = True
 
+            # Reset physics
+            robot0.resetPhysics()
+
 
             # Restart controller code
             # robot0.restartController()
@@ -2116,13 +2122,13 @@ if __name__ == '__main__':
 
             # Relocate robot if stationary for 20 sec
             if robot0Obj.timeStopped() >= 20:
-                relocate(robot0Obj)
+                relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
 
             if robot0Obj.position[1] < -0.035 and currentlyRunning:
-                relocate(robot0Obj)
+                relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
@@ -2194,7 +2200,7 @@ if __name__ == '__main__':
                     data = message.split(",", 1)
                     if len(data) > 1:
                         if int(data[1]) == 0:
-                            relocate(robot0Obj)
+                            relocate(robot0, robot0Obj)
 
                 if parts[0] == 'quit':
                     data = message.split(",", 1)
