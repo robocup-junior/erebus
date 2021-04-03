@@ -739,7 +739,7 @@ def add_robot():
         root = supervisor.getRoot()
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
-        root_children_field.importMFNode(12,filePath + '/nodes/robot0.wbo')
+        root_children_field.importMFNode(12,filePath + '/../../nodes/robot0.wbo')
         # Update robot0 variable
         robot0 = supervisor.getFromDef("ROBOT0")
         # Update robot window to say robot is in simulation
@@ -1772,7 +1772,7 @@ def generate_robot_proto(robot_json):
     proto_code += closeBracket
     
     path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(path, "protos")
+    path = os.path.join(path, "../../protos")
     path = os.path.join(path, "custom_robot.proto")
     
     # print(proto_code)
