@@ -16,8 +16,6 @@ var robot1Name = "Robot 1";
 
 var scores = [0,0];
 
-var usingDetectionAPI = false;
-
 function receive (message){
 	//Receive message from the python supervisor
 	//Split on comma
@@ -239,7 +237,6 @@ function runPressed(){
 	
 	// setEnableButton('quit0', true)
 	setEnableButton('relocate0', true)
-	setEnableButton('detectionApi', false)
 	window.robotWindow.send("run");
 }
 
@@ -422,23 +419,4 @@ function relocate(id){
 function quit(id){
 	unloadPressed(id);
 	window.robotWindow.send("quit,"+id.toString());
-}
-
-function switchDetectionApiSelected() {
-	usingDetectionAPI = !usingDetectionAPI;
-	updateDectectionApi();
-}
-
-function updateDectectionApi(){
-	if (!usingDetectionAPI){
-		document.getElementById("detectionApi").style.borderColor = "#ba53ba";
-		document.getElementById("detectionApi").style.color = "#ba53ba";
-		document.getElementById("detectionApi").innerHTML = "No Detection API";
-		window.robotWindow.send("detectionApi,0");
-	} else {
-		document.getElementById("detectionApi").style.borderColor = "#811b9b";
-		document.getElementById("detectionApi").style.color = "#811b9b";
-		document.getElementById("detectionApi").innerHTML = "Using Detection API";
-		window.robotWindow.send("detectionApi,1");
-	}
 }

@@ -30,8 +30,6 @@ maxTime = maxTimeMinute * 60
 
 DEFAULT_MAX_VELOCITY = 6.28
 
-robotApiDetection = False
-
 pointsMultiplier = 1
 
 #Room multipliers
@@ -744,8 +742,6 @@ def add_robot():
         robot0 = supervisor.getFromDef("ROBOT0")
         # Update robot window to say robot is in simulation
         supervisor.wwiSendText("robotInSimulation0")
-        # Set using_detection_api to whether the team is using the detection API or not
-        robot0.getField("using_detection_api").setSFBool(robotApiDetection)
 
 
 def create_log_str():
@@ -857,7 +853,6 @@ def generate_robot_proto(robot_json):
       field SFRotation         camera_rotation              1 0 0 0                  
       field SFFloat            camera_noise                 0.0                      
       field SFFloat            camera_motionBlur            0.0                      
-      field SFBool             using_detection_api          FALSE
       field SFInt32            emitter_channel              1                        
       field SFInt32            receiver_channel             1                        
       field MFFloat            battery                      []                       
@@ -871,7 +866,6 @@ def generate_robot_proto(robot_json):
       local v1 = fields.version.value:find("^1") ~= nil
       local v2 = fields.version.value:find("^2") ~= nil
       local kinematic = fields.kinematic.value
-      local usingDetectionApi = fields.using_detection_api.value
     }%
     Robot {
       translation IS translation
@@ -1614,10 +1608,6 @@ def generate_robot_proto(robot_json):
                 noise IS camera_noise
                 zoom Zoom {{
                 }}
-                %{{ if usingDetectionApi == true then }}%
-                recognition Recognition {{
-                }}
-                %{{ end }}%
                 }}
             ]
             }}"""
@@ -2210,16 +2200,6 @@ if __name__ == '__main__':
                             if gameStarted:
                                 robot_quit(robot0Obj, 0, True)
                         updateHistory()
-
-                if parts[0] == 'detectionApi':
-                    data = message.split(",", 1)
-                    if len(data) > 1:
-                        if int(data[1]) == 0:
-                            robotApiDetection = False
-                            pointsMultiplier = 1
-                        elif int(data[1]) == 1:
-                            robotApiDetection = True
-                            pointsMultiplier = 0.3
                 
                 if parts[0] == 'robotJson':
                     data = message.split(",", 1)
