@@ -1793,6 +1793,7 @@ if __name__ == '__main__':
 
     if supervisor.getCustomData() != '':
         maxTime = int(supervisor.getCustomData())
+        supervisor.wwiSendText("update," + str(0) + "," + str(0) + "," + str(maxTime))
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
