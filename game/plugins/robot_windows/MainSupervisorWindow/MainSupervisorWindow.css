@@ -39,6 +39,11 @@ span{
   font-weight: bold;
 }
 
+#score0{
+	font-size: 30px;
+  font-weight: bold;
+}
+
 .hidden{
 	display: none;
 }
@@ -198,7 +203,7 @@ span{
   margin-bottom: 100%;
 }
 
-.buttonRelocate{
+.buttonReset{
   cursor: pointer;
   font-family: OpenSansBold;
   text-transform: uppercase;
@@ -206,9 +211,9 @@ span{
   font-size: 13px;
   padding: 10px 15px;
   border: 5px solid;
-  border-color: rgb(83, 105, 186);
+  border-color: #e84393;
   border-radius: 0px;
-  color: rgb(83, 105, 186);
+  color: #e84393;
   background: #eeeeee;
 }
 
