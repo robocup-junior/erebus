@@ -9,12 +9,13 @@ import struct
 import math
 import datetime
 import threading
+import AutoInstall
+AutoInstall._import("np", "numpy")
 import ControllerUploader
 import MapScorer
 import obstacleCheck
 import glob
 import json
-import numpy as np
 import obstacleCheck
 import mapSolutionCalculator
 

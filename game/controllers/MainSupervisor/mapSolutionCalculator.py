@@ -9,6 +9,9 @@ ChangeLog:
  - V3
  - Now split into three regions - normal, small and curved walls
 """
+import os
+import AutoInstall
+AutoInstall._import("Image", "PIL.Image", "Pillow")
 
 def getWallData(tilesList:list) -> list:
     '''Iterates through 2d array of tile data leaving only the wall information'''
@@ -321,10 +324,7 @@ def wallsToArray(wallData) -> (list, list, list):
     return partialMaps[0], partialMaps[2], partialMaps[1]
 
 def arrayToImage (wallArray: list) -> None:
-    '''Create an image representation of the data'''
-    #Import necessary libraries
-    from PIL import Image
-    import os
+    '''Create an image representation of the data'''    
 
     #Get directory name
     dirname = os.path.dirname(__file__)

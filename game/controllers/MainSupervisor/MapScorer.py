@@ -8,7 +8,8 @@
 # NOT FULLY IMPLEMENTED!!!!
 # THIS IS TEST CODE ONLY
 
-import numpy as np
+import AutoInstall
+AutoInstall._import("np", "numpy")
 
 def _get_first_connector_instance(matrix: np.array) -> np.array:
     n,m = matrix.shape
