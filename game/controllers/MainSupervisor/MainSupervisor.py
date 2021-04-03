@@ -405,8 +405,8 @@ def resetRobotProto() -> None:
     - Reset robot proto file back to default
     '''
     path = os.path.dirname(os.path.abspath(__file__))
-    default_robot_proto = os.path.join(path, 'protos/E-puck-custom-default.proto')
-    robot_proto = os.path.join(path,'protos/custom_robot.proto')
+    default_robot_proto = os.path.join(path, '../../protos/E-puck-custom-default.proto')
+    robot_proto = os.path.join(path,'../../protos/custom_robot.proto')
     try:
         with open(default_robot_proto) as drp:
             with open(robot_proto, "w") as rp:
