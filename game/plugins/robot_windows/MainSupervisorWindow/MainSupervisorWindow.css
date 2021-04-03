@@ -14,6 +14,11 @@
 body{
   background: white;
 }
+
+span{
+  font-size: 13px;
+  color:#808080;
+}
 #controlTable{
 	margin:0 auto;
 	width: 100%;

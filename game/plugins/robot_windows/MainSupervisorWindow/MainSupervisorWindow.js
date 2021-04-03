@@ -16,6 +16,9 @@ var robot1Name = "Robot 1";
 
 var scores = [0,0];
 
+const stream = "21";
+const version = "21.0.0 Beta-1";
+
 function receive (message){
 	//Receive message from the python supervisor
 	//Split on comma
@@ -278,7 +281,29 @@ window.onload = function(){
 	window.robotWindow.receive = receive;
 	//Set timer to inital time value
 	document.getElementById("timer").innerHTML = '--:--'
+	//Set version info
+	document.getElementById("versionInfo").innerHTML = "Ver. " + version;
+	//Check update
+	checkUpdate();
 };
+
+function checkUpdate(){
+	$.ajax({
+		url: 'https://rcj-rescue-tc.gitlab.io/erebus/erebus/releases.json',
+		dataType: 'json',
+		success: function(data){
+			let versions = data[stream];
+			if(versions[0].version === version){
+				//Latest
+				document.getElementById("versionInfo").style.color = "#27ae60";
+			}else{
+				document.getElementById("versionInfo").style.color = "#c0392b";
+				document.getElementById("newVersion").innerHTML = `New version: ${versions[0].version} is available. Please update it!`;
+			}
+		}
+	});
+	
+}
 
 function endGame(){
 	//Once the game is over turn off both the run and pause buttons
