@@ -12,3 +12,5 @@ world_gen/generatedWorld.wbt
 game/worlds/.*.wbproj
 
 *.cache
+
+game/protos/custom_robot.proto
