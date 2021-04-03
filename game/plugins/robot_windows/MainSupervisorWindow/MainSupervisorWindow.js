@@ -296,8 +296,10 @@ function checkUpdate(){
 			if(versions[0].version === version){
 				//Latest
 				document.getElementById("versionInfo").style.color = "#27ae60";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Latest)`;
 			}else{
 				document.getElementById("versionInfo").style.color = "#c0392b";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Outdated)`;
 				document.getElementById("newVersion").innerHTML = `New version: ${versions[0].version} is available. Please update it!`;
 			}
 		}

@@ -19,13 +19,15 @@
 						<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/" style="margin:0;">
 							<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
 						</form>
-						<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load<br>Controller</button>
-						<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove<br>Controller</button>
+						<img src="program.svg" style="max-width:100%;height:40px;"/><br>
+						<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load</button>
+						<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove</button>
 					</div>
 					<div class="col-6">
 						<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
-						<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load<br>Robot JSON</button>
-						<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload<br>Robot JSON</button>
+						<img src="robot.svg" style="max-width:100%;height:40px;"/><br>
+						<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load</button>
+						<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload</button>
 					</div>
 					<div class="col-12">
 						<button class="button buttonReset" onclick="resetPressed()" style="display:inline-block;" id="resetButton">Reset</button>
