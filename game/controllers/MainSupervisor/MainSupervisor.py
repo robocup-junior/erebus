@@ -404,8 +404,14 @@ def resetRobotProto() -> None:
     - Reset robot proto file back to default
     '''
     path = os.path.dirname(os.path.abspath(__file__))
-    default_robot_proto = os.path.join(path, '../../protos/E-puck-custom-default.proto')
-    robot_proto = os.path.join(path,'../../protos/custom_robot.proto')
+
+    if path[-4:] == "game":
+      default_robot_proto = os.path.join(path, 'protos/E-puck-custom-default.proto')
+      robot_proto = os.path.join(path,'protos/custom_robot.proto')
+    else: 
+      default_robot_proto = os.path.join(path, '../../protos/E-puck-custom-default.proto')
+      robot_proto = os.path.join(path,'../../protos/custom_robot.proto')
+      
     try:
         with open(default_robot_proto) as drp:
             with open(robot_proto, "w") as rp:
@@ -738,7 +744,10 @@ def add_robot():
         root = supervisor.getRoot()
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
-        root_children_field.importMFNode(12,filePath + '/../../nodes/robot0.wbo')
+        if filePath[-4:] == "game":
+          root_children_field.importMFNode(12,filePath + '/nodes/robot0.wbo')
+        else:
+          root_children_field.importMFNode(12,filePath + '/../../nodes/robot0.wbo')
         # Update robot0 variable
         robot0 = supervisor.getFromDef("ROBOT0")
         # Update robot window to say robot is in simulation
@@ -1762,15 +1771,19 @@ def generate_robot_proto(robot_json):
     proto_code += "\n}"
     proto_code += closeBracket
     
+
     path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(path, "../../protos")
+
+    if path[-4:] == "game":
+      path = os.path.join(path, "protos")
+    else:
+      path = os.path.join(path, "../../protos")
+
     path = os.path.join(path, "custom_robot.proto")
-    
-    # print(proto_code)
-    
+
     with open(path, 'w') as robot_file:
         robot_file.write(proto_code)
-            
+
 
 def process_robot_json(json_data):
     '''Process json file to generate robot file'''
