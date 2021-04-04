@@ -386,7 +386,11 @@ class StartTile(Tile):
 def resetControllerFile() -> None:
     '''Remove the controller'''
     path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(path, "controllers/robot0Controller")
+
+    if path[-4:] == "game":
+      path = os.path.join(path, "controllers/robot0Controller")
+    else:
+      path = os.path.join(path, "../robot0Controller")
     path = os.path.join(path, "robot0Controller.*")
     print(path)
 
@@ -738,16 +742,15 @@ def add_robot():
     if robot0 == None:
         # Get relative path
         filePath = os.path.dirname(os.path.abspath(__file__))
-        filePath = filePath.replace('\\', '/')
 
         # Get webots root
         root = supervisor.getRoot()
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
-          root_children_field.importMFNode(12,filePath + '/nodes/robot0.wbo')
+          root_children_field.importMFNode(12, os.path.join(filePath,'nodes/robot0.wbo'))
         else:
-          root_children_field.importMFNode(12,filePath + '/../../nodes/robot0.wbo')
+          root_children_field.importMFNode(12, os.path.join(filePath, '../../nodes/robot0.wbo'))
         # Update robot0 variable
         robot0 = supervisor.getFromDef("ROBOT0")
         # Update robot window to say robot is in simulation
@@ -773,14 +776,16 @@ def write_log():
     log_str = create_log_str()
     # Get relative path to logs dir
     filePath = os.path.dirname(os.path.abspath(__file__))
-    filePath = filePath.replace('\\', '/')
-    filePath = filePath + "/../logs/"
+    if filePath[-4:] == "game":
+      filePath = os.path.join(filePath, "logs/")
+    else:
+      filePath = os.path.join(filePath, "../../logs/")
 
     # Create file name using date and time
     file_date = datetime.datetime.now()
     logFileName = file_date.strftime("log %m-%d-%y %H,%M,%S")
 
-    filePath += logFileName + ".txt"
+    filePath = os.path.join(filePath, logFileName + ".txt")
 
     try:
         # Write file
