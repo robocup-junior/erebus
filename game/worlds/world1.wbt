@@ -4,8 +4,8 @@ WorldInfo {
   coordinateSystem "NUE"
 }
 Viewpoint {
-  orientation -1 0 0 0.85
-  position -0.08 1.6 1.36
+  orientation -1 4.5317877835753625e-14 9.448830298683955e-15 0.670000000000022
+  position -0.05097664811755035 1.4872131100190586 1.6276952609407322
 }
 TexturedBackground {
 }
@@ -1158,12 +1158,6 @@ DEF OBSTACLES Group {
 }
 DEF HUMANGROUP Group {
   children [
-    HeatVictim {
-      translation -0.5344 0 0.22
-      rotation 0 1 0 -1.57
-      name "HeatVictim0"
-      scoreWorth 5
-    }
     Victim {
       translation -0.20099999999999998 0 0.1750000000000001
       name "Victim1"
@@ -1191,6 +1185,12 @@ DEF HAZARDGROUP Group {
       translation -0.5344 0 -0.208
       rotation 0 1 0 -1.57
       name "Hazard0"
+    }
+    HazardMap {
+      translation -0.534048 0 0.232
+      rotation 0 1 0 -1.57
+      name "Hazard1"
+      type "P"
     }
   ]
 }
