@@ -60,6 +60,10 @@ PROTO halfTile [
             swamp %{=fields.swamp.value and "TRUE" or "FALSE" }%
             id %{= "\"" .. fields.id.value .. ".0" .. "\"" }%
             tileColor IS tileColor
+            topExternal %{= (fields.tile1External.value[1] and fields.tile2External.value[1]) and "TRUE" or "FALSE" }%
+            rightExternal %{= (fields.tile2External.value[2] and fields.tile4External.value[2]) and "TRUE" or "FALSE" }%
+            bottomExternal %{= (fields.tile3External.value[3] and fields.tile4External.value[3]) and "TRUE" or "FALSE" }%
+            leftExternal %{= (fields.tile1External.value[4] and fields.tile3External.value[4]) and "TRUE" or "FALSE" }%
           }
           DEF TILE worldTile {
             xPos 0 

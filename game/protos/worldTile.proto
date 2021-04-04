@@ -173,6 +173,24 @@ PROTO worldTile [
 							}
 						]
 					}
+					%{if fields.rightWall.value > 0 and fields.rightExternal.value == true and fields.bottomExternal.value == false then}%
+
+					Transform {
+						translation .15 %{=-wallHeight/2-tileThickness/2}% .15
+						children [
+								Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor 0.2 0.466667 0.521569
+										}
+									}
+								geometry DEF BACKWALLBOX Box {
+									size %{=wallThickness}% %{=tileThickness}% %{=wallThickness}%
+								}
+								}
+							]
+					}
+					%{end}%
 				%{end}%
 				%{if fields.topWall.value > 0 then
 
