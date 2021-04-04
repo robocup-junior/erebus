@@ -2131,13 +2131,13 @@ if __name__ == '__main__':
                         updateHistory()
 
             # Relocate robot if stationary for 20 sec
-            if robot0Obj.timeStopped() >= 20:
+            if robot0Obj.timeStopped() >= 20 and not finished:
                 relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
 
-            if robot0Obj.position[1] < -0.035 and currentlyRunning:
+            if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
                 relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
