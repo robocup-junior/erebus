@@ -51,7 +51,7 @@ Robot {
       }
       device [
         RotationalMotor {
-          name "left wheel motor"
+          name "wheel1 motor"
           consumptionFactor -0.001 # small trick to encourage the movement (calibrated for the rat's life contest)
           %{ if v2 then }%
             maxVelocity IS max_velocity
@@ -60,7 +60,7 @@ Robot {
           %{ end }%
         }
         PositionSensor {
-          name "left wheel sensor"
+          name "wheel1 sensor"
           resolution 0.00628  # (2 * pi) / 1000
         }
       ]
@@ -180,7 +180,7 @@ Robot {
             ]
           }
         ]
-        name "left wheel"
+        name "wheel1"
         boundingObject DEF EPUCK_WHEEL_BOUNDING_OBJECT Transform {
           rotation 0 0 1 1.57
           children [
@@ -206,7 +206,7 @@ Robot {
       }
       device [
         RotationalMotor {
-          name "right wheel motor"
+          name "wheel2 motor"
           consumptionFactor -0.001 # small trick to encourage the movement (calibrated for the rat's life contest)
           %{ if v2 then }%
             maxVelocity IS max_velocity
@@ -215,7 +215,7 @@ Robot {
           %{ end }%
         }
         PositionSensor {
-          name "right wheel sensor"
+          name "wheel2 sensor"
           resolution 0.00628  # (2 * pi) / 1000
         }
       ]
@@ -230,7 +230,7 @@ Robot {
             ]
           }
         ]
-        name "right wheel"
+        name "wheel2"
         boundingObject USE EPUCK_WHEEL_BOUNDING_OBJECT
         %{ if kinematic == false then }%
           physics USE EPUCK_WHEEL_PHYSICS

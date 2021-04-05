@@ -7,58 +7,43 @@ import time
 timeStep = 32            # Set the time step for the simulation
 max_velocity = 6.28      # Set a maximum velocity time constant
 
+# Make robot controller instance
 robot = Robot()
 
+'''
+Every component on the robot is initialised through robot.getDevice("name") 
+If the "name" does not register well, check the custom_robot.proto file in the /games/protos folder
+There you will find the configuration for the robot including each component name
+'''
 
-# wheel1 = robot.getMotor("wheel1 motor")   # Create an object to control the left wheel
-# wheel2 = robot.getMotor("wheel2 motor") # Create an object to control the right wheel
-# s1 = robot.getDistanceSensor("sensor1")
-# s2 = robot.getDistanceSensor("sensor2")
-# s3 = robot.getDistanceSensor("sensor3")
-# s4 = robot.getDistanceSensor("sensor4")
-# s5 = robot.getDistanceSensor("sensor5")
-# s1.enable(timeStep)
-# s2.enable(timeStep)
-# s3.enable(timeStep)
-# s4.enable(timeStep)
-# s5.enable(timeStep)
-# # wheel3 = robot.getMotor("wheel3 motor") # Create an object to control the right wheel
-# # wheel4 = robot.getMotor("wheel4 motor") # Create an object to control the right wheel
+# Define the wheels 
+wheel1 = robot.getDevice("wheel1 motor")   # Create an object to control the left wheel
+wheel2 = robot.getDevice("wheel2 motor") # Create an object to control the right wheel
 
-# # Declare GPS
-# gps = robot.getGPS("gps")
-# gps.enable(timeStep)
+# Set the wheels to have infinite rotation 
+wheel1.setPosition(float("inf"))       
+wheel2.setPosition(float("inf"))
 
-# # colour_camera = robot.getCamera("colour sensor")
-# # colour_camera.enable(timeStep)
-# # camera = robot.getCamera("camera")
-# # camera.enable(timeStep)
+# Define distance sensors
+s1 = robot.getDevice("ps5")
+s2 = robot.getDevice("ps7")
+s3 = robot.getDevice("ps0")
+s4 = robot.getDevice("ps2")
 
-# wheel1.setPosition(float("inf"))
-# wheel1.setVelocity(max_velocity)              # Send the speed values we have chosen to the robot
-# wheel2.setPosition(float("inf"))
-# wheel2.setVelocity(max_velocity)
-# # wheel3.setPosition(float("inf"))
-# # wheel3.setVelocity(max_velocity)
-# # wheel4.setPosition(float("inf"))
-# # wheel4.setVelocity(max_velocity)
+'''
+The names ps0, ps2, etc corresponds to the distance sensors located on the e-puck robot. 
+When you create your custom robot the names should change to "distance sensor1", "distance sensor2", etc
+The custom_robot.proto file should be refered for any such differences. 
+'''
 
-# # Declare heat/temperature sensor
-# left_heat_sensor = robot.getLightSensor("heat_sensor1")
-# right_heat_sensor = robot.getLightSensor("heat_sensor2")
-# left_heat_sensor.enable(timeStep)
-# right_heat_sensor.enable(timeStep)
-
-# acc = robot.getAccelerometer("accelerometer")
-# acc.enable(timeStep)
-
-# gyro = robot.getGyro("gyro")
-# gyro.enable(timeStep)
-
-lidar = robot.getLidar("lidar")
-lidar.enable(timeStep)
+# Enable distance sensors N.B.: This needs to be done for every sensor
+s1.enable(timeStep)
+s2.enable(timeStep)
+s3.enable(timeStep)
+s4.enable(timeStep)
 
 
+# Mini visualiser for the distance sensors on the console
 def numToBlock(num):
     if num > 0.7:
         return '▁'
@@ -80,24 +65,27 @@ def numToBlock(num):
 
 start = robot.getTime()
 while robot.step(timeStep) != -1:
-    # print(numToBlock(s5.getValue()),numToBlock(s4.getValue()),numToBlock(s3.getValue()),numToBlock(s2.getValue()),numToBlock(s1.getValue()), gps.getValues())
-    # print(left_heat_sensor.getValue(),right_heat_sensor.getValue())
-    # print(acc.getValues(),gyro.getValues())
-    print(robot.getTime() - start)
-    # if (robot.getTime() - start) > 6:
-    #     print("\n\n\n")
-    #     print(lidar.getHorizontalResolution(), lidar.getNumberOfLayers())
-    #     arr = lidar.getRangeImageArray ()
-    #     # for row in arr:
-    #     #     print([round(x, 2) for x in row])
-    #     arr = np.rot90(np.array(arr),k=1,axes=(1,0))
-    #     arr = arr[::,:64]
-    #     print(arr)
-    #     # for row in arr:
-    #     #     print(row)
+    # Display distance values of the sensors
+    # For any sensor its readings are obtained via the .getValue() funciton. 
+    print(numToBlock(s1.getValue()),numToBlock(s2.getValue()),numToBlock(s3.getValue()),numToBlock(s4.getValue()))
+    
+    # pre-set each wheel velocity
+    speed1 = max_velocity
+    speed2 = max_velocity
 
-    #     img = Image.fromarray(arr, 'L')
-    #     img.save('my.png')
-    #     img.show()
-    #     break
+
+    # Very simple (but also poor) strategy to demonstrate simple motion
+    if s1.getValue() < 0.1:
+        speed2 = max_velocity/2
+    
+    if s4.getValue() < 0.1:
+        speed1 = max_velocity/2
+    
+    if s2.getValue() < 0.1:
+            speed1 = max_velocity
+            speed2 = -max_velocity
+        
+    # Set the wheel velocity 
+    wheel1.setVelocity(speed1)              
+    wheel2.setVelocity(speed2)
     
