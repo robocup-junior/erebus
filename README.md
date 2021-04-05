@@ -49,7 +49,7 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.0.0 Beta-1] - 2021-04-05
+## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
 - First Beta release
 
 [Unreleased]: https://gitlab.com/rcj-rescue-tc/erebus/erebus  
