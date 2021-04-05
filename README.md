@@ -15,7 +15,7 @@ The offical documentaion is under development.
 In the meanwhile, the [documentation and tutorial](https://github.com/Shadow149/RescueMaze/wiki) from the 2020 development cycle may be useful (some functionalities are likely to be depreciated). 
 
 ## Robot Customization
-The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). If the robot customi
+The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). 
 
 ## Map Generator
 The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/).
