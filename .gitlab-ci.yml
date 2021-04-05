@@ -4,6 +4,7 @@ release_job:
   rules:
     - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
   script:
+    - apt-get update && apt-get install ssh
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H "$CI_SERVER_HOST" >> ~/.ssh/known_hosts
