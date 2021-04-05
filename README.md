@@ -6,7 +6,7 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 <div align="center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%></div>
 
 ## Quick Start
-Download [Webots 2021a](https://cyberbotics.com/) and open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py) (on the first test there may be an error - please refer to the "Known issues" section). 
+Download [Webots 2021a](https://cyberbotics.com/) and open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
 
 
 ## Documentation
@@ -38,7 +38,6 @@ Annoucements will be made in a number of different locations.
 The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
-- On the first go of running the simulation without a custom robot loaded, the MainSupervisor may fail. Re-load the world and it should be fine onwards. 
 - For a generated map using the world generator, the scoring system does not fully function (specifically for the mapping bonus).
 
 ### Reporting bugs and fixes
