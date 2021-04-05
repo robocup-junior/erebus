@@ -1844,6 +1844,9 @@ if __name__ == '__main__':
     # Reset the controllers
     resetControllerFile()
 
+    # Reset the robot proto
+    resetRobotProto()
+
     # How long the game has been running for
     timeElapsed = 0
     lastTime = -1
