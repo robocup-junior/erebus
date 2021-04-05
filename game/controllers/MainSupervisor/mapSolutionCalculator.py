@@ -360,7 +360,8 @@ def convertTilesToArray (tileDataGrid: list) -> (list, list, list):
     wallData = getWallData(tileDataGrid)
     #Create map arrays from wall data array
     normalWallArray, smallWallArray, curvedWallArray = wallsToArray(wallData)
+
     #Create an image of the array - (!used for testing purposes only!)
-    arrayToImage(curvedWallArray)
+    #arrayToImage(curvedWallArray)
     #Return completed arrays
     return normalWallArray, smallWallArray, curvedWallArray
