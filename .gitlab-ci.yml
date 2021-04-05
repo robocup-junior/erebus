@@ -8,6 +8,7 @@ release-pre:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H "$CI_SERVER_HOST" >> ~/.ssh/known_hosts
+    - eval "$(ssh-agent -s)"
     - echo "$SSH_PRIVATE_KEY" | ssh-add - > /dev/null
     - git config --global user.name "CI"
     - git config --global user.email "CI@rescue.rcj.cloud"
