@@ -17,6 +17,6 @@ release_job:
     - ls | grep -v -E 'game|player_controllers|README.md$|CHANGELOG.md$' | xargs rm -r
   release:
     name: 'Release $CI_COMMIT_TAG'
-    description: '' # $EXTRA_DESCRIPTION must be defined
+    description: '$CI_COMMIT_TAG' # $EXTRA_DESCRIPTION must be defined
     tag_name: '$CI_COMMIT_TAG'                                      # elsewhere in the pipeline.
     ref: '$CI_COMMIT_TAG'
