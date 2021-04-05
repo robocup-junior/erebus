@@ -9,6 +9,7 @@ import struct
 import math
 import datetime
 import threading
+import shutil
 import AutoInstall
 AutoInstall._import("np", "numpy")
 import ControllerUploader
@@ -414,11 +415,7 @@ def resetRobotProto() -> None:
       robot_proto = os.path.join(path,'../../protos/custom_robot.proto')
       
     try:
-        with open(default_robot_proto) as drp:
-            with open(robot_proto, "w") as rp:
-                for line in drp:
-                    rp.write(line)
-
+        shutil.copyfile(default_robot_proto, robot_proto)
         supervisor.wwiSendText("unloaded1")
     except:
         print('Error resetting robot proto')
