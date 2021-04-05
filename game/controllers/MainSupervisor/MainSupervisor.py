@@ -415,7 +415,11 @@ def resetRobotProto() -> None:
       robot_proto = os.path.join(path,'../../protos/custom_robot.proto')
       
     try:
-        shutil.copyfile(default_robot_proto, robot_proto)
+        if os.path.isfile(robot_proto):
+          shutil.copyfile(default_robot_proto, robot_proto)
+        else:
+          shutil.copyfile(default_robot_proto, robot_proto)          
+          supervisor.worldReload()
         supervisor.wwiSendText("unloaded1")
     except:
         print('Error resetting robot proto')
