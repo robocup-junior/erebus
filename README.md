@@ -3,7 +3,7 @@ Erebus is a simulation competition environtment for a new sub-league for RoboCup
 
 Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf)
 
-<div style="text-align:center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%></div>
+<div align="center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%></div>
 
 ## Quick Start
 Download [Webots 2021a](https://cyberbotics.com/) and open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py) (on the first test there may be an error - please refer to the "Known issues" section). 
