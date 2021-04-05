@@ -289,18 +289,19 @@ window.onload = function(){
 
 function checkUpdate(){
 	$.ajax({
-		url: 'https://rcj-rescue-tc.gitlab.io/erebus/erebus/releases.json',
+		url: 'https://gitlab.com/api/v4/projects/22054848/releases',
 		dataType: 'json',
 		success: function(data){
-			let versions = data[stream];
-			if(versions[0].version === version){
+			let versions = data.filter(release => release['tag_name'].startsWith(`v${stream}`));
+			if(versions.length == 0) return;
+			if(versions[0]['tag_name'] === `v${version}`){
 				//Latest
 				document.getElementById("versionInfo").style.color = "#27ae60";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Latest)`;
 			}else{
 				document.getElementById("versionInfo").style.color = "#c0392b";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Outdated)`;
-				document.getElementById("newVersion").innerHTML = `New version: ${versions[0].version} is available. Please update it!`;
+				document.getElementById("newVersion").innerHTML = `New version: ${versions[0]['tag_name']} is available. Please update it!`;
 			}
 		}
 	});

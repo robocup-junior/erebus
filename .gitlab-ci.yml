@@ -1,13 +1,3 @@
-pages:
-  stage: deploy
-  script:
-  - echo 'Nothing to do...'
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
-
 release_job:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/release-cli:latest
