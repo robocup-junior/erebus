@@ -315,9 +315,8 @@ class Victim(VictimObject):
     HARMED = 'harmed'
     UNHARMED = 'unharmed'
     STABLE = 'stable'
-    HEAT = 'Heat'
     
-    VICTIM_TYPES = [HARMED,UNHARMED,STABLE,HEAT]
+    VICTIM_TYPES = [HARMED,UNHARMED,STABLE]
 
     def get_simple_type(self):
       # Get victim type via proto node
@@ -327,8 +326,6 @@ class Victim(VictimObject):
           return 'U'
       elif self._victim_type == Victim.STABLE:
           return 'S'
-      elif self._victim_type == Victim.HEAT: # Temperature victim
-          return 'T'
       else:
           return self._victim_type
 
@@ -445,7 +442,7 @@ def getHumans(humans, numberOfHumans):
         humans.append(humanObj)
         
 def getHazards(hazards, numberOfHazards):
-    '''Get humans in simulation'''
+    '''Get hazards in simulation'''
     hazardNodes = supervisor.getFromDef('HAZARDGROUP').getField("children")
     # Iterate for each hazard
     for i in range(numberOfHazards):
@@ -844,8 +841,7 @@ def generate_robot_proto(robot_json):
     component_max_counts = {
         "Wheel": 4,
         "Distance Sensor": 8,
-        "Camera": 2,
-        "Heat sensor": 2,
+        "Camera": 2
     }
     
     component_counts = {}
@@ -1633,23 +1629,6 @@ def generate_robot_proto(robot_json):
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             name "{robot_json[component]["customName"]}"
-            }}
-            """
-        
-        if(robot_json[component]["name"] == "Heat sensor"):
-            proto_code += f"""
-            LightSensor {{
-            translation {x} {y} {z}
-            name "{robot_json[component]["customName"]}"
-            lookupTable [
-                0 21 0
-                2 25 0
-                5 30 0
-                12 37 0
-                1000 38 0
-            ]
-            colorFilter 1 0 0
-            occlusion TRUE
             }}
             """
         
