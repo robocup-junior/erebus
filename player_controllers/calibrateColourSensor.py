@@ -24,18 +24,18 @@ duration = 0
 robot = Robot()
 
 # Declare colour sensor underneith the robot
-colour_camera = robot.getCamera("colour_sensor")
-colour_camera.enable(timeStep)
+colour_sensor = robot.getDevice("colour_sensor")
+colour_sensor.enable(timeStep)
 
 
 # Avoid holes and swamps by looking at the RBG colour of the camera
 def viewColour():
-    colour = colour_camera.getImage()
+    colour = colour_sensor.getImage()
 
     print("Binary colour : ", colour)
 
     if viewHSV: 
-        img = np.array(np.frombuffer(colour, np.uint8).reshape((colour_camera.getHeight(), colour_camera.getWidth(), 4)))
+        img = np.array(np.frombuffer(colour, np.uint8).reshape((colour_sensor.getHeight(), colour_sensor.getWidth(), 4)))
         img[:,:,2] = np.zeros([img.shape[0], img.shape[1]])
         hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[0][0]
         print("HSV : ", hsv)

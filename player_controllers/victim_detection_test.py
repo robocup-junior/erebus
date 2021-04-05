@@ -29,7 +29,7 @@ def detectVisualSimple(image_data, camera):
 robot = Robot()
 timeStep = 32
 
-camera = robot.getCamera("camera_centre")
+camera = robot.getDevice("camera_centre")
 camera.enable(timeStep)
 
 while robot.step(timeStep) != -1:
