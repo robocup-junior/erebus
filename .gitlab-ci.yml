@@ -14,7 +14,10 @@ release-pre:
     - git config --global user.email "CI@rescue.rcj.cloud"
     - git remote set-url --push origin git@$CI_SERVER_HOST:$CI_PROJECT_PATH.git
     - ls | grep -v -E 'game|player_controllers|README.md$|CHANGELOG.md$' | xargs rm -r
-    - mv * working/
+    - mkdir working
+    - mv game working/game
+    - mv player_controllers working/player_controllers
+    - mv *.md working/
     - git pull remote
     - cd remote
     - git checkout release
