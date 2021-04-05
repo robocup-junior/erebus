@@ -1,61 +1,57 @@
-# RescueMaze
-RescueMaze is a rescue simulation competition environment designed for semi-experienced to highly experienced programmers. 
+# Erebus
+Erebus is a simulation competition environtment for a new sub-league for RoboCupJunior(RCJ) Rescue, running as a demonstration in 2021 to become a full sub-league in the future. The challenge is designed for semi-experienced to highly experienced programmers. The aim of the competition is to program a customizable robot to autonomously navigate and map a complex maze environemnt whilst detecting victims and avoiding obstacles. 
 
-<p align="center"><img src="/docs/images/environment.JPG" width="500"><p/>
+Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf)
 
-## Getting started
-[Installation](https://github.com/Shadow149/RescueMaze/wiki/Installation)  
+<p align="center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%><p/>
 
-[Programming a controller](https://github.com/Shadow149/RescueMaze/wiki/Programming-a-controller)  
+## Quick Start
+Download [Webots 2021a](https://cyberbotics.com/) and open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py) (on the first test there may be an error - please refer to the "Known issues" section). 
 
 
-## [Changelog](https://github.com/Shadow149/RescueMaze/blob/master/CHANGELOG.md)
+## Documentation
+The offical documentaion is under development. 
 
-## [Release 6] - 2020-08-18
+In the meanwhile, the [documentation and tutorial](https://github.com/Shadow149/RescueMaze/wiki) from the 2020 development cycle may be useful (some functionalities are likely to be depreciated). 
 
-### Fixed
-- Fixed error messages on startup
+## Robot Customization
+The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). If the robot customi
 
-### Added
-- Added front facing camera labelled `camera_centre`.
+## Map Generator
+The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/).
 
-## [Release 5] - 2020-08-13
 
-### Fixed
-- Fixed bug with specific distance sensors only reading 0
-- Fixed bug where heat sensors weren't reading correct values
+## Communication
 
-## [Release 4] - 2020-08-13
+### Annoucements 
+Annoucements will be made in a number of different locations. 
+- Community [Discord server](https://discord.gg/5QQntAPg7K) 
+- [RCJ official forum](https://junior.forum.robocup.org/)
+- [RCJ Rescue mailing list](http://eepurl.com/g-II71)
 
-### Added
-- Robots are now placed into the world by the supervisor
-- Export log of events after each game
-- Positions of tiles, humans and obstacles randomly generated and automatically calculated based on tile scale
-- Added an extra camera on the front of the robot. The cameras are labelled `camera_left` and `camera_right`.
-- Start tile changes from green to white when the robots move off it and doesn't change back.
+### For discussions and questions 
+- For technical and platform specific questions and discussions please use the community [Discord server] (https://discord.gg/5QQntAPg7K) 
+- For other RCJ related questions and discussions please use the [RCJ official forum](https://junior.forum.robocup.org/)
 
-### Changed
-- There is now no need to specify robot type when sending data for estimated victim detection and exit messages.   
-For example from `struct.pack('i i i c', data, data1, data2, data3)` to `struct.pack('i i c', data, data1, data2)`
-- Thermal victims radius decreased
-- Tiles are now much smaller
-- Victims are now much smaller
-- Increased distance sensor range
-- Moved colour camera to a less obstructive position to avoid shadows
-- Moved starting tile to within the maze
-- Removed automatic object recognition from the camera
-- Heated victims are now only a point light. Removed white box.
-- Changed robot sensor configuration internally however it shouldn't affect anything.
-- Distance sensor values are now linear ranging from 0 to 0.8, with a max range of around 2x tile size.
 
-### Removed
-- Start 'bay' on outside of maze removed
-- Robots not in generated world file
-- Obstacles are not placed into the map due to smaller tile size
+## About the current version (beta release)
+The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
 
-### Fixed
-- Attempting to relocate with no robot no longer causes a crash
+### Known issues
+- On the first go of running the simulation without a custom robot loaded, the MainSupervisor may fail. Re-load the world and it should be fine onwards. 
+- For a generated map using the world generator, the scoring system does not fully function (specifically for the mapping bonus).
 
-[Release 6]: https://github.com/Shadow149/RescueMaze/releases/tag/v1.2.2
-[Release 5]: https://github.com/Shadow149/RescueMaze/releases/tag/v1.2.1
-[Release 4]: https://github.com/Shadow149/RescueMaze/releases/tag/v1.2
+### Reporting bugs and fixes
+Please report bugs and potential fixes either through: 
+- Raising issues on this repository
+- Pull requests
+- Through the community Discord server
+
+
+## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
+
+## [Release v21.0.0 Beta-1] - 2021-04-05
+- First Beta release
+
+[Unreleased]: https://gitlab.com/rcj-rescue-tc/erebus/erebus  
+<!-- [Release v21.0.0 Beta-1]: URL HERE!!  -->
