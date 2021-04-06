@@ -636,7 +636,7 @@ def getTiles(grid=False):
             curveNode = tile.getField("curve")
             curveData = [curveNode.getMFInt32(0), curveNode.getMFInt32(1), curveNode.getMFInt32(2), curveNode.getMFInt32(3)]
             #Iterate through the four sections
-            for index in range(0, 3):
+            for index in range(0, 4):
                 #If there is a curve activate the appropriate small walls
                 if curveData[index] == 1:
                     smallData[index][0] = True
@@ -662,6 +662,7 @@ def getTiles(grid=False):
             walls.append([[False, False, False, False], [False, False, False, False], [False, False, False, False], [False, False, False, False]])
         #Get transition data
         colour = tile.getField("tileColor").getSFColor()
+        colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
         #Add whether or not this tile is a transition between two of the regions to the wall data
         walls.append(colour == [0.1, 0.1, 0.9] or colour == [0.3, 0.1, 0.6] or colour == [0.9, 0.1, 0.1])
         walls.append(curved)

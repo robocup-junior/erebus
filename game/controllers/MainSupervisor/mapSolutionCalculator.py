@@ -98,7 +98,7 @@ def wallsToArray(wallData) -> (list, list, list):
                     #Get the wall data
                     tilePart = smallTile[index]
                     #Add to data if there are any small walls
-                    wallInfoArray[tileY][tileX][1] = tilePart[0] or tilePart[1] or tilePart[2] or tilePart[3] or curved
+                    wallInfoArray[tileY][tileX][1] = tilePart[0] or tilePart[1] or tilePart[2] or tilePart[3] or curved or wallInfoArray[tileY][tileX][1]
 
     #List of surrounding tile changes
     around = [[0,-1], [1,0], [0,1], [-1,0]]
@@ -125,7 +125,7 @@ def wallsToArray(wallData) -> (list, list, list):
     transitionParts = []
 
     #Iterate for each of the regions (represented by 1, 2 and 3)
-    for tileType in range(1, 4):
+    for tileType in [2, 3, 1]:
         
         #List of tiles yet to be tested
         tilesToCheck = []
