@@ -1,0 +1,39 @@
+stages:
+  - publish
+  - deploy
+
+build:
+  stage: publish
+  image: alpine
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - apk update
+    - apk add curl zip
+    - buildPath="Erebus-"
+    - buildPath=$buildPath$CI_COMMIT_TAG
+    - buildPath=`echo ${buildPath} | sed 's/\./_/g'`
+    - echo $buildPath
+    - mkdir -p $buildPath
+    - mv game ${buildPath}/game
+    - mv player_controllers ${buildPath}/player_controllers
+    - mv README.md ${buildPath}/README.md
+    - mv CHANGELOG.md ${buildPath}
+    - zip -r ${buildPath} ${buildPath}
+    - ls
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file ${buildPath}.zip "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/erebus/${CI_COMMIT_TAG}/${buildPath}.zip"'
+  
+release_job:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG                  # Run this job when a tag is created manually
+  script:
+    - buildPath="Erebus-"
+    - buildPath=$buildPath$CI_COMMIT_TAG
+    - buildPath=`echo ${buildPath} | sed 's/\./_/g'`
+    - echo $buildPath
+    - >
+      release-cli create --name "$CI_COMMIT_TAG" --description "Created using the release-cli"
+      --tag-name $CI_COMMIT_TAG --ref $CI_COMMIT_TAG
+      --assets-link "{\"name\":\"Download Release Package (zip)\",\"url\":\"https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/generic/erebus/${CI_COMMIT_TAG}/${buildPath}.zip\", \"link_type\":\"package\"}"
