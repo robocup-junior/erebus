@@ -117,13 +117,9 @@ def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> 
 
 def calculateScore(answerMatrices: list, subMatrix: list) -> float:
     subMatrix = np.rot90(subMatrix,k=0,axes=(1,0))
-    # Map 1
-    score1 = _calculate_map_completeness(np.array(answerMatrices[0]),np.array(subMatrix))
-    # Map 2
-    score2 = _calculate_map_completeness(np.array(answerMatrices[1]),np.array(subMatrix))
-    # Map 3
-    score3 = _calculate_map_completeness(np.array(answerMatrices[2]),np.array(subMatrix))
-    return max([score1,score2,score3])
+    score = _calculate_map_completeness(np.array(answerMatrices),np.array(subMatrix))
+
+    return score
 
 if __name__ == "__main__":
     subMatrix = np.array([

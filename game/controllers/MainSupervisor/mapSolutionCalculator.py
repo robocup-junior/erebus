@@ -364,4 +364,4 @@ def convertTilesToArray (tileDataGrid: list) -> (list, list, list):
     #Create an image of the array - (!used for testing purposes only!)
     #arrayToImage(curvedWallArray)
     #Return completed arrays
-    return normalWallArray, smallWallArray, curvedWallArray
+    return [normalWallArray, smallWallArray, curvedWallArray]
