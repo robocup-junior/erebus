@@ -1,12 +1,15 @@
 # Erebus
-Erebus is a simulation competition environtment for a new sub-league for RoboCupJunior(RCJ) Rescue, running as a demonstration in 2021 to become a full sub-league in the future. The challenge is designed for semi-experienced to highly experienced programmers. The aim of the competition is to program a customizable robot to autonomously navigate and map a complex maze environemnt whilst detecting victims and avoiding obstacles. 
+Erebus is a simulation competition environtment for a new sub-league for [RoboCupJunior(RCJ) Rescue](https://rescue.rcj.cloud/), running as a demonstration in 2021. The challenge is designed for semi-experienced to highly experienced programmers. The aim of the competition is to program a customizable robot to autonomously navigate and map a complex maze environemnt whilst detecting victims and avoiding obstacles. 
 
-Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf)
+Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf).
 
 <div align="center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%></div>
 
 ## Quick Start
-Download [Webots 2021a](https://cyberbotics.com/) and open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
+1. Download and install [Python 3.x](https://www.python.org/).
+1. Download and install [Webots 2021a](https://cyberbotics.com/).
+1. Download our [latest release](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases) and extract the zip file.
+1. Open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
 
 
 ## Documentation
@@ -38,7 +41,7 @@ Annoucements will be made in a number of different locations.
 The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
-- For a generated map using the world generator, the scoring system does not fully function (specifically for the mapping bonus).
+- 
 
 ### Reporting bugs and fixes
 Please report bugs and potential fixes either through: 
