@@ -142,7 +142,7 @@ class Robot:
 
     def _isStopped(self) -> bool:
         vel = self.wb_node.getVelocity()
-        return abs(vel[0]) < 0.01 and abs(vel[1]) < 0.01 and abs(vel[2]) < 0.01
+        return all(abs(ve) < 0.1 for ve in vel)
 
 
     def timeStopped(self) -> float:
