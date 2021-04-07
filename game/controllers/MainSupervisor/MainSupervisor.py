@@ -32,8 +32,6 @@ maxTime = maxTimeMinute * 60
 
 DEFAULT_MAX_VELOCITY = 6.28
 
-pointsMultiplier = 1
-
 #Room multipliers
 roomMult = [1, 1.25, 1.5]
 
@@ -169,11 +167,15 @@ class Robot:
 
         return self.robot_timeStopped
 
-    def increaseScore(self, score: int, multiplier = 1.0) -> None:
-        if self._score + score < 0:
-            self._score = 0
-        else:
-            self._score += int(score * multiplier)
+    def increaseScore(self, message: str, score: int, multiplier = 1) -> None:
+      point = round(score * multiplier, 2)
+      if point > 0.0:
+        self.history.enqueue(f"{message} +{point}")
+      elif point < 0.0:
+        self.history.enqueue(f"{message} {point}")
+      self._score += point
+      if self._score < 0:
+        self._score = 0
 
     def getScore(self) -> int:
         return self._score
@@ -718,9 +720,7 @@ def relocate(robot, robotObj):
     emitter.send(struct.pack("c", bytes("L", "utf-8")))
 
     # Update history with event
-    robotObj.history.enqueue("Lack of Progress - 5")
-    robotObj.history.enqueue("Relocating to checkpoint")
-    robotObj.increaseScore(-5)
+    robotObj.increaseScore("Lack of Progress", -5)
     updateHistory()
 
 def robot_quit(robotObj, num, manualExit):
@@ -834,10 +834,7 @@ def clamp(n, minn, maxn):
   
 def add_map_multiplier():  
     score_change = robot0Obj.getScore() * robot0Obj.map_score_percent
-    robot0Obj.increaseScore(score_change)
-                            
-    if score_change > 0:
-        robot0Obj.history.enqueue("Map Score Bonus +" + str(round(score_change,1)))
+    robot0Obj.increaseScore("Map Score Bonus", score_change)
         
     updateHistory()
 
@@ -1951,8 +1948,7 @@ if __name__ == '__main__':
                         robot0Obj.visitedCheckpoints.append(checkpoint.center)
                         grid = coord2grid(checkpoint.center)
                         roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-                        robot0Obj.increaseScore(10, roomMult[roomNum])
-                        robot0Obj.history.enqueue("Found checkpoint  +10")
+                        robot0Obj.increaseScore("Found checkpoint", 10, roomMult[roomNum])
                         updateHistory()
                 cpNum = cpNum + 1
 
@@ -2050,9 +2046,7 @@ if __name__ == '__main__':
                     if robot0Obj.startingTile.checkPosition(robot0Obj.position):
                         finished = True
                         supervisor.wwiSendText("ended")
-                        addScore = robot0Obj.getScore() * 0.1
-                        robot0Obj.increaseScore(int(addScore))
-                        robot0Obj.history.enqueue("Exit bonus +" + str(addScore))
+                        robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
                         updateHistory()
@@ -2120,19 +2114,15 @@ if __name__ == '__main__':
 
                                         # Update score and history
                                         if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                            robot0Obj.history.enqueue(f"Successful {name} Type Correct Bonus  +  {str(int(10*pointsMultiplier*roomMult[roomNum]))}")
-                                            robot0Obj.increaseScore(10, pointsMultiplier*roomMult[roomNum])
-                                            #pointsScored += 10
+                                            robot0Obj.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
 
-                                        robot0Obj.history.enqueue(f"Successful {name} Identification + {str(int(h.scoreWorth*pointsMultiplier*roomMult[roomNum]))}")
-                                        robot0Obj.increaseScore(h.scoreWorth, pointsMultiplier*roomMult[roomNum])
+                                        robot0Obj.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
 
                                         h.identified = True
                                         updateHistory()
 
                     if misidentification and r0_est_vic_type.lower() != 'm':
-                        robot0Obj.history.enqueue(f"Misidentification of {name}  - 5")
-                        robot0Obj.increaseScore(-5)
+                        robot0Obj.increaseScore(f"Misidentification of {name}", -5)
                         updateHistory()
 
             # Relocate robot if stationary for 20 sec
