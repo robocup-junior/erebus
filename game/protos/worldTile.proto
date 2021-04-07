@@ -352,7 +352,7 @@ PROTO worldTile [
 										appearance CorrodedMetal  {
 										}
 										geometry Box {
-											size 0.3 0.001 0.3
+											size 0.3 0.0001 0.3
 										}
 									}
 								]
@@ -388,7 +388,7 @@ PROTO worldTile [
 											}
 										}
 										geometry Box {
-											size 0.3 0.001 0.3
+											size 0.3 0.0001 0.3
 										}
 									}
 								]
