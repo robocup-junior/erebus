@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 - Fixed map solving (Map bonus)
-- Do not delete history
+- History will no longer be rotated, it will be added
 - Fix of score calculation (handling of decimal points)
 - Fixed a problem that robot stuck at entrance of swamp/checkpoint with using default robot
 - Fixed a problem where the rescue of a victim could be successful even if the robot was not completely stopped
