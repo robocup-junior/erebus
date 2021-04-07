@@ -18,7 +18,6 @@ var scores = [0,0];
 
 const stream = "21";
 const version = "21.0.0 Beta-2";
-const unreleased = true;
 
 function receive (message){
 	//Receive message from the python supervisor
@@ -304,11 +303,6 @@ window.onload = function(){
 };
 
 function checkUpdate(){
-	if(unreleased){
-		document.getElementById("versionInfo").style.color = "#e67e22";
-		document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Unreleased)`;
-		return;
-	}
 	$.ajax({
 		url: 'https://gitlab.com/api/v4/projects/22054848/releases',
 		dataType: 'json',
@@ -319,10 +313,13 @@ function checkUpdate(){
 				//Latest
 				document.getElementById("versionInfo").style.color = "#27ae60";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Latest)`;
-			}else{
+			}else if(versions.some(v => v['tag_name'].replace(/_/g, ' ') === `v${version}`)){
 				document.getElementById("versionInfo").style.color = "#c0392b";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Outdated)`;
 				document.getElementById("newVersion").innerHTML = `New version: ${versions[0]['tag_name'].replace(/_/g, ' ')} is available. Please update it!`;
+			}else{
+				document.getElementById("versionInfo").style.color = "#e67e22";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Unreleased)`;
 			}
 		}
 	});
