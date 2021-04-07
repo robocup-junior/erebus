@@ -2069,8 +2069,8 @@ if __name__ == '__main__':
                             updateHistory()
                             # Do something...
 
-            # If robot stopped for 3 seconds
-            if robot0Obj.timeStopped() >= 3:
+            # If robot stopped for 1 second
+            if robot0Obj.timeStopped() >= 1.0:
 
                 # If messaged sent
                 if robot0Obj.message != []:
