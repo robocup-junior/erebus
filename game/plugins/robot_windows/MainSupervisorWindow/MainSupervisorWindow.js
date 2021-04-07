@@ -318,7 +318,7 @@ function checkUpdate(){
 			}else if(versions.some(v => v['tag_name'].replace(/_/g, ' ') === `v${version}`)){
 				document.getElementById("versionInfo").style.color = "#c0392b";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Outdated)`;
-				document.getElementById("newVersion").innerHTML = `New version: ${versions[0]['tag_name'].replace(/_/g, ' ')} is available. Please update it!`;
+				document.getElementById("newVersion").innerHTML = `New version: ${versions[0]['tag_name'].replace('v','').replace(/_/g, ' ')} is available. Please update it!`;
 			}else{
 				document.getElementById("versionInfo").style.color = "#e67e22";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Unreleased)`;
