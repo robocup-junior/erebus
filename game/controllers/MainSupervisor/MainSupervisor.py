@@ -66,8 +66,8 @@ class RobotHistory(Queue):
         #update master history when an event happens
         self.update_master_history(data)
 
-        if len(self.queue) > 8:
-            self.dequeue()
+        #if len(self.queue) > 8:
+        #    self.dequeue()
 
         return self.queue.append(data)
 
