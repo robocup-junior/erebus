@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Improved behaviour of the LoP button
 - Fixed implementation of map bonuses
 - You can no longer earn EB without identifying at least one victim
+- Refactored the main supervisor
 
 ## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
 - First Beta release

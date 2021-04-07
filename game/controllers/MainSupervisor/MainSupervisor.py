@@ -2161,14 +2161,28 @@ if __name__ == '__main__':
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
+            
+            # Send the update information to the robot window
+            nowScore = robot0Obj.getScore()
+            if lastSentScore != nowScore or lastSentTime != timeElapsed:
+                supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(timeElapsed) + "," + str(maxTime))
+                lastSentScore = nowScore
+                lastSentTime = timeElapsed
 
-        if currentlyRunning:
-            # Check if robot has not left the starting tile
-            if not robot0Obj.left_exit_tile:
-                # Check robot position is on starting tile
-                if not robot0Obj.startingTile.checkPosition(robot0Obj.position):
-                    robot0Obj.left_exit_tile = True
-                    robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
+            # If the time is up
+            if timeElapsed >= maxTime and last != -1:
+                add_map_multiplier()
+                finished = True
+                last = True
+                supervisor.wwiSendText("ended")
+
+            if currentlyRunning:
+                # Check if robot has not left the starting tile
+                if not robot0Obj.left_exit_tile:
+                    # Check robot position is on starting tile
+                    if not robot0Obj.startingTile.checkPosition(robot0Obj.position):
+                        robot0Obj.left_exit_tile = True
+                        robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
 
 
         # If the running state changes
@@ -2250,19 +2264,7 @@ if __name__ == '__main__':
                   f.write(','.join(message.split(",")[1:]))
                   f.close()
 
-        # Send the update information to the robot window
-        nowScore = robot0Obj.getScore()
-        if lastSentScore != nowScore or lastSentTime != timeElapsed:
-            supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(timeElapsed) + "," + str(maxTime))
-            lastSentScore = nowScore
-            lastSentTime = timeElapsed
-
-        # If the time is up
-        if timeElapsed >= maxTime and last != -1:
-            add_map_multiplier()
-            finished = True
-            last = True
-            supervisor.wwiSendText("ended")
+        
 
         # If the match is running
         if currentlyRunning and not finished:
@@ -2277,11 +2279,9 @@ if __name__ == '__main__':
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating
-                simulationRunning = False
                 finished = True
-        elif first or last:
-            supervisor.step(32)
-
-        if not simulationRunning and timeElapsed > 0:
-            #write log for game if the game ran for more than 0 seconds
-            write_log()
+                if  timeElapsed > 0:
+                  #write log for game if the game ran for more than 0 seconds
+                  write_log()
+        elif first or last or finished:
+            supervisor.step(32)            
