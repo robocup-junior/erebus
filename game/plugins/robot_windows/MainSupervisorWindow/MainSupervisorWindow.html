@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<div id="winning-screen" onclick="hide_winning_screen()"><h1 id="winning-team">DRAW</h1></div>
-		<div style="width:100%; height:100%">
+		<div class="wrapper">
 			<div class = "smallSection rowType1">
 				<div class="row center">
 					<div class="col-12">
@@ -29,13 +29,44 @@
 						<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load</button>
 						<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload</button>
 					</div>
-					<div class="col-12">
-						<button class="button buttonReset" onclick="resetPressed()" style="display:inline-block;" id="resetButton">Reset</button>
+				</div>
+				<div class="row center" style="background-color: #7f8fa6;">
+					<div class="col-6">
+						<label class="btn-settings" for="settings">Settings</label>
+					</div>
+					<div class="col-6">
+						<label class="btn-reset" for="reset">Reset</label>
+    					<input type="button" onclick="resetPressed()" style="display:none;" id="reset"/>
 					</div>
 				</div>
-				
-				<br>
+				<div class="hidden_box row center">
+					<input type="checkbox" id="settings"/>
+					<div class="hidden_show">
+						<div class="col-12">
+							<span>Keep controller/robot files</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="autoRemoveFiles" onchange="configChanged()"/>
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
+							</div>
+						</div>
+						<div class="col-12">
+								<span>Disable automatic LoP</span>
+								<div class="switch">
+									<label class="switch__label">
+										<input type="checkbox" class="switch__input" id="autoLoP" onchange="configChanged()"/>
+										<span class="switch__content"></span>
+										<span class="switch__circle"></span>
+									</label>
+								</div>
+						</div>
+					</div>
+					
+				</div>
 			</div>
+			
 			<div class = "smallSection rowType2">
 				<br>
 				<table id="controlTable">
@@ -82,8 +113,8 @@
 					</div>
 				</div>
 			</div>
-			<img src="drip.png" width="100%" style="position: absolute;">
-			<div>
+			<img src="drip.png" width="100%">
+			<div class="historyArea">
 				<table id="history">
 				</table>
 			</div>

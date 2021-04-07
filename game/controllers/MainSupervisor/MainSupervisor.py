@@ -383,6 +383,8 @@ class StartTile(Tile):
 
 def resetControllerFile() -> None:
     '''Remove the controller'''
+    if configData[0]:
+      return
     path = os.path.dirname(os.path.abspath(__file__))
 
     if path[-4:] == "game":
@@ -416,6 +418,8 @@ def resetRobotProto() -> None:
       
     try:
         if os.path.isfile(robot_proto):
+          if configData[0]:
+            return
           shutil.copyfile(default_robot_proto, robot_proto)
         else:
           shutil.copyfile(default_robot_proto, robot_proto)          
@@ -1784,6 +1788,23 @@ if __name__ == '__main__':
     if supervisor.getCustomData() != '':
         maxTime = int(supervisor.getCustomData())
         supervisor.wwiSendText("update," + str(0) + "," + str(0) + "," + str(maxTime))
+    
+    # Load settings
+    # configData
+    # [0]: Keep controller/robot files
+    # [1]: Disable auto LoP
+
+    configFilePath = os.path.dirname(os.path.abspath(__file__))
+    if configFilePath[-4:] == "game":
+      configFilePath = os.path.join(configFilePath, "controllers/MainSupervisor/config.txt")
+    else:
+      configFilePath = os.path.join(configFilePath, "config.txt")
+    f = open(configFilePath, 'r')
+    configData = f.read().split(',')
+    f.close()
+    supervisor.wwiSendText("config," + ','.join(configData))
+    configData = list(map((lambda x: int(x)), configData))
+    
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
@@ -2116,13 +2137,15 @@ if __name__ == '__main__':
 
             # Relocate robot if stationary for 20 sec
             if robot0Obj.timeStopped() >= 20 and not finished:
-                relocate(robot0, robot0Obj)
+                if not configData[1]:
+                  relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
 
             if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
-                relocate(robot0, robot0Obj)
+                if not configData[1]:
+                  relocate(robot0, robot0Obj)
                 robot0Obj.robot_timeStopped = 0
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
@@ -2208,6 +2231,12 @@ if __name__ == '__main__':
                     data = message.split(",", 1)
                     if len(data) > 1:
                         process_robot_json(data[1])
+                
+                if parts[0] == 'config':
+                  configData = list(map((lambda x: int(x)), message.split(",")[1:]))
+                  f = open(configFilePath, 'w')
+                  f.write(','.join(message.split(",")[1:]))
+                  f.close()
 
         # Send the update information to the robot window
         nowScore = robot0Obj.getScore()

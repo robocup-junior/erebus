@@ -17,7 +17,7 @@ var robot1Name = "Robot 1";
 var scores = [0,0];
 
 const stream = "21";
-const version = "21.0.0 Beta-1";
+const version = "21.0.0 Beta-2";
 
 function receive (message){
 	//Receive message from the python supervisor
@@ -34,6 +34,10 @@ function receive (message){
 			case "update":
 				//Update the information on the robot window every frame (of game time)
 				update(parts.slice(1,parts.length + 1));
+				break;
+			case "config":
+				//Load config data from world
+				updateConfig(parts.slice(1,parts.length + 1));
 				break;
 			case "unloaded0":
 				//Robot 0's controller has been unloaded
@@ -177,7 +181,6 @@ function startup (){
 	//Turn on the run button and reset button when the program has loaded
 	setEnableButton("runButton", true);
 	setEnableButton("pauseButton", false);
-	setEnableButton("resetButton", true);
 
 	// setEnableButton('quit0', false)
 	setEnableButton('relocate0', false)
@@ -195,6 +198,19 @@ function update (data){
 
 	maxTime = data[2]
 	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1]);
+}
+
+function updateConfig (data){
+	//Update the config ui
+	document.getElementById("autoRemoveFiles").checked = Boolean(Number(data[0]));
+	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
+}
+
+function configChanged(){
+	let data = [0,0];
+	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
+	data[1] = String(Number(document.getElementById("autoLoP").checked));
+	window.robotWindow.send(`config,${data.join(',')}`);
 }
 
 function calculateTimeRemaining(done){
@@ -256,7 +272,6 @@ function resetPressed(){
 	//Disable all buttons
 	setEnableButton("runButton", false)
 	setEnableButton("pauseButton", false);
-	setEnableButton("resetButton", false);
 	//Send signal to reset everything
 	window.robotWindow.send("reset");
 }
