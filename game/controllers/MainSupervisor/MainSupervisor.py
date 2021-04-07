@@ -107,6 +107,8 @@ class Robot:
         self.sent_maps = [False, False, False]
         self.map_score_percent = 0
 
+        self.victimIdentified = False
+
         self.lastVisitedCheckPointPosition = []
 
         self.visitedCheckpoints = []
@@ -2051,7 +2053,10 @@ if __name__ == '__main__':
                   if robot0Obj.startingTile.checkPosition(robot0Obj.position):
                     finished = True
                     supervisor.wwiSendText("ended")
-                    robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
+                    if robot0Obj.victimIdentified:
+                      robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
+                    else:
+                      robot0Obj.history.enqueue("No exit bonus")
                     add_map_multiplier()
                     # Update score and history
                     robot_quit(robot0Obj, 0, False)
@@ -2133,6 +2138,7 @@ if __name__ == '__main__':
                                             robot0Obj.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
 
                                         robot0Obj.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
+                                        robot0Obj.victimIdentified = True
 
                                         h.identified = True
                                         updateHistory()
