@@ -183,7 +183,7 @@ function startup (){
 	setEnableButton("pauseButton", false);
 
 	// setEnableButton('quit0', false)
-	setEnableButton('relocate0', false)
+	setEnableButton('lopButton', false)
 
 	setEnableButton("load0", true);
 	setEnableButton("unload0", true);
@@ -255,7 +255,7 @@ function runPressed(){
 	setEnableButton("pauseButton", true);
 	
 	// setEnableButton('quit0', true)
-	setEnableButton('relocate0', true)
+	setEnableButton('lopButton', true)
 	window.robotWindow.send("run");
 }
 
@@ -264,6 +264,7 @@ function pausePressed(){
 	//Turn off pause button, on run button and send signal to pause
 	setEnableButton("pauseButton", false);
 	setEnableButton("runButton", true);
+	setEnableButton('lopButton', false)
 	window.robotWindow.send("pause");
 }
 
@@ -272,6 +273,7 @@ function resetPressed(){
 	//Disable all buttons
 	setEnableButton("runButton", false)
 	setEnableButton("pauseButton", false);
+	setEnableButton('lopButton', false)
 	//Send signal to reset everything
 	window.robotWindow.send("reset");
 }
@@ -330,6 +332,7 @@ function endGame(){
 	//Once the game is over turn off both the run and pause buttons
 	setEnableButton("runButton", false)
 	setEnableButton("pauseButton", false);
+	setEnableButton('lopButton', false)
 }
 
 function unloadPressed(id){
