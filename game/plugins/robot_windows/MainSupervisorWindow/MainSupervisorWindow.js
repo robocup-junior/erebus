@@ -18,6 +18,7 @@ var scores = [0,0];
 
 const stream = "21";
 const version = "21.0.0 Beta-2";
+const unreleased = true;
 
 function receive (message){
 	//Receive message from the python supervisor
@@ -303,6 +304,11 @@ window.onload = function(){
 };
 
 function checkUpdate(){
+	if(unreleased){
+		document.getElementById("versionInfo").style.color = "#e67e22";
+		document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Unreleased)`;
+		return;
+	}
 	$.ajax({
 		url: 'https://gitlab.com/api/v4/projects/22054848/releases',
 		dataType: 'json',
