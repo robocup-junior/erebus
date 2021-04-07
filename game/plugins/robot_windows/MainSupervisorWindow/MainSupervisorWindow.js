@@ -37,7 +37,7 @@ function receive (message){
 				update(parts.slice(1,parts.length + 1));
 				break;
 			case "config":
-				//Load config data from world
+				//Load config data
 				updateConfig(parts.slice(1,parts.length + 1));
 				break;
 			case "unloaded0":
