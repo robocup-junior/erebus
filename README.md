@@ -41,7 +41,7 @@ Annoucements will be made in a number of different locations.
 The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
-- 
+- The map bonus will not calculated correctly.
 
 ### Reporting bugs and fixes
 Please report bugs and potential fixes either through: 
@@ -53,7 +53,25 @@ Please report bugs and potential fixes either through:
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
 ## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
-- First Beta release
 
-[Unreleased]: https://gitlab.com/rcj-rescue-tc/erebus/erebus  
-<!-- [Release v21.0.0 Beta-1]: URL HERE!!  -->
+## [Release v21.0.0 Beta-2] - TBD
+
+### Added
+- Added the ability to configure the following settings for the simulator
+    - Keep controller and robot files
+    - Disable automatic LoP [#1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues/1)
+- Added a sample world (Only Area1.wbt)
+
+### Changed
+- Fixed map solving (Map bonus)
+- History will no longer be rotated, it will be added
+- Fix of score calculation (handling of decimal points)
+- Fixed a problem that robot stuck at entrance of swamp/checkpoint with using default robot
+- Fixed a problem where the rescue of a victim could be successful even if the robot was not completely stopped
+- The stopping time duration required to score a victim was fixed to fit the rules
+- Improved behaviour of the LoP button
+- Fixed implementation of map bonuses
+- You can no longer earn EB without identifying at least one victim
+- Refactored the main supervisor
+- Improved display items and handling in the history view
+
