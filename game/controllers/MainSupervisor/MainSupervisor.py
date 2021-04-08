@@ -717,7 +717,7 @@ def relocate(robot, robotObj):
     # Update history with event
     robotObj.increaseScore("Lack of Progress", -5)
 
-def robot_quit(robotObj, num, manualExit):
+def robot_quit(robotObj, num, timeup):
     '''Quit robot from simulation'''
     # Quit robot if present
     if robotObj.inSimulation:
@@ -727,8 +727,8 @@ def robot_quit(robotObj, num, manualExit):
         # Send message to robot window to update quit button
         supervisor.wwiSendText("robotNotInSimulation"+str(num))
         # Update history event whether its manual or via exit message
-        if manualExit:
-            robotObj.history.enqueue("Manual Exit")
+        if timeup:
+            robotObj.history.enqueue("Time is up")
         else:
             robotObj.history.enqueue("Successful Exit")
 
@@ -816,7 +816,7 @@ def set_robot_start_pos():
 
     robot0Obj.startingTile = startingTileObj
     robot0Obj.lastVisitedCheckPointPosition = startingTileObj.center
-    robot0Obj.startingTile.wb_node.getField("start").setSFBool(True)
+    robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
     robot0Obj.visitedCheckpoints.append(startingTileObj.center)
 
     robot0Obj.position = [startingTileObj.center[0], startingTileObj.center[1], startingTileObj.center[2]]
@@ -1900,6 +1900,7 @@ if __name__ == '__main__':
 
         # The first frame of the game running only
         if first and currentlyRunning:
+            
             # Get the robot nodes by their DEF names
             robot0 = supervisor.getFromDef("ROBOT0")
             # Add robot into world
@@ -2106,29 +2107,24 @@ if __name__ == '__main__':
                         if misidentification:
                             robot0Obj.increaseScore(f"Misidentification of {name}", -5)
 
-            # Relocate robot if stationary for 20 sec
-            if robot0Obj.timeStopped() >= 20 and not finished:
-                if not configData[1]:
-                  relocate(robot0, robot0Obj)
-                robot0Obj.robot_timeStopped = 0
-                robot0Obj.stopped = False
-                robot0Obj.stoppedTime = None
-
-            if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
-                if not configData[1]:
-                  relocate(robot0, robot0Obj)
-                robot0Obj.robot_timeStopped = 0
-                robot0Obj.stopped = False
-                robot0Obj.stoppedTime = None
+            
             
 
-            if currentlyRunning:
-                # Check if robot has not left the starting tile
-                if not robot0Obj.left_exit_tile:
-                    # Check robot position is on starting tile
-                    if not robot0Obj.startingTile.checkPosition(robot0Obj.position):
-                        robot0Obj.left_exit_tile = True
-                        robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
+            if currentlyRunning and not finished:
+              # Relocate robot if stationary for 20 sec
+              if robot0Obj.timeStopped() >= 20:
+                  if not configData[1]:
+                    relocate(robot0, robot0Obj)
+                  robot0Obj.robot_timeStopped = 0
+                  robot0Obj.stopped = False
+                  robot0Obj.stoppedTime = None
+
+              if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
+                  if not configData[1]:
+                    relocate(robot0, robot0Obj)
+                  robot0Obj.robot_timeStopped = 0
+                  robot0Obj.stopped = False
+                  robot0Obj.stoppedTime = None
 
 
             # Send the update information to the robot window
@@ -2141,6 +2137,7 @@ if __name__ == '__main__':
             # If the time is up
             if timeElapsed >= maxTime and last != -1:
                 add_map_multiplier()
+                robot_quit(robot0Obj, 0, True)
                 finished = True
                 last = True
                 supervisor.wwiSendText("ended")

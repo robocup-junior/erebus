@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - You can no longer earn EB without identifying at least one victim
 - Refactored the main supervisor
 - Improved display items and handling in the history view
+- Fixed the removal of robots when time is up
 
 ## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
 - First Beta release

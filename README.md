@@ -74,4 +74,5 @@ Please report bugs and potential fixes either through:
 - You can no longer earn EB without identifying at least one victim
 - Refactored the main supervisor
 - Improved display items and handling in the history view
+- Fixed the removal of robots when time is up
 
