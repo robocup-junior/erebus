@@ -1922,49 +1922,24 @@ if __name__ == '__main__':
 
         if robot0Obj.inSimulation:
             # Test if the robots are in checkpoints
-            cpNum = 0
-            for checkpoint in checkpoints:
-                # Check position of checkpoint with the robots position
-                if checkpoint.checkPosition(robot0Obj.position):
-                    r0 = True
-                    # Update the robot's last visited position
-                    robot0Obj.lastVisitedCheckPointPosition = checkpoint.center
+            checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
+            if len(checkpoint):
+              robot0Obj.lastVisitedCheckPointPosition = checkpoint[0].center
+              alreadyVisited = False
 
-                    alreadyVisited = False
-
-                    # Dont update if checkpoint is already visited
-                    # TODO could change this to edit webots node to reduce compute time
-                    if len(robot0Obj.visitedCheckpoints) > 0:
-                        for visitedCheckpoint in robot0Obj.visitedCheckpoints:
-                            if visitedCheckpoint == checkpoint.center:
-                                alreadyVisited = True
-
-                    # Update robot's points and history
-                    if not alreadyVisited:
-                        robot0Obj.visitedCheckpoints.append(checkpoint.center)
-                        grid = coord2grid(checkpoint.center)
-                        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-                        robot0Obj.increaseScore("Found checkpoint", 10, roomMult[roomNum])
-                cpNum = cpNum + 1
-
-            # Print when robot0 enters or exits a checkpoint
-            # Not really needed
-
-            if robot0Obj.inCheckpoint != r0:
-                robot0Obj.inCheckpoint = r0
-                if robot0Obj.inCheckpoint:
-                    print("Robot 0 entered a checkpoint")
-                else:
-                    print("Robot 0 exited a checkpoint")
+              # Dont update if checkpoint is already visited
+              if not any([c == checkpoint[0].center for c in robot0Obj.visitedCheckpoints]):
+                  # Update robot's points and history
+                  robot0Obj.visitedCheckpoints.append(checkpoint[0].center)
+                  grid = coord2grid(checkpoint[0].center)
+                  roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                  robot0Obj.increaseScore("Found checkpoint", 10, roomMult[roomNum])
 
             # Check if the robots are in swamps
-            for swamp in swamps:
-                if swamp.checkPosition(robot0Obj.position):
-                    r0s = True
-
+            inSwamp = any([s.checkPosition(robot0Obj.position) for s in swamps])
             # Check if robot is in swamp
-            if robot0Obj.inSwamp != r0s:
-                robot0Obj.inSwamp = r0s
+            if robot0Obj.inSwamp != inSwamp:
+                robot0Obj.inSwamp = inSwamp
                 if robot0Obj.inSwamp:
                     # Cap the robot's velocity to 2
                     robot0Obj.setMaxVelocity(2)
