@@ -1,4 +1,4 @@
-#VRML_SIM R2020a utf8
+#VRML_SIM R2021a utf8
 # tags: static
 
 PROTO Victim [
@@ -72,13 +72,6 @@ PROTO Victim [
                 ]
                 name IS name
                 boundingObject USE VICTIMPLANE
-                recognitionColors [
-                    %{ if fields.found.value then }%
-                        0 0 0
-                    %{ else }%                 
-                        1 1 1
-                    %{ end }%
-                ]
             }
         ]
     }
