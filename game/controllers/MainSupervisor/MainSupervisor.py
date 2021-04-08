@@ -2005,106 +2005,106 @@ if __name__ == '__main__':
 
                 receiver.nextPacket()
 
-            # If data sent to receiver
-            if robot0Obj.message != []:
+                # If data sent to receiver
+                if robot0Obj.message != []:
 
-                r0_message = robot0Obj.message
-                robot0Obj.message = []
+                    r0_message = robot0Obj.message
+                    robot0Obj.message = []
 
-                # If exit message is correct
-                if r0_message[0] == 'E':
-                  # Check robot position is on starting tile
-                  if robot0Obj.startingTile.checkPosition(robot0Obj.position):
-                    finished = True
-                    supervisor.wwiSendText("ended")
-                    if robot0Obj.victimIdentified:
-                      robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
-                    else:
-                      robot0Obj.history.enqueue("No exit bonus")
-                    add_map_multiplier()
-                    # Update score and history
-                    robot_quit(robot0Obj, 0, False)
-                        
-                elif r0_message[0] == 'M':
-                    try:
-                      # If map_data submitted
-                      if robot0Obj.map_data.size != 0:
-                        area = r0_message[1]
-                        # If not previously evaluated
-                        if not robot0Obj.sent_maps[area-1]: 
-                          #robot0Obj.history.enqueue("Map entry successful")
-                          if area == 1:
-                            map_score = MapScorer.calculateScore(mapSolution[0], robot0Obj.map_data)
-                          elif area == 2:
-                            map_score = MapScorer.calculateScore(mapSolution[1], robot0Obj.map_data)
-                          elif area == 3:
-                            map_score = MapScorer.calculateScore(mapSolution[2], robot0Obj.map_data)
-                          else:
-                            print("Map scoring error. Please check your code.")
-                                                  
-                          robot0Obj.history.enqueue(f"Map Correctness (Area{area}) {str(round(map_score * 100,1))}%")
-                          
-                          # Add percent
-                          robot0Obj.map_score_percent += map_score
-                          robot0Obj.sent_maps[area-1] = True
-                          
-                          robot0Obj.map_data = np.array([])
-                          # Do something...
+                    # If exit message is correct
+                    if r0_message[0] == 'E':
+                      # Check robot position is on starting tile
+                      if robot0Obj.startingTile.checkPosition(robot0Obj.position):
+                        finished = True
+                        supervisor.wwiSendText("ended")
+                        if robot0Obj.victimIdentified:
+                          robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
                         else:
-                          print(f"The map of area {area} has already been evaluated.")
-                      else:
-                        print("Please send your map data before hand.")
-                    except:
-                      print("Map scoring error. Please check your code. (except)")
+                          robot0Obj.history.enqueue("No exit bonus")
+                        add_map_multiplier()
+                        # Update score and history
+                        robot_quit(robot0Obj, 0, False)
+                            
+                    elif r0_message[0] == 'M':
+                        try:
+                          # If map_data submitted
+                          if robot0Obj.map_data.size != 0:
+                            area = r0_message[1]
+                            # If not previously evaluated
+                            if not robot0Obj.sent_maps[area-1]: 
+                              #robot0Obj.history.enqueue("Map entry successful")
+                              if area == 1:
+                                map_score = MapScorer.calculateScore(mapSolution[0], robot0Obj.map_data)
+                              elif area == 2:
+                                map_score = MapScorer.calculateScore(mapSolution[1], robot0Obj.map_data)
+                              elif area == 3:
+                                map_score = MapScorer.calculateScore(mapSolution[2], robot0Obj.map_data)
+                              else:
+                                print("Map scoring error. Please check your code.")
+                                                      
+                              robot0Obj.history.enqueue(f"Map Correctness (Area{area}) {str(round(map_score * 100,1))}%")
+                              
+                              # Add percent
+                              robot0Obj.map_score_percent += map_score
+                              robot0Obj.sent_maps[area-1] = True
+                              
+                              robot0Obj.map_data = np.array([])
+                              # Do something...
+                            else:
+                              print(f"The map of area {area} has already been evaluated.")
+                          else:
+                            print("Please send your map data before hand.")
+                        except:
+                          print("Map scoring error. Please check your code. (except)")
 
-                # If robot stopped for 1 second
-                elif robot0Obj.timeStopped() >= 1.0:
+                    # If robot stopped for 1 second
+                    elif robot0Obj.timeStopped() >= 1.0:
 
-                    # Get estimated values
-                    r0_est_vic_pos = r0_message[0]
-                    r0_est_vic_type = r0_message[1]
+                        # Get estimated values
+                        r0_est_vic_pos = r0_message[0]
+                        r0_est_vic_type = r0_message[1]
 
-                    # For each human
-                    # TODO optimise
-                    
-                    def toLower(s):
-                        return s.lower()
-                    
-                    iterator = humans
-                    name = 'Victim'
-                    
-                    if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
-                        iterator = hazards
-                        name = 'Hazard'
+                        # For each human
+                        # TODO optimise
                         
-                    misidentification = True
-                    for i, h in enumerate(iterator):
-                        # Check if in range
-                        if h.checkPosition(robot0Obj.position):
-                            # Check if estimated position is in range
-                            if h.checkPosition(r0_est_vic_pos):
-                                # If robot on same side
-                                if h.onSameSide(robot0Obj.position):
-                                    misidentification = False
-                                    # If not already identified
-                                    if not h.identified:
-                                        # Get points scored depending on the type of victim
-                                        #pointsScored = h.scoreWorth
+                        def toLower(s):
+                            return s.lower()
+                        
+                        iterator = humans
+                        name = 'Victim'
+                        
+                        if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
+                            iterator = hazards
+                            name = 'Hazard'
+                            
+                        misidentification = True
+                        for i, h in enumerate(iterator):
+                            # Check if in range
+                            if h.checkPosition(robot0Obj.position):
+                                # Check if estimated position is in range
+                                if h.checkPosition(r0_est_vic_pos):
+                                    # If robot on same side
+                                    if h.onSameSide(robot0Obj.position):
+                                        misidentification = False
+                                        # If not already identified
+                                        if not h.identified:
+                                            # Get points scored depending on the type of victim
+                                            #pointsScored = h.scoreWorth
 
-                                        grid = coord2grid(h.wb_translationField.getSFVec3f())
-                                        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                                            grid = coord2grid(h.wb_translationField.getSFVec3f())
+                                            roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
 
-                                        # Update score and history
-                                        if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                            robot0Obj.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
+                                            # Update score and history
+                                            if r0_est_vic_type.lower() == h.simple_victim_type.lower():
+                                                robot0Obj.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
 
-                                        robot0Obj.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
-                                        robot0Obj.victimIdentified = True
+                                            robot0Obj.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
+                                            robot0Obj.victimIdentified = True
 
-                                        h.identified = True
+                                            h.identified = True
 
-                    if misidentification and r0_est_vic_type.lower() != 'm':
-                        robot0Obj.increaseScore(f"Misidentification of {name}", -5)
+                        if misidentification:
+                            robot0Obj.increaseScore(f"Misidentification of {name}", -5)
 
             # Relocate robot if stationary for 20 sec
             if robot0Obj.timeStopped() >= 20 and not finished:
