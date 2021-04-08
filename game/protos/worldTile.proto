@@ -81,21 +81,73 @@ PROTO worldTile [
 
 				
 				}%
-					DEF FLOOR Transform {
-						translation %{=x_shift}% -0.085 %{=z_shift}%
-						children [
-							Shape {
-								appearance Appearance {
-									material Material {
-										diffuseColor IS tileColor
+					%{if fields.checkpoint.value == false and fields.swamp.value == false and fields.start.value == false then}%
+						DEF FLOOR Transform {
+							translation %{=x_shift}% -0.085 %{=z_shift}%
+							children [
+								Shape {
+									appearance Appearance {
+										material Material {
+											diffuseColor IS tileColor
+										}
+									}
+									geometry DEF FLOORBOX Box {
+										size %{=x_size}% %{=tileThickness}% %{=z_size}%
 									}
 								}
-								geometry DEF FLOORBOX Box {
-									size %{=x_size}% %{=tileThickness}% %{=z_size}%
-								}
-							}
-						]
-					}
+							]
+						}
+					%{end}%
+					%{if fields.checkpoint.value == true then}%
+						DEF CHECKPOINT Transform {
+							translation %{=x_shift}% -0.085 %{=z_shift}%
+									children [
+										Shape {
+											appearance CorrodedMetal  {
+											}
+											geometry Box {
+												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+											}
+										}
+									]
+						}
+					%{end}%
+					%{if fields.swamp.value == true then}%
+						DEF FLOOR Transform {
+							translation %{=x_shift}% -0.085 %{=z_shift}%
+									children [
+										Shape {
+											appearance Appearance {
+												material Material {
+													diffuseColor 0.517647 0.392157 0.192157
+												}
+											}
+											geometry Box {
+												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+											}
+										}
+									]
+						}
+					%{end}%
+					%{if fields.start.value == true then}%
+						DEF START Transform {
+							translation %{=x_shift}% -0.085 %{=z_shift}%
+									children [
+										Shape {
+											appearance Appearance {
+												material Material {
+													diffuseColor 0 0 0
+													emissiveColor 0.0313 0.835 0.0313
+													shininess 0.8
+												}
+											}
+											geometry Box {
+												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+											}
+										}
+									]
+						}
+					%{end}%
 				%{end}%
 				%{if fields.rightWall.value > 0 then
 					z_size = .3
@@ -343,56 +395,6 @@ PROTO worldTile [
 								}
 							  ]
 							}
-				%{end}%
-				%{if fields.checkpoint.value == true then}%
-					DEF CHECKPOINT Transform {
-						translation 0 -0.075 0
-								children [
-									Shape {
-										appearance CorrodedMetal  {
-										}
-										geometry Box {
-											size 0.3 0.0001 0.3
-										}
-									}
-								]
-					}
-				%{end}%
-				%{if fields.start.value == true then}%
-					DEF START Transform {
-						translation 0 -0.075 0
-								children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0 0 0
-												emissiveColor 0.0313 0.835 0.0313
-												shininess 0.8
-											}
-										}
-										geometry Box {
-											size 0.3 0.0001 0.3
-										}
-									}
-								]
-					}
-				%{end}%
-				%{if fields.swamp.value == true then}%
-					DEF START Transform {
-						translation 0 -0.075 0
-								children [
-									Shape {
-										appearance Appearance {
-											material Material {
-												diffuseColor 0.517647 0.392157 0.192157
-											}
-										}
-										geometry Box {
-											size 0.3 0.0001 0.3
-										}
-									}
-								]
-					}
 				%{end}%
 				%{if fields.curveDir.value > 0 then}%
 					DEF CURVED curvedWall {
