@@ -19,6 +19,7 @@ import glob
 import json
 import obstacleCheck
 import mapSolutionCalculator
+import mapAnswer
 
 # Create the instance of the supervisor class
 supervisor = Supervisor()
@@ -101,7 +102,7 @@ class Robot:
 
         self.message = []
         self.map_data = np.array([])
-        self.sent_maps = [False, False, False]
+        self.sent_maps = False
         self.map_score_percent = 0
 
         self.victimIdentified = False
@@ -827,8 +828,7 @@ def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
   
 def add_map_multiplier():  
-    score_change = robot0Obj.getScore() * (robot0Obj.map_score_percent / areaCount)
-    robot0Obj.history.enqueue(f"Map Correctness (Total) {str(round((robot0Obj.map_score_percent / areaCount) * 100,1))}%")
+    score_change = robot0Obj.getScore() * robot0Obj.map_score_percent
     robot0Obj.increaseScore("Map Bonus", score_change)    
 
 def generate_robot_proto(robot_json):
@@ -1882,9 +1882,9 @@ if __name__ == '__main__':
     lastSentTime = 0
 
     #Calculate the solution arrays for the map layout
-    #Can be moved to another location - only here for testingwe
-    mapSolution = mapSolutionCalculator.convertTilesToArray(getTiles(grid=True))
-    areaCount = sum(1 for m in mapSolution if len(m)!=0)
+    mapSolution = mapAnswer.generateAnswer(supervisor)
+    for m in mapSolution:
+      print(f"{m},")
     
     # -------------------------------
 
@@ -1960,10 +1960,6 @@ if __name__ == '__main__':
                     if rDataLen == 1:
                       tup = struct.unpack('c', receivedData)
                       robot0Obj.message = [tup[0].decode("utf-8")]
-                    elif rDataLen == 8:
-                      #Check map answer
-                      tup = struct.unpack('c i', receivedData)
-                      robot0Obj.message = [tup[0].decode("utf-8"), tup[1]]
                     # Victim identification bytes data should be of length = 9
                     elif rDataLen == 9:
                         # Unpack data
@@ -1996,13 +1992,15 @@ if __name__ == '__main__':
                         # Size of flattened 2d array
                         shape_size = shape[0] * shape[1]
                         # Get map data
-                        map_data = struct.unpack(f'{shape_size}i',data_bytes)
+                        map_data = struct.unpack(f'{shape_size}c',data_bytes)
+                        map_data = list(map(lambda m: m.decode(), map_data))
                         # Reshape data using the shape data given
                         reshaped_data = np.array(map_data).reshape(shape, order='f')
                         
                         robot0Obj.map_data = reshaped_data
-                except:
+                except Exception as e:
                     print("Incorrect data format sent")
+                    print(e)
 
                 receiver.nextPacket()
 
@@ -2030,33 +2028,25 @@ if __name__ == '__main__':
                         try:
                           # If map_data submitted
                           if robot0Obj.map_data.size != 0:
-                            area = r0_message[1]
                             # If not previously evaluated
-                            if not robot0Obj.sent_maps[area-1]: 
-                              #robot0Obj.history.enqueue("Map entry successful")
-                              if area == 1:
-                                map_score = MapScorer.calculateScore(mapSolution[0], robot0Obj.map_data)
-                              elif area == 2:
-                                map_score = MapScorer.calculateScore(mapSolution[1], robot0Obj.map_data)
-                              elif area == 3:
-                                map_score = MapScorer.calculateScore(mapSolution[2], robot0Obj.map_data)
-                              else:
-                                print("Map scoring error. Please check your code.")
+                            if not robot0Obj.sent_maps: 
+                              map_score = MapScorer.calculateScore(mapSolution, robot0Obj.map_data)
                                                       
-                              robot0Obj.history.enqueue(f"Map Correctness (Area{area}) {str(round(map_score * 100,1))}%")
+                              robot0Obj.history.enqueue(f"Map Correctness {str(round(map_score * 100,1))}%")
                               
                               # Add percent
-                              robot0Obj.map_score_percent += map_score
-                              robot0Obj.sent_maps[area-1] = True
+                              robot0Obj.map_score_percent = map_score
+                              robot0Obj.sent_maps = True
                               
                               robot0Obj.map_data = np.array([])
                               # Do something...
                             else:
-                              print(f"The map of area {area} has already been evaluated.")
+                              print(f"The map has already been evaluated.")
                           else:
                             print("Please send your map data before hand.")
-                        except:
+                        except Exception as e:
                           print("Map scoring error. Please check your code. (except)")
+                          print(e)
 
                     # If robot stopped for 1 second
                     elif robot0Obj.timeStopped() >= 1.0:
