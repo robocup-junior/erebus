@@ -11,15 +11,33 @@ PROTO HazardMap [
 ]
 {
     %{
-        filename = "\"./textures/placard-5.2-organic-peroxide.png\""      
+        if fields.type.value == "O" then
+            if fields.found.value then
+                filename = "\"./textures/placard-5.2-organic-peroxide_found.png\""   
+            else
+                filename = "\"./textures/placard-5.2-organic-peroxide.png\"" 
+            end
+        end
         if fields.type.value == "F" then
-            filename = "\"./textures/placard-2-flammable-gas.png\""      
+            if fields.found.value then
+                filename = "\"./textures/placard-2-flammable-gas_found.png\""    
+            else
+                filename = "\"./textures/placard-2-flammable-gas.png\""    
+            end
         end
         if fields.type.value == "P" then
-            filename = "\"./textures/placard-6-poison.png\""      
+            if fields.found.value then
+                filename = "\"./textures/placard-6-poison_found.png\""  
+            else
+                filename = "\"./textures/placard-6-poison.png\""  
+            end
         end
         if fields.type.value == "C" then
-            filename = "\"./textures/placard-8-corrosive.png\""      
+            if fields.found.value then
+                filename = "\"./textures/placard-8-corrosive_found.png\"" 
+            else
+                filename = "\"./textures/placard-8-corrosive.png\""  
+            end
         end
     }%
     Transform{

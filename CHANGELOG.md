@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Refactored the main supervisor
 - Improved display items and handling in the history view
 - Fixed the removal of robot when time is up
+- Made the hazard map lighter in colour when found it
 
 ## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
 - First Beta release
