@@ -156,10 +156,13 @@ span{
   }
 
 #history{
-  padding-top: 7%;
   width: 100%;
-  /* height: 300px; */
-  table-layout: fixed;
+  text-align: center;
+}
+
+#history td:first-child{
+  width:60px;
+  white-space: nowrap;
 }
 
 /* #historyrow{

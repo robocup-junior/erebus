@@ -19,6 +19,8 @@ var scores = [0,0];
 const stream = "21";
 const version = "21.0.0 Beta-2";
 
+let historyHtml = "";
+
 function receive (message){
 	//Receive message from the python supervisor
 	//Split on comma
@@ -80,8 +82,7 @@ function receive (message){
 				activityUnloadedColour(1)
 				break;
 			case "historyUpdate":
-				let msg = message.split(":");
-				let history0 = msg[0].split(",").slice(1,msg[0].length-1)
+				let history0 = message.split(",").slice(1,message.length-1)
 				updateHistory(history0)
 				break;
 			case "robotInSimulation0":
@@ -131,35 +132,19 @@ function activityUnloadedColour(id){
 	document.getElementById("activity"+id).style.stroke = "black";
 }
 function updateHistory(history0){
-	let text = ""
-
-
-	let history0End = false;
-	// let history1End = false;
-
-	let i = history0.length -1;
-	// let j = history1.length -1;
-
-
-	while(!history0End){
-		text += "<tr id='historyrow'>";
-		if(history0[i] != null){
-			if(history0[i].indexOf("+") != -1){
-				text += "<div class='outerDiv'><div class='innerDiv'><td id='historyrowtext' style='font-size:18px;color:#2980b9;'>"+history0[i]+"</td></div></div>";
-			}else if(history0[i].indexOf("-") != -1){
-				text += "<div class='outerDiv'><div class='innerDiv'><td id='historyrowtext' style='font-size:18px;color:#c0392b;'>"+history0[i]+"</td></div></div>";
-			}else{
-				text += "<div class='outerDiv'><div class='innerDiv'><td id='historyrowtext' style='font-size:18px;color:#2c3e50;'>"+history0[i]+"</td></div></div>";
-			}
-
-			i--;
+	let html = "<tr>";
+	if(history0[0].indexOf(":") != -1){
+		if(history0[1].indexOf("+") != -1){
+			html += `<td style='font-size:18px;color:#2980b9;width:'>${history0[0]}</td><td style='font-size:18px;color:#2980b9;'>${history0[1]}</td>`;
+		}else if(history0[1].indexOf("-") != -1){
+			html += `<td style='font-size:18px;color:#c0392b;'>${history0[0]}</td><td style='font-size:18px;color:#c0392b;'>${history0[1]}</td>`;
 		}else{
-			text += "<div class='outerDiv'><div class='innerDiv'><td id='historyrowtext'></td></div></div>"
-			history0End = true;
+			html += `<td style='font-size:18px;color:#2c3e50;'>${history0[0]}</td><td style='font-size:18px;color:#2c3e50;'>${history0[1]}</td>`;
 		}
-		text += "</tr>";
 	}
-	document.getElementById("history").innerHTML = text;
+	html += "</tr>";
+	historyHtml = html + historyHtml;
+	document.getElementById("history").innerHTML = historyHtml;
 }
 
 function loadedController(id){

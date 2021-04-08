@@ -62,20 +62,17 @@ class RobotHistory(Queue):
 
     def enqueue(self, data):
         #update master history when an event happens
-        self.update_master_history(data)
-
-        #if len(self.queue) > 8:
-        #    self.dequeue()
-
-        return self.queue.append(data)
+        record = self.update_master_history(data)
+        supervisor.wwiSendText("historyUpdate" + "," + ",".join(record))
 
     def update_master_history(self, data):
         #Get time
-        time = int(maxTime - timeElapsed)
+        time = int(timeElapsed)
         minute = str(datetime.timedelta(seconds=time))[2:]
         #update list with data in format [game time, event data]
         record = [minute, data]
         self.master_history.append(record)
+        return record
 
 
 class Robot:
@@ -431,9 +428,6 @@ def resetRobotProto() -> None:
     except:
         print('Error resetting robot proto')
 
-def updateHistory():
-    supervisor.wwiSendText("historyUpdate" + "," + ",".join(robot0Obj.history.queue))
-
 def getHumans(humans, numberOfHumans):
     '''Get humans in simulation'''
     humanNodes = supervisor.getFromDef('HUMANGROUP').getField("children")
@@ -722,7 +716,6 @@ def relocate(robot, robotObj):
 
     # Update history with event
     robotObj.increaseScore("Lack of Progress", -5)
-    updateHistory()
 
 def robot_quit(robotObj, num, manualExit):
     '''Quit robot from simulation'''
@@ -836,9 +829,7 @@ def clamp(n, minn, maxn):
 def add_map_multiplier():  
     score_change = robot0Obj.getScore() * (robot0Obj.map_score_percent / areaCount)
     robot0Obj.history.enqueue(f"Map Correctness (Total) {str(round((robot0Obj.map_score_percent / areaCount) * 100,1))}%")
-    robot0Obj.increaseScore("Map Bonus", score_change)
-    
-    updateHistory()
+    robot0Obj.increaseScore("Map Bonus", score_change)    
 
 def generate_robot_proto(robot_json):
     
@@ -1954,7 +1945,6 @@ if __name__ == '__main__':
                         grid = coord2grid(checkpoint.center)
                         roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
                         robot0Obj.increaseScore("Found checkpoint", 10, roomMult[roomNum])
-                        updateHistory()
                 cpNum = cpNum + 1
 
             # Print when robot0 enters or exits a checkpoint
@@ -1980,7 +1970,6 @@ if __name__ == '__main__':
                     robot0Obj.setMaxVelocity(2)
                     # Update history
                     robot0Obj.history.enqueue("Entered swamp")
-                    updateHistory()
                 else:
                     # If not in swamp, reset max velocity to default
                     robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
@@ -2060,7 +2049,6 @@ if __name__ == '__main__':
                     add_map_multiplier()
                     # Update score and history
                     robot_quit(robot0Obj, 0, False)
-                    updateHistory()
                         
                 elif r0_message[0] == 'M':
                     try:
@@ -2070,7 +2058,6 @@ if __name__ == '__main__':
                         # If not previously evaluated
                         if not robot0Obj.sent_maps[area-1]: 
                           #robot0Obj.history.enqueue("Map entry successful")
-                          
                           if area == 1:
                             map_score = MapScorer.calculateScore(mapSolution[0], robot0Obj.map_data)
                           elif area == 2:
@@ -2087,7 +2074,6 @@ if __name__ == '__main__':
                           robot0Obj.sent_maps[area-1] = True
                           
                           robot0Obj.map_data = np.array([])
-                          updateHistory()
                           # Do something...
                         else:
                           print(f"The map of area {area} has already been evaluated.")
@@ -2141,11 +2127,9 @@ if __name__ == '__main__':
                                         robot0Obj.victimIdentified = True
 
                                         h.identified = True
-                                        updateHistory()
 
                     if misidentification and r0_est_vic_type.lower() != 'm':
                         robot0Obj.increaseScore(f"Misidentification of {name}", -5)
-                        updateHistory()
 
             # Relocate robot if stationary for 20 sec
             if robot0Obj.timeStopped() >= 20 and not finished:
@@ -2162,19 +2146,6 @@ if __name__ == '__main__':
                 robot0Obj.stopped = False
                 robot0Obj.stoppedTime = None
             
-            # Send the update information to the robot window
-            nowScore = robot0Obj.getScore()
-            if lastSentScore != nowScore or lastSentTime != timeElapsed:
-                supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(timeElapsed) + "," + str(maxTime))
-                lastSentScore = nowScore
-                lastSentTime = timeElapsed
-
-            # If the time is up
-            if timeElapsed >= maxTime and last != -1:
-                add_map_multiplier()
-                finished = True
-                last = True
-                supervisor.wwiSendText("ended")
 
             if currentlyRunning:
                 # Check if robot has not left the starting tile
@@ -2184,6 +2155,20 @@ if __name__ == '__main__':
                         robot0Obj.left_exit_tile = True
                         robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
 
+
+            # Send the update information to the robot window
+            nowScore = robot0Obj.getScore()
+            if lastSentScore != nowScore or lastSentTime != int(timeElapsed):
+                supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(int(timeElapsed)) + "," + str(maxTime))
+                lastSentScore = nowScore
+                lastSentTime = int(timeElapsed)
+
+            # If the time is up
+            if timeElapsed >= maxTime and last != -1:
+                add_map_multiplier()
+                finished = True
+                last = True
+                supervisor.wwiSendText("ended")
 
         # If the running state changes
         if previousRunState != currentlyRunning:
@@ -2251,7 +2236,6 @@ if __name__ == '__main__':
                         if int(data[1]) == 0:
                             if gameStarted:
                                 robot_quit(robot0Obj, 0, True)
-                        updateHistory()
                 
                 if parts[0] == 'robotJson':
                     data = message.split(",", 1)
