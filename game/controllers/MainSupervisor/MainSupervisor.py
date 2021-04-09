@@ -89,7 +89,7 @@ class Robot:
             self.wb_rotationField = self.wb_node.getField('rotation')
 
         self.inCheckpoint = True
-        self.inSwamp = True
+        self.inSwamp = False
 
         self.history = RobotHistory()
 
@@ -1909,6 +1909,7 @@ if __name__ == '__main__':
             # Set robots starting position in world
             set_robot_start_pos()
             robot0Obj.inSimulation = True
+            robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
 
             # Reset physics
             robot0.resetPhysics()
