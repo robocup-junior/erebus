@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added the ability to configure the following settings for the simulator
     - Keep controller and robot files
     - Disable automatic LoP [#1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues/1)
-- Added a sample world (Only Area1.wbt)
+- Added new sample worlds
 
 ### Changed
 - Fixed map solving (Map bonus)
