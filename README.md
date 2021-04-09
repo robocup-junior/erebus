@@ -3,7 +3,7 @@ Erebus is a simulation competition environtment for a new sub-league for [RoboCu
 
 Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf).
 
-<div align="center"><img src="/docs/images/environment_v21_0_0_b1.png" width=80%></div>
+<div align="center"><img src="/docs/images/environment_v21_0_0_b2.png" width=80%></div>
 
 ## Quick Start
 1. Download and install [Python 3.x](https://www.python.org/).
@@ -38,7 +38,7 @@ Annoucements will be made in a number of different locations.
 
 
 ## About the current version (beta release)
-The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
+The platform is currently in its beta release phase (v21.0.0 Beta-2). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
 - 
@@ -52,9 +52,7 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
-
-## [Release v21.0.0 Beta-2] - TBD
+## [Release v21.0.0 Beta-2] - (https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-2) - 2021-04-09
 
 ### Added
 - Added the ability to configure the following settings for the simulator
