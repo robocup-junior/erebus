@@ -374,20 +374,33 @@ def generateAnswer(supervisor):
                 # Vertical
                 zCount = int(zCount/2)
                 if xCount % 2 == 0:
-                    answerMatrix[2*zCount + 1 + zShift][xCount] = victimType
+                    row_temp = 2*zCount + 1 + zShift
+                    col_temp = xCount
                 else:
-                    answerMatrix[2*zCount + 1 + zShift][xCount+1] = victimType
+                    row_temp = 2*zCount + 1 + zShift
+                    col_temp = xCount+1
             else:
                 # Horizontal
                 xCount = int(xCount/2)
                 if zCount % 2 == 0:
-                    answerMatrix[zCount][2*xCount + 1 + xShift] = victimType
+                    row_temp = zCount
+                    col_temp = 2*xCount + 1 + xShift
                 else:
-                    answerMatrix[zCount+1][2*xCount + 1 + xShift] = victimType
+                    row_temp = zCount+1
+                    col_temp = 2*xCount + 1 + xShift
 
+            # Concatenate if victims on either side of the wall
+            if type(answerMatrix[row_temp][col_temp]) == str:
+                answerMatrix[row_temp][col_temp] += victimType
+            else:
+                answerMatrix[row_temp][col_temp] = victimType
+            
+        #for row in answerMatrix:
+        #    print(row)
         
         for i in range(len(answerMatrix)):
             answerMatrix[i] = list(map(str, answerMatrix[i]))
+        
         return answerMatrix
         
     except:
