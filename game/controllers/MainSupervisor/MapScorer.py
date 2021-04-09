@@ -70,6 +70,12 @@ def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> floa
             if not(subMatrix[i][j] == '0' and answerMatrix[i][j] == '0'):
                 if subMatrix[i][j] == answerMatrix[i][j]:
                     correct += 1
+                # if a victim is on either side of the wall
+                elif len(answerMatrix[i][j]) == 2:
+                    if subMatrix[i][j] == answerMatrix[i][j] or subMatrix[i][j] == answerMatrix[i][j][::-1]:
+                        correct += 1
+                    else:
+                        incorrect += 1
                 else:
                     incorrect += 1
 
