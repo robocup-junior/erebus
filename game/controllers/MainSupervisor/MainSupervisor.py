@@ -18,7 +18,6 @@ import obstacleCheck
 import glob
 import json
 import obstacleCheck
-import mapSolutionCalculator
 import mapAnswer
 
 # Create the instance of the supervisor class
@@ -1883,8 +1882,8 @@ if __name__ == '__main__':
 
     #Calculate the solution arrays for the map layout
     mapSolution = mapAnswer.generateAnswer(supervisor)
-    for m in mapSolution:
-      print(f"{m},")
+    #for m in mapSolution:
+    #  print(f"{m},")
     
     # -------------------------------
 
@@ -1949,6 +1948,8 @@ if __name__ == '__main__':
                 else:
                     # If not in swamp, reset max velocity to default
                     robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+                    # Update history
+                    robot0Obj.history.enqueue("Exited swamp")
 
             # If receiver has got a message
             if receiver.getQueueLength() > 0:
@@ -2032,7 +2033,7 @@ if __name__ == '__main__':
                             if not robot0Obj.sent_maps: 
                               map_score = MapScorer.calculateScore(mapSolution, robot0Obj.map_data)
                                                       
-                              robot0Obj.history.enqueue(f"Map Correctness {str(round(map_score * 100,1))}%")
+                              robot0Obj.history.enqueue(f"Map Correctness {str(round(map_score * 100,2))}%")
                               
                               # Add percent
                               robot0Obj.map_score_percent = map_score

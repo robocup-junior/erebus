@@ -36,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Improved display items and handling in the history view
 - Fixed the removal of robot when time is up
 - Made the hazard map lighter in colour when found it
+- Full implementation of map bonus
 
 ### Removed
 - Removed setting of a detection API from robot0.wbo

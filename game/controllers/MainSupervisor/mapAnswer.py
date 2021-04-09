@@ -298,31 +298,31 @@ def generateAnswer(supervisor):
                 tmpMatrix[z+3][x+1] = 4
                 tmpMatrix[z+3][x+3] = 4
             if tile.getField("start").getSFBool():
-                tmpMatrix[z+1][x+1] = 6
-                tmpMatrix[z+1][x+3] = 6
-                tmpMatrix[z+3][x+1] = 6
-                tmpMatrix[z+3][x+3] = 6
+                tmpMatrix[z+1][x+1] = 5
+                tmpMatrix[z+1][x+3] = 5
+                tmpMatrix[z+3][x+1] = 5
+                tmpMatrix[z+3][x+3] = 5
             
             colour = tile.getField("tileColor").getSFColor()
             colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
             if colour == [0.3, 0.1, 0.6]:
                 # 1 to 3
-                tmpMatrix[z+1][x+1] = 8
-                tmpMatrix[z+1][x+3] = 8
-                tmpMatrix[z+3][x+1] = 8
-                tmpMatrix[z+3][x+3] = 8
-            elif colour == [0.1, 0.1, 0.9]:
-                # 1 to 2
                 tmpMatrix[z+1][x+1] = 7
                 tmpMatrix[z+1][x+3] = 7
                 tmpMatrix[z+3][x+1] = 7
                 tmpMatrix[z+3][x+3] = 7
+            elif colour == [0.1, 0.1, 0.9]:
+                # 1 to 2
+                tmpMatrix[z+1][x+1] = 6
+                tmpMatrix[z+1][x+3] = 6
+                tmpMatrix[z+3][x+1] = 6
+                tmpMatrix[z+3][x+3] = 6
             elif colour == [0.9, 0.1, 0.1]:
                 # 2 to 3
-                tmpMatrix[z+1][x+1] = 9
-                tmpMatrix[z+1][x+3] = 9
-                tmpMatrix[z+3][x+1] = 9
-                tmpMatrix[z+3][x+3] = 9
+                tmpMatrix[z+1][x+1] = 8
+                tmpMatrix[z+1][x+3] = 8
+                tmpMatrix[z+3][x+1] = 8
+                tmpMatrix[z+3][x+3] = 8
 
             for i in range(len(answerMatrix)):
                 for j in range(len(answerMatrix[i])):

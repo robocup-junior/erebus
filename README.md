@@ -75,4 +75,9 @@ Please report bugs and potential fixes either through:
 - Refactored the main supervisor
 - Improved display items and handling in the history view
 - Fixed the removal of robot when time is up
+- Made the hazard map lighter in colour when found it
+- Full implementation of map bonus
+
+### Removed
+- Removed setting of a detection API from robot0.wbo
 
