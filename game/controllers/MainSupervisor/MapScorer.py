@@ -20,7 +20,7 @@ def _shift_matrix(answerMatrix: np.array, subMatrix: np.array, dy: int, dx: int)
     n,m = subMatrix.shape
     an,am = answerMatrix.shape
 
-    bigSubMatrix = np.full((n *3,m *3),'0') 
+    bigSubMatrix = np.full((n *3,m *3),'0', dtype=subMatrix.dtype) 
     bigSubMatrix[n:2*n,m:2*m] = subMatrix
 
     x = m - (dx)
