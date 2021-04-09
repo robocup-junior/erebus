@@ -1993,10 +1993,9 @@ if __name__ == '__main__':
                         # Size of flattened 2d array
                         shape_size = shape[0] * shape[1]
                         # Get map data
-                        map_data = struct.unpack(f'{shape_size}c',data_bytes)
-                        map_data = list(map(lambda m: m.decode(), map_data))
+                        map_data = data_bytes.decode('utf-8').split(',')
                         # Reshape data using the shape data given
-                        reshaped_data = np.array(map_data).reshape(shape, order='f')
+                        reshaped_data = np.array(map_data).reshape(shape)
                         
                         robot0Obj.map_data = reshaped_data
                 except Exception as e:
