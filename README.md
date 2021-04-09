@@ -41,7 +41,7 @@ Annoucements will be made in a number of different locations.
 The platform is currently in its beta release phase (v21.0.0 Beta-1). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
-- The map bonus will not calculated correctly.
+- 
 
 ### Reporting bugs and fixes
 Please report bugs and potential fixes either through: 
