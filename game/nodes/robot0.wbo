@@ -1,4 +1,4 @@
-#VRML_OBJ R2020a utf8
+#VRML_OBJ R2021a utf8
 DEF ROBOT0 custom_robot {
   translation 1000 1000 1000
   rotation 0 1 0 0
@@ -7,7 +7,6 @@ DEF ROBOT0 custom_robot {
   camera_fieldOfView 1
   camera_width 128
   camera_height 128
-  using_detection_api FALSE
   turretSlot [
     
   ]
