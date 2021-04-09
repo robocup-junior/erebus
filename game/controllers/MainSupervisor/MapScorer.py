@@ -5,24 +5,22 @@
 # to teams for the outputted map
 # matrix.
 
-# NOT FULLY IMPLEMENTED!!!!
-# THIS IS TEST CODE ONLY
-
 import AutoInstall
 AutoInstall._import("np", "numpy")
 
-def _get_first_connector_instance(matrix: np.array) -> np.array:
+def _get_start_instance(matrix: np.array) -> np.array:
     n,m = matrix.shape
     for y in range(n):
         for x in range(m):
-            if matrix[y,x] == 5:
+            if matrix[y,x] == '5':
                 return np.array([y,x])
+    return None
 
 def _shift_matrix(answerMatrix: np.array, subMatrix: np.array, dy: int, dx: int) -> np.array:
     n,m = subMatrix.shape
     an,am = answerMatrix.shape
 
-    bigSubMatrix = np.zeros((n *3,m *3),subMatrix.dtype) 
+    bigSubMatrix = np.full((n *3,m *3),'0') 
     bigSubMatrix[n:2*n,m:2*m] = subMatrix
 
     x = m - (dx)
@@ -37,28 +35,17 @@ def _align(answerMatrix: np.array, subMatrix: np.array) -> np.array:
     Returns:
         subMatrix aligned with the answerMatrix
     """
-    ans_con_pos = _get_first_connector_instance(answerMatrix)
-    sub_con_pos = _get_first_connector_instance(subMatrix)
+    ans_con_pos = _get_start_instance(answerMatrix)
+    if ans_con_pos is None:
+        raise Exception("No starting tile('5') was found on the answer map")
+    sub_con_pos = _get_start_instance(subMatrix)
+    if sub_con_pos is None:
+        raise Exception("No starting tile('5') was found on the submitted map")
+
     d_pos = ans_con_pos - sub_con_pos
 
     return _shift_matrix(answerMatrix, subMatrix,*d_pos)
 
-
-# def _get_same_orientation(answerMatrix: np.array, subMatrix: np.array) -> np.array:
-#     """
-#     Rotate the subMatrix to fit the same orientation as the answerMatrix
-
-#     Returns:
-#         subMatrix rotated (np array)
-#     """
-#     if answerMatrix.shape == subMatrix.shape:
-#         return subMatrix
-#     # else
-#     # TODO Could be upside down??
-#     while True:
-#         subMatrix = np.rot90(subMatrix, k=1, axes=(1,0))
-#         if answerMatrix.shape == subMatrix.shape:
-#             return subMatrix
 
 def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> float:
     """
@@ -74,23 +61,20 @@ def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> floa
     correct = 0
     incorrect = 0
 
-
     if answerMatrix.shape != subMatrix.shape:
         return 0
 
     for i in range(len(answerMatrix)):
         for j in range(len(answerMatrix[0])):
             # If the cells are equal
-            a = (subMatrix[i][j] == answerMatrix[i][j])
-            if a:
-                correct += 1
-            else:
-                incorrect += 1
+            if not(subMatrix[i][j] == '0' and answerMatrix[i][j] == '0'):
+                if subMatrix[i][j] == answerMatrix[i][j]:
+                    correct += 1
+                else:
+                    incorrect += 1
 
     # Calculate completeness as a ratio of the correct count over the sum of the correct count and incorrect count 
-    completeness = (correct / (correct + incorrect))
-
-    return completeness
+    return (correct / (correct + incorrect))
 
 def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> float:
     """
@@ -106,8 +90,6 @@ def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> 
         answerMatrix = np.rot90(answerMatrix,k=i,axes=(1,0))
         aSubMatrix = _align(answerMatrix,subMatrix)
 
-
-        # Calculate score for matrix
         completeness = _calculate_completeness(answerMatrix, aSubMatrix)
         completeness_list.append(completeness)
     # Return the highest score
@@ -116,21 +98,5 @@ def _calculate_map_completeness(answerMatrix: np.array, subMatrix: np.array) -> 
     
 
 def calculateScore(answerMatrices: list, subMatrix: list) -> float:
-    subMatrix = np.rot90(subMatrix,k=0,axes=(1,0))
     score = _calculate_map_completeness(np.array(answerMatrices),np.array(subMatrix))
-
     return score
-
-if __name__ == "__main__":
-    subMatrix = np.array([
-        [0,0,0,1,5,1,0,0,0,1,5,1],
-        [0,0,0,1,5,1,0,0,0,1,5,1],
-        [0,0,0,1,5,1,1,1,1,1,5,1],
-        [0,0,0,1,3,3,3,3,3,3,3,1],
-        [0,1,1,1,3,1,1,1,3,3,3,1],
-        [0,1,3,1,3,1,3,1,3,3,3,1],
-        [0,1,3,1,3,1,3,1,1,1,3,1],
-        [0,1,3,3,3,3,3,2,2,2,3,1],
-        [0,1,1,1,1,1,1,1,1,1,1,1]
-    ])
-    
