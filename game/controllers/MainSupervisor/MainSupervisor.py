@@ -12,6 +12,7 @@ import threading
 import shutil
 import AutoInstall
 AutoInstall._import("np", "numpy")
+AutoInstall._import("cl", "termcolor")
 import ControllerUploader
 import MapScorer
 import obstacleCheck
@@ -1387,7 +1388,9 @@ def generate_robot_proto(robot_json):
       'Lidar': 500,
       'Wheel': 300,
       'Distance Sensor': 50
-    } 
+    }
+
+    genERR = False
     
     for component in robot_json:
         
@@ -1412,12 +1415,17 @@ def generate_robot_proto(robot_json):
                 continue
 
         # Cost calculation
-        cost += costs[robot_json[component]["name"]]
-        if cost > budget:
-          print("ERROR! The necessary costs exceed the budget.")
-          print(f"Budget: {budget}  Cost: {cost}")
-          break
-                
+        try:
+          cost += costs[robot_json[component]["name"]]
+          if cost > budget:
+            print(cl.colored("ERROR! The necessary costs exceed the budget.", "red"))
+            print(cl.colored(f"Budget: {budget}  Cost: {cost}", "red"))
+            genERR = True
+            break
+        except KeyError as e:
+          print(cl.colored(f"{e.args[0]} is no longer supported in this version. Therefore, the specification for this sensor is skipped.", "red"))
+          continue
+                      
         # Hard coded, so if ranges change in the website, 
         # I need to change them here too :(
         if(robot_json[component]["name"] == "Wheel"):
@@ -1770,21 +1778,22 @@ def generate_robot_proto(robot_json):
     proto_code += "\n}"
     proto_code += closeBracket
 
-    print("Your custom robot has been successfully generated!")
-    print(f"Budget: {budget}  Cost: {cost}")
-    
+    if not genERR:
+      print(cl.colored("Your custom robot has been successfully generated!", "green"))
+      print(cl.colored(f"Budget: {budget}  Cost: {cost}", "green"))
+      
 
-    path = os.path.dirname(os.path.abspath(__file__))
+      path = os.path.dirname(os.path.abspath(__file__))
 
-    if path[-4:] == "game":
-      path = os.path.join(path, "protos")
-    else:
-      path = os.path.join(path, "../../protos")
+      if path[-4:] == "game":
+        path = os.path.join(path, "protos")
+      else:
+        path = os.path.join(path, "../../protos")
 
-    path = os.path.join(path, "custom_robot.proto")
+      path = os.path.join(path, "custom_robot.proto")
 
-    with open(path, 'w') as robot_file:
-        robot_file.write(proto_code)
+      with open(path, 'w') as robot_file:
+          robot_file.write(proto_code)
 
 
 def process_robot_json(json_data):
@@ -2023,8 +2032,8 @@ if __name__ == '__main__':
                         
                         robot0Obj.map_data = reshaped_data
                 except Exception as e:
-                    print("Incorrect data format sent")
-                    print(e)
+                    print(cl.colored("Incorrect data format sent", "red"))
+                    print(cl.colored(e, "red"))
 
                 receiver.nextPacket()
 
@@ -2065,12 +2074,12 @@ if __name__ == '__main__':
                               robot0Obj.map_data = np.array([])
                               # Do something...
                             else:
-                              print(f"The map has already been evaluated.")
+                              print(cl.colored(f"The map has already been evaluated.", "red"))
                           else:
-                            print("Please send your map data before hand.")
+                            print(cl.colored("Please send your map data before hand.", "red"))
                         except Exception as e:
-                          print("Map scoring error. Please check your code. (except)")
-                          print(e)
+                          print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
+                          print(cl.colored(e, "red"))
 
                     # If robot stopped for 1 second
                     elif robot0Obj.timeStopped() >= 1.0:
