@@ -6,13 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [Unreleased]
 
 ### Added
-- 
+- Cost checks to custom robots introduced
 
 ### Changed
-- 
+- The budget limit for custom robots has been increased to 3000
+- The maximum number of cameras for custom robots has been increased to 3
 
 ### Removed
-- 
+- Removed temperature sensor from default robot
 
 ## [Release v21.0.0 Beta-2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-2) - 2021-04-09
 

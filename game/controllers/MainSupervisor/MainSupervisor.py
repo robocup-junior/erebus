@@ -836,7 +836,7 @@ def generate_robot_proto(robot_json):
     component_max_counts = {
         "Wheel": 4,
         "Distance Sensor": 8,
-        "Camera": 2
+        "Camera": 3
     }
     
     component_counts = {}
@@ -857,7 +857,7 @@ def generate_robot_proto(robot_json):
       field SFInt32            camera_height                39                       
       field SFBool             camera_antiAliasing          FALSE                    
       field SFRotation         camera_rotation              1 0 0 0                  
-      field SFFloat            camera_noise                 0.0                      
+      field SFFloat            camera_noise                 0.1                      
       field SFFloat            camera_motionBlur            0.0                      
       field SFInt32            emitter_channel              1                        
       field SFInt32            receiver_channel             1                        
@@ -1375,6 +1375,19 @@ def generate_robot_proto(robot_json):
         """
     
     closeBracket = "\n\t\t}\n"
+
+    budget = 3000
+    cost = 0
+    costs = {
+      'Gyro': 100,
+      'GPS': 250,
+      'Camera': 500,
+      'Colour sensor': 100,
+      'Accelerometer': 100,
+      'Lidar': 500,
+      'Wheel': 300,
+      'Distance Sensor': 50
+    } 
     
     for component in robot_json:
         
@@ -1397,6 +1410,13 @@ def generate_robot_proto(robot_json):
             # Skip if count is > 1
             if component_count > 1:
                 continue
+
+        # Cost calculation
+        cost += costs[robot_json[component]["name"]]
+        if cost > budget:
+          print("ERROR! The necessary costs exceed the budget.")
+          print(f"Budget: {budget}  Cost: {cost}")
+          break
                 
         # Hard coded, so if ranges change in the website, 
         # I need to change them here too :(
