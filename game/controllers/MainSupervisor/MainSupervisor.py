@@ -1769,6 +1769,9 @@ def generate_robot_proto(robot_json):
     """
     proto_code += "\n}"
     proto_code += closeBracket
+
+    print("Your custom robot has been successfully generated!")
+    print(f"Budget: {budget}  Cost: {cost}")
     
 
     path = os.path.dirname(os.path.abspath(__file__))
