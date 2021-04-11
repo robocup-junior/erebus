@@ -858,7 +858,7 @@ def generate_robot_proto(robot_json):
       field SFInt32            camera_height                39                       
       field SFBool             camera_antiAliasing          FALSE                    
       field SFRotation         camera_rotation              1 0 0 0                  
-      field SFFloat            camera_noise                 0.1                      
+      field SFFloat            camera_noise                 0.0                      
       field SFFloat            camera_motionBlur            0.0                      
       field SFInt32            emitter_channel              1                        
       field SFInt32            receiver_channel             1                        
