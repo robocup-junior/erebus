@@ -22,7 +22,7 @@ PROTO custom_robot [
   field SFInt32            camera_height                39                       # Is `Camera.height`.
   field SFBool             camera_antiAliasing          FALSE                    # Is `Camera.antiAliasing`.
   field SFRotation         camera_rotation              1 0 0 0                  # Is `Camera.rotation`. Interesting setup: set `1 0 0 -0.47` in order to simulate the linear camera mode.
-  field SFFloat            camera_noise                 0.0                      # Is `Camera.noise`.
+  field SFFloat            camera_noise                 0.1                      # Is `Camera.noise`.
   field SFFloat            camera_motionBlur            0.0                      # Is `Camera.motionBlur`.
   field SFBool             using_detection_api          FALSE
   field SFInt32            emitter_channel              1                        # Is `Emitter.channel`.
@@ -674,33 +674,6 @@ Robot {
       height 1
     }
     GPS {
-    }
-    LightSensor {
-      translation -0.03 0.03 0
-      rotation 0 1 0 3.14
-      name "left_heat_sensor"
-      lookupTable [
-        0 21 0
-        2 25 0
-        5 30 0
-        12 37 0
-        1000 38 0
-      ]
-      colorFilter 1 0 0
-      occlusion TRUE
-    }
-    LightSensor {
-      translation 0.03 0.03 0
-      name "right_heat_sensor"
-      lookupTable [
-        0 21 0
-        2 25 0
-        5 30 0
-        12 37 0
-        1000 38 0
-      ]
-      colorFilter 1 0 0
-      occlusion TRUE
     }
     DistanceSensor {
       translation 0.00941437 0.04 -0.0401418
