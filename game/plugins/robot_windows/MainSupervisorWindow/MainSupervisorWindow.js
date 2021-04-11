@@ -17,7 +17,7 @@ var robot1Name = "Robot 1";
 var scores = [0,0];
 
 const stream = "21";
-const version = "21.0.0 Beta-2";
+const version = "21.0.0 Beta-3";
 
 let historyHtml = "";
 
