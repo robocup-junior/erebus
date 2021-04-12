@@ -6,7 +6,7 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 <div align="center"><img src="/docs/images/environment_v21_0_0_b2.png" width=80%></div>
 
 ## Quick Start
-1. Download and install [Python 3.x](https://www.python.org/).
+1. Download and install [Python 3.x](https://www.python.org/). Don't forget to add a path to the "Python".
 1. Download and install [Webots 2021a](https://cyberbotics.com/).
 1. Download our [latest release](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases) and extract the zip file.
 1. Open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
@@ -38,7 +38,7 @@ Annoucements will be made in a number of different locations.
 
 
 ## About the current version (beta release)
-The platform is currently in its beta release phase (v21.0.0 Beta-2). There are still bugs (both known and unknown), and the documentation is under development. 
+The platform is currently in its beta release phase (v21.0.0 Beta-3). There are still bugs (both known and unknown), and the documentation is under development. 
 
 ### Known issues
 - 
@@ -51,6 +51,18 @@ Please report bugs and potential fixes either through:
 
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
+
+## [Release v21.0.0 Beta-3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-3) - 2021-04-12
+
+### Added
+- Cost checks to custom robots introduced
+
+### Changed
+- The budget limit for custom robots has been increased to 3000
+- The maximum number of cameras for custom robots has been increased to 3
+
+### Removed
+- Removed temperature sensor from default robot
 
 ## [Release v21.0.0 Beta-2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-2) - 2021-04-09
 
