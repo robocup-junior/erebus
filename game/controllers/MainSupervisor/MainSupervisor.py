@@ -1407,12 +1407,14 @@ def generate_robot_proto(robot_json):
             component_max_count = component_max_counts[robot_json[component]["name"]]
             # If there are more components in json than there should be, continue
             if component_count > component_max_count:
-                continue
+              print(cl.colored(f"[SKIP] The number of {robot_json[component]['name']} is limited to {component_max_count}.", "yellow"))
+              continue
         else:
             # If there should only be one component
             # Skip if count is > 1
             if component_count > 1:
-                continue
+              print(cl.colored(f"[SKIP] The number of {robot_json[component]['name']} is limited to only one.", "yellow"))
+              continue
 
         # Cost calculation
         try:
@@ -1423,8 +1425,16 @@ def generate_robot_proto(robot_json):
             genERR = True
             break
         except KeyError as e:
-          print(cl.colored(f"{e.args[0]} is no longer supported in this version. Therefore, the specification for this sensor is skipped.", "red"))
+          print(cl.colored(f"[SKIP] {e.args[0]} is no longer supported in this version.", "orange"))
           continue
+
+        if robot_json[component].get("customName") is None or robot_json[component].get("customName") == "":
+          print(cl.colored(f"ERROR! No tag name has been specified for {robot_json[component].get('name')}. Please specify a suitable name in the robot generator.", "red"))
+          genERR = True
+          break
+        
+        print(cl.colored(f"Adding... {robot_json[component].get('name')} ({robot_json[component].get('customName')})", "blue"))
+
                       
         # Hard coded, so if ranges change in the website, 
         # I need to change them here too :(
