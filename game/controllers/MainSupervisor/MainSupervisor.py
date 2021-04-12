@@ -1804,6 +1804,8 @@ def generate_robot_proto(robot_json):
 
       with open(path, 'w') as robot_file:
           robot_file.write(proto_code)
+    else:
+      print(cl.colored("Your custom robot generation has been cancelled.", "red"))
 
 
 def process_robot_json(json_data):
