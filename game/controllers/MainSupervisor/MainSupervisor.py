@@ -1433,7 +1433,12 @@ def generate_robot_proto(robot_json):
           genERR = True
           break
         
-        print(cl.colored(f"Adding... {robot_json[component].get('name')} ({robot_json[component].get('customName')})", "blue"))
+        if robot_json[component].get("name") == "Wheel":
+          print(cl.colored(f"Adding motor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} motor)", "blue"))
+          print(cl.colored(f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} sensor)", "blue"))
+        else:
+          print(cl.colored(f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')})", "blue"))
+
 
                       
         # Hard coded, so if ranges change in the website, 
