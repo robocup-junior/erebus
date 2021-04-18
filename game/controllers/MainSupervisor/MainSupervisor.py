@@ -24,7 +24,7 @@ import obstacleCheck
 import mapAnswer
 
 # Version info
-stream = 22
+stream = 21
 version = "21.0.0"
 
 
