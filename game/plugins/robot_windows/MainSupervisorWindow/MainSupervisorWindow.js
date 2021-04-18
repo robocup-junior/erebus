@@ -97,6 +97,22 @@ function receive (message){
 			case "robotNotInSimulation1":
 				robotQuitUnavailableColour(1);
 				break;
+			case "latest":
+				document.getElementById("versionInfo").style.color = "#27ae60";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]} (Latest)`;
+				break;
+			case "version":
+				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]}`;
+				break;
+			case "outdated":
+				document.getElementById("versionInfo").style.color = "#c0392b";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]} (Outdated)`;
+				document.getElementById("newVersion").innerHTML = `New version: ${parts[2]} is available. Please update it!`;
+				break;
+			case "unreleased":
+				document.getElementById("versionInfo").style.color = "#e67e22";
+				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]} (Unreleased)`;
+				break;
 		}
 	}
 }
@@ -278,40 +294,12 @@ window.onload = function(){
 	//Connect the window
 	window.robotWindow = webots.window();
 	//Set the title
-	window.robotWindow.setTitle('Simulation Controls');
+	window.robotWindow.setTitle('Erebus Simulation Controls');
 	//Set which function handles the recieved messages
 	window.robotWindow.receive = receive;
 	//Set timer to inital time value
-	document.getElementById("timer").innerHTML = '--:--'
-	//Set version info
-	document.getElementById("versionInfo").innerHTML = "Ver. " + version;
-	//Check update
-	checkUpdate();
+	document.getElementById("timer").innerHTML = 'Initializing'
 };
-
-function checkUpdate(){
-	$.ajax({
-		url: 'https://gitlab.com/api/v4/projects/22054848/releases',
-		dataType: 'json',
-		success: function(data){
-			let versions = data.filter(release => release['tag_name'].startsWith(`v${stream}`));
-			if(versions.length == 0) return;
-			if(versions[0]['tag_name'].replace(/_/g, ' ') === `v${version}`){
-				//Latest
-				document.getElementById("versionInfo").style.color = "#27ae60";
-				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Latest)`;
-			}else if(versions.some(v => v['tag_name'].replace(/_/g, ' ') === `v${version}`)){
-				document.getElementById("versionInfo").style.color = "#c0392b";
-				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Outdated)`;
-				document.getElementById("newVersion").innerHTML = `New version: ${versions[0]['tag_name'].replace('v','').replace(/_/g, ' ')} is available. Please update it!`;
-			}else{
-				document.getElementById("versionInfo").style.color = "#e67e22";
-				document.getElementById("versionInfo").innerHTML = `Ver. ${version} (Unreleased)`;
-			}
-		}
-	});
-	
-}
 
 function endGame(){
 	//Once the game is over turn off both the run and pause buttons

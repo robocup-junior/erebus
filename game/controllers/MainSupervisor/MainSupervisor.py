@@ -10,9 +10,11 @@ import math
 import datetime
 import threading
 import shutil
+import json
 import AutoInstall
 AutoInstall._import("np", "numpy")
 AutoInstall._import("cl", "termcolor")
+AutoInstall._import("req", "requests")
 import ControllerUploader
 import MapScorer
 import obstacleCheck
@@ -20,6 +22,11 @@ import glob
 import json
 import obstacleCheck
 import mapAnswer
+
+# Version info
+stream = 22
+version = "21.0.0"
+
 
 # Create the instance of the supervisor class
 supervisor = Supervisor()
@@ -1843,6 +1850,24 @@ if __name__ == '__main__':
     supervisor.wwiSendText("config," + ','.join(configData))
     configData = list(map((lambda x: int(x)), configData))
     
+    try:
+      supervisor.wwiSendText(f"version,{version}")
+      # Check updates
+      url = "https://gitlab.com/api/v4/projects/22054848/releases"
+      response = req.get(url)
+      releases = response.json()
+      releases = list(filter(lambda release: release['tag_name'].startswith(f"v{stream}"), releases))
+      if len(releases) > 0:
+        if releases[0]['tag_name'].replace('_', ' ') == f'v{version}':
+          supervisor.wwiSendText(f"latest,{version}")
+        elif any([r['tag_name'].replace('_', ' ') == f'v{version}' for r in releases]):
+          supervisor.wwiSendText(f"outdated,{version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
+        else:
+          supervisor.wwiSendText(f"unreleased,{version}")
+      else:
+        supervisor.wwiSendText(f"version,{version}")
+    except:
+      supervisor.wwiSendText(f"version,{version}")
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
