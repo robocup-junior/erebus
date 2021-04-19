@@ -3,6 +3,8 @@ Erebus is a simulation competition environtment for a new sub-league for [RoboCu
 
 Later releases of this platform will be used for the RCJ Rescue 2021 International Event as a demonstration competition based on [these rules](https://cdn.robocup.org/junior/wp/2021/03/2021_RescueNewSimulationDemo_Rules_draft01.pdf).
 
+### [Erebus Official Website](https://erebus.rcj.cloud/)
+
 <div align="center"><img src="/docs/images/environment_v21_0_0_b2.png" width=80%></div>
 
 ## Quick Start
@@ -13,9 +15,8 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 
 ## Documentation
-The offical documentaion is under development. 
-
-In the meanwhile, the [documentation and tutorial](https://github.com/Shadow149/RescueMaze/wiki) from the 2020 development cycle may be useful (some functionalities are likely to be depreciated). 
+Documentation for the platform can be accessed through [this link](https://erebus.rcj.cloud/docs/).  
+However, some pages are currently under construction.
 
 ## Robot Customization
 The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). 
@@ -37,9 +38,6 @@ Annoucements will be made in a number of different locations.
 - For other RCJ related questions and discussions please use the [RCJ official forum](https://junior.forum.robocup.org/)
 
 
-## About the current version (beta release)
-The platform is currently in its beta release phase (v21.0.0 Beta-3). There are still bugs (both known and unknown), and the documentation is under development. 
-
 ### Known issues
 - 
 
@@ -52,42 +50,8 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.0.0 Beta-3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-3) - 2021-04-12
-
-### Added
-- Cost checks to custom robots introduced
+## [Release v21.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0) - 2021-04-20
 
 ### Changed
-- The budget limit for custom robots has been increased to 3000
-- The maximum number of cameras for custom robots has been increased to 3
-
-### Removed
-- Removed temperature sensor from default robot
-
-## [Release v21.0.0 Beta-2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-2) - 2021-04-09
-
-### Added
-- Added the ability to configure the following settings for the simulator
-    - Keep controller and robot files
-    - Disable automatic LoP [#1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues/1)
-- Added new sample worlds
-
-### Changed
-- Fixed map solving (Map bonus)
-- History will no longer be rotated, it will be added
-- Fix of score calculation (handling of decimal points)
-- Fixed a problem that robot stuck at entrance of swamp/checkpoint with using default robot
-- Fixed a problem where the rescue of a victim could be successful even if the robot was not completely stopped
-- The stopping time duration required to score a victim was fixed to fit the rules
-- Improved behaviour of the LoP button
-- Fixed implementation of map bonuses
-- You can no longer earn EB without identifying at least one victim
-- Refactored the main supervisor
-- Improved display items and handling in the history view
-- Fixed the removal of robot when time is up
-- Made the hazard map lighter in colour when found it
-- Full implementation of map bonus
-
-### Removed
-- Removed setting of a detection API from robot0.wbo
+- Refactored version check function
 
