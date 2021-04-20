@@ -1,10 +1,8 @@
 from controller import Robot
-from PIL import Image
 import numpy as np
 import struct
 
 timeStep = 32            # Set the time step for the simulation
-max_velocity = 6.28      # Set a maximum velocity time constant
 
 robot = Robot()
 
@@ -12,7 +10,7 @@ emitter = robot.getDevice("emitter")
 
 while robot.step(timeStep) != -1:
 
-    
+
     # '0': None/Unknown
     # '1': Walls
     # '2': Holes
@@ -29,8 +27,8 @@ while robot.step(timeStep) != -1:
     # 'P': Poison
     # 'C': Corrosive
     # 'O': Organic Peroxide
-    
-    
+
+
     ## Test map array for world1.wbt
     subMatrix = np.array([
         ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
@@ -67,7 +65,7 @@ while robot.step(timeStep) != -1:
         ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '4', '0', '4', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
         ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1']
     ])
-    
+
 
     """
     ## Test map array for world2.wbt
@@ -175,5 +173,3 @@ while robot.step(timeStep) != -1:
     emitter.send(exit_mes)
 
     break
-    
-    
