@@ -54,4 +54,4 @@ Please report bugs and potential fixes either through:
 
 ### Changed
 - Changed Lidar field of view from 90 to 360 degrees
-- Addresses the problem of robots firing like rocket:rocket: near the swamps in some environments.
+- Addresses the problem of robots firing like rocket :rocket: near the swamps in some environments.
