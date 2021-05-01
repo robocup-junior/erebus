@@ -1,8 +1,4 @@
 from controller import Robot
-from PIL import Image
-import numpy as np
-import time
-
 
 timeStep = 32            # Set the time step for the simulation
 max_velocity = 6.28      # Set a maximum velocity time constant
