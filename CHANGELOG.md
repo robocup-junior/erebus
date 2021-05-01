@@ -8,10 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Added
 
 ### Changed
-- Changed Lidar field of view from 90 to 360 degrees
 
 ### Removed
 
+
+## [Release v21.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.1) - 2021-05-01
+
+### Changed
+- Changed Lidar field of view from 90 to 360 degrees
+- Addresses the problem of robots firing like rocket:rocket: near the swamps in some environments.
 
 ## [Release v21.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0) - 2021-04-20
 

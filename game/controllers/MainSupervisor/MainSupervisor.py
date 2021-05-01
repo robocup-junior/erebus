@@ -25,7 +25,7 @@ import mapAnswer
 
 # Version info
 stream = 21
-version = "21.0.0"
+version = "21.0.1"
 
 
 # Create the instance of the supervisor class
@@ -2019,11 +2019,15 @@ if __name__ == '__main__':
                 if robot0Obj.inSwamp:
                     # Cap the robot's velocity to 2
                     robot0Obj.setMaxVelocity(2)
+                    # Reset physics
+                    robot0.resetPhysics()
                     # Update history
                     robot0Obj.history.enqueue("Entered swamp")
                 else:
                     # If not in swamp, reset max velocity to default
                     robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+                    # Reset physics
+                    robot0.resetPhysics()
                     # Update history
                     robot0Obj.history.enqueue("Exited swamp")
 

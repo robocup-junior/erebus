@@ -50,8 +50,8 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0) - 2021-04-20
+## [Release v21.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.1) - 2021-05-01
 
 ### Changed
-- Refactored version check function
-
+- Changed Lidar field of view from 90 to 360 degrees
+- Addresses the problem of robots firing like rocket:rocket: near the swamps in some environments.
