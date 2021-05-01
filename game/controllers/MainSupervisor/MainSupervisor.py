@@ -1730,6 +1730,7 @@ def generate_robot_proto(robot_json):
             children [
                 Lidar {{
                 rotation 0 1 0 -1.57
+                fieldOfView 6.2832
                 }}
             ]
             }}"""
