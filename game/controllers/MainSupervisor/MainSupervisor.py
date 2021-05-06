@@ -2060,7 +2060,7 @@ if __name__ == '__main__':
               else:
                 path = os.path.join(path, "../../../recording.mp4")
               supervisor.movieStartRecording(
-                  path, width=1280, height=720, quality=80,
+                  path, width=1280, height=720, quality=70,
                   codec=0, acceleration=1, caption=False,
               )
               wait(0.5)
@@ -2088,9 +2088,8 @@ if __name__ == '__main__':
             robot0.resetPhysics()
 
             
-            if configData[3]:
-                if viewpoint_node:
-                  viewpoint_node.getField('follow').setSFString("e-puck 0")
+            if configData[3] and viewpoint_node:
+                viewpoint_node.getField('follow').setSFString("e-puck 0")
                 setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
 
@@ -2104,7 +2103,7 @@ if __name__ == '__main__':
             lastTime = supervisor.getTime()
 
         if robot0Obj.inSimulation:
-            if configData[3]:
+            if configData[3] and viewpoint_node:
               nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
               if len(nearVictims) > 0:
                 if(len(nearVictims) > 1):
