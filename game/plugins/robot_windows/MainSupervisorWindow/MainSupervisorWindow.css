@@ -266,6 +266,30 @@ span{
   color: #4b4b4b;
 }
 
+.btn-giveup {
+  background: #fff url('exit.svg') no-repeat top left;
+  background-size: 20px 20px;
+  padding-left: 23px;
+  padding-right: 5px;
+  height: 24px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #4b4b4b;
+}
+
+.btn-giveupD {
+  background: #888 url('exit.svg') no-repeat top left;
+  background-size: 20px 20px;
+  padding-left: 23px;
+  padding-right: 5px;
+  height: 24px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #4b4b4b;
+}
+
 .hidden_box input {
   display: none;
 }

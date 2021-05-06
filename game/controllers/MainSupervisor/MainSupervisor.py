@@ -72,6 +72,12 @@ class RobotHistory(Queue):
         #update master history when an event happens
         record = self.update_master_history(data)
         supervisor.wwiSendText("historyUpdate" + "," + ",".join(record))
+        hisT = ""
+        histories = list(reversed(self.master_history))
+        for h in range(min(len(histories),5)):
+            hisT = "[" + histories[h][0] + "] " + histories[h][1] + "\n" + hisT
+        if configData[2]:
+          supervisor.setLabel(2, hisT, 0.7, 0,0.05, 0xfbc531, 0.2)
 
     def update_master_history(self, data):
         #Get time
@@ -236,7 +242,6 @@ class VictimObject():
 
         self.arrayPosition = ap
         self.scoreWorth = score
-        self.radius = 0.09
         self._victim_type = vtype
 
         self.simple_victim_type = self.get_simple_type()
@@ -277,13 +282,16 @@ class VictimObject():
         # Will be overloaded
         pass
 
-    def checkPosition(self, pos: list) -> bool:
+    def checkPosition(self, pos: list, radius:float = 0.09) -> bool:
         '''Check if a position is near an object, based on the min_dist value'''
         # Get distance from the object to the passed position using manhattan distance for speed
         # TODO Check if we want to use euclidian or manhattan distance -- currently manhattan
         distance = math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
-        return distance <= self.radius
-
+        return distance <= radius
+    
+    def getDistance(self, pos: list) -> bool:
+        return (((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
+        
     def onSameSide(self, pos: list) -> bool:
         #Get side the victim pointing at
 
@@ -317,6 +325,20 @@ class VictimObject():
                 return True
 
         return False
+
+    def getSide(self) -> str:
+        #Get side the victim pointing at
+        rot = self.rotation[3]
+        rot = round(rot, 2)
+
+        if rot == -1.57:
+            return "right"
+        elif rot == 1.57:
+            return "left"
+        elif rot == 3.14:
+            return "bottom"
+        else:
+            return "top"
 
 class Victim(VictimObject):
     '''Human object holding the boundaries'''
@@ -735,9 +757,7 @@ def robot_quit(robotObj, num, timeup):
         # Send message to robot window to update quit button
         supervisor.wwiSendText("robotNotInSimulation"+str(num))
         # Update history event whether its manual or via exit message
-        if timeup:
-            robotObj.history.enqueue("Time is up")
-        else:
+        if not timeup:
             robotObj.history.enqueue("Successful Exit")
 
 def add_robot():
@@ -1821,6 +1841,47 @@ def generate_robot_proto(robot_json):
       print(cl.colored("Your custom robot generation has been cancelled.", "red"))
 
 
+def setViewPoint(robotObj, viewpoint_node, dir):
+    if dir == "top":
+      vp = [
+        robotObj.position[0],
+        robotObj.position[1] + 0.8,
+        robotObj.position[2] - 0.8
+      ]
+      vo = [0.0, 0.9235793898666079, 0.3834072386035822, 3.141592653589793]
+    elif dir == "right":
+      vp = [
+        robotObj.position[0] + 0.8,
+        robotObj.position[1] + 0.8,
+        robotObj.position[2]
+      ]
+      vo = [-0.357996176885067, 0.8623673664230065, 0.357996176885067, 1.7183320854248436]
+    elif dir == "bottom":
+      vp = [
+        robotObj.position[0],
+        robotObj.position[1] + 0.8,
+        robotObj.position[2] + 0.8
+      ]
+      vo = [1.0, 0.0, 0.0, 5.4962200048483485]
+    elif dir == "left":
+      vp = [
+        robotObj.position[0] - 0.8,
+        robotObj.position[1] + 0.8,
+        robotObj.position[2]
+      ]
+      vo = [0.357996176885067, 0.8623673664230065, 0.357996176885067, 4.564853221754743]
+    viewpoint_node.getField('position').setSFVec3f(vp)
+    viewpoint_node.getField('orientation').setSFRotation(vo)
+
+def wait(sec):
+  first = supervisor.getTime()
+  while 1:
+    supervisor.step(32)
+    if supervisor.getTime() - first > sec:
+      break
+  return
+    
+
 def process_robot_json(json_data):
     '''Process json file to generate robot file'''
     robot_json = json.loads(json_data)
@@ -1832,13 +1893,16 @@ def process_robot_json(json_data):
 if __name__ == '__main__':
 
     if supervisor.getCustomData() != '':
-        maxTime = int(supervisor.getCustomData())
+        customData = supervisor.getCustomData().split(',')
+        maxTime = int(customData[0])
         supervisor.wwiSendText("update," + str(0) + "," + str(0) + "," + str(maxTime))
     
     # Load settings
     # configData
     # [0]: Keep controller/robot files
     # [1]: Disable auto LoP
+    # [2]: Recording
+    # [3]: Automatic camera
 
     configFilePath = os.path.dirname(os.path.abspath(__file__))
     if configFilePath[-4:] == "game":
@@ -1934,6 +1998,14 @@ if __name__ == '__main__':
     # Reset the robot proto
     resetRobotProto()
 
+    # Get Viewppoint Node
+    viewpoint_node = supervisor.getFromDef("Viewpoint")
+
+    if len(customData) > 1:
+      nowSide = customData[1]
+    else:
+      nowSide = "bottom"
+
     # How long the game has been running for
     timeElapsed = 0
     lastTime = -1
@@ -1955,6 +2027,8 @@ if __name__ == '__main__':
     lastSentScore = 0
     lastSentTime = 0
 
+    robotInitialized = False
+
     #Calculate the solution arrays for the map layout
     mapSolution = mapAnswer.generateAnswer(supervisor)
     #for m in mapSolution:
@@ -1968,13 +2042,36 @@ if __name__ == '__main__':
         if last == True:
             last = -1
             finished = True
+            if configData[2]:
+                supervisor.setLabel(0, "Score: " + str(round(robot0Obj.getScore(),2)), 0.15, 0.3,0.3, 0xe74c3c, 0)
+                supervisor.setLabel(1, "Game time: " + str(int(int(timeElapsed)/60)).zfill(2) + ":"+ str(int(int(timeElapsed)%60)).zfill(2), 0.15, 0.45,0.3, 0xe74c3c, 0)
+                wait(5)
+                supervisor.movieStopRecording()
         
         r0 = False
         r0s = False
 
         # The first frame of the game running only
         if first and currentlyRunning:
-            
+            if configData[2]:
+              path = os.path.dirname(os.path.abspath(__file__))
+              if path[-4:] == "game":
+                path = os.path.join(path, "../recording.mp4")
+              else:
+                path = os.path.join(path, "../../../recording.mp4")
+              supervisor.movieStartRecording(
+                  path, width=1280, height=720, quality=80,
+                  codec=0, acceleration=1, caption=False,
+              )
+              wait(0.5)
+              supervisor.setLabel(4, "3", 0.4, 0,0.7, 0xe74c3c, 0)
+              wait(1)
+              supervisor.setLabel(4, "2", 0.4, 0,0.7, 0xe74c3c, 0)
+              wait(1)
+              supervisor.setLabel(4, "1", 0.4, 0,0.7, 0xe74c3c, 0)
+              wait(1)
+              supervisor.setLabel(4, "START", 0.2, 0,0.7, 0xe74c3c, 0)
+              wait(1)
             # Get the robot nodes by their DEF names
             robot0 = supervisor.getFromDef("ROBOT0")
             # Add robot into world
@@ -1985,18 +2082,37 @@ if __name__ == '__main__':
             set_robot_start_pos()
             robot0Obj.inSimulation = True
             robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+            robotInitialized = True
 
             # Reset physics
             robot0.resetPhysics()
+
+            
+            if configData[3]:
+                if viewpoint_node:
+                  viewpoint_node.getField('follow').setSFString("e-puck 0")
+                setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
 
             # Restart controller code
             # robot0.restartController()
             first = False
-
+            if configData[2]:
+              supervisor.setLabel(4, "", 0.2, 0,0.4, 0xe74c3c, 0)
             #robot0Obj.increaseScore("Debug", 100)
 
+            lastTime = supervisor.getTime()
+
         if robot0Obj.inSimulation:
+            if configData[3]:
+              nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
+              if len(nearVictims) > 0:
+                if(len(nearVictims) > 1):
+                  nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
+                side = nearVictims[0].getSide()
+                if side != nowSide:
+                  setViewPoint(robot0Obj, viewpoint_node, side)
+                  nowSide = side
             # Test if the robots are in checkpoints
             checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
             if len(checkpoint):
@@ -2103,6 +2219,7 @@ if __name__ == '__main__':
                         add_map_multiplier()
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
+                        last = True
                             
                     elif r0_message[0] == 'M':
                         try:
@@ -2197,20 +2314,25 @@ if __name__ == '__main__':
                   robot0Obj.stoppedTime = None
 
 
-            # Send the update information to the robot window
-            nowScore = robot0Obj.getScore()
-            if lastSentScore != nowScore or lastSentTime != int(timeElapsed):
-                supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(int(timeElapsed)) + "," + str(maxTime))
-                lastSentScore = nowScore
-                lastSentTime = int(timeElapsed)
+            if robotInitialized:
+              # Send the update information to the robot window
+              nowScore = robot0Obj.getScore()
+              if lastSentScore != nowScore or lastSentTime != int(timeElapsed):
+                  supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(int(timeElapsed)) + "," + str(maxTime))
+                  lastSentScore = nowScore
+                  lastSentTime = int(timeElapsed)
+                  if configData[2]:
+                    supervisor.setLabel(0, "Score: " + str(round(nowScore,2)), 0.15, 0,0.15, 0x4cd137, 0)
+                    remainTime = maxTime - int(timeElapsed)
+                    supervisor.setLabel(1, "Clock: " + str(int(int(remainTime)/60)).zfill(2) + ":"+ str(int(int(remainTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
 
-            # If the time is up
-            if timeElapsed >= maxTime and last != -1:
-                add_map_multiplier()
-                robot_quit(robot0Obj, 0, True)
-                finished = True
-                last = True
-                supervisor.wwiSendText("ended")
+              # If the time is up
+              if timeElapsed >= maxTime and last != -1:
+                  add_map_multiplier()
+                  robot_quit(robot0Obj, 0, True)
+                  finished = True
+                  last = True
+                  supervisor.wwiSendText("ended")
 
         # If the running state changes
         if previousRunState != currentlyRunning:
@@ -2228,7 +2350,6 @@ if __name__ == '__main__':
                 if parts[0] == "run":
                     # Start running the match
                     currentlyRunning = True
-                    lastTime = supervisor.getTime()
                     gameStarted = True
                 if parts[0] == "pause":
                     # Pause the match
@@ -2277,7 +2398,12 @@ if __name__ == '__main__':
                     if len(data) > 1:
                         if int(data[1]) == 0:
                             if gameStarted:
+                                add_map_multiplier()
                                 robot_quit(robot0Obj, 0, True)
+                                finished = True
+                                last = True
+                                supervisor.wwiSendText("ended")
+                                robot0Obj.history.enqueue("Give up!")
                 
                 if parts[0] == 'robotJson':
                     data = message.split(",", 1)
@@ -2293,7 +2419,7 @@ if __name__ == '__main__':
         
 
         # If the match is running
-        if currentlyRunning and not finished:
+        if robotInitialized and currentlyRunning and not finished:
             # Get the time since the last frame
             frameTime = supervisor.getTime() - lastTime
             # Add to the elapsed time

@@ -182,8 +182,6 @@ function startup (){
 	//Turn on the run button and reset button when the program has loaded
 	setEnableButton("runButton", true);
 	setEnableButton("pauseButton", false);
-
-	// setEnableButton('quit0', false)
 	setEnableButton('lopButton', false)
 
 	setEnableButton("load0", true);
@@ -205,12 +203,16 @@ function updateConfig (data){
 	//Update the config ui
 	document.getElementById("autoRemoveFiles").checked = Boolean(Number(data[0]));
 	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
+	document.getElementById("recording").checked = Boolean(Number(data[2]));
+	document.getElementById("autoCam").checked = Boolean(Number(data[3]));
 }
 
 function configChanged(){
-	let data = [0,0];
+	let data = [0,0,0,0];
 	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
+	data[2] = String(Number(document.getElementById("recording").checked));
+	data[3] = String(Number(document.getElementById("autoCam").checked));
 	window.robotWindow.send(`config,${data.join(',')}`);
 }
 
@@ -246,8 +248,8 @@ function runPressed(){
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
 	
-	setEnableButton("load1", false);
-	setEnableButton("unload1", false);
+	//setEnableButton("load1", false);
+	//setEnableButton("unload1", false);
 	//When the run button is pressed
 	//Disable the run button
 	setEnableButton("runButton", false);
@@ -257,6 +259,8 @@ function runPressed(){
 	
 	// setEnableButton('quit0', true)
 	setEnableButton('lopButton', true)
+
+	setEnableButton("giveupB", true);
 	window.robotWindow.send("run");
 }
 
@@ -279,6 +283,16 @@ function resetPressed(){
 	window.robotWindow.send("reset");
 }
 
+function giveupPressed(){
+	if(document.getElementById("giveupB").className == "btn-giveup"){
+		window.robotWindow.send("quit,0");
+		setEnableButton("runButton", false)
+		setEnableButton("pauseButton", false);
+		setEnableButton('lopButton', false)
+		setEnableButton('giveupB', false)
+	}
+}
+
 function openLoadController(id){
 	//When a load button is pressed - opens the file explorer window
 	document.getElementById("robot"+id+"Controller").click();
@@ -287,6 +301,10 @@ function openLoadController(id){
 function setEnableButton(name, state){
 	//Set the disabled state of a button (state is if it is enabled as a boolean)
 	document.getElementById(name).disabled = !state;
+	if(name == "giveupB"){
+		if(state) document.getElementById(name).className = "btn-giveup"
+		else document.getElementById(name).className = "btn-giveupD"
+	}
 }
 
 //Set the onload command for the window
