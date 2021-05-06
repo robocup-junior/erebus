@@ -3,7 +3,7 @@
           basicTimeStep 16
           coordinateSystem "NUE"
         }
-        Viewpoint {
+        DEF Viewpoint Viewpoint {
           orientation -1 0 0 0.85
           position -0.08 1.2000000000000002 1.02
         }
@@ -1792,7 +1792,7 @@
             ]
             supervisor TRUE
             controller "MainSupervisor"
-            customData "480"
+            customData "480,bottom"
             window "MainSupervisorWindow"
             showWindow TRUE
           }

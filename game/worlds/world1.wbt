@@ -3,7 +3,7 @@ WorldInfo {
   basicTimeStep 16
   coordinateSystem "NUE"
 }
-Viewpoint {
+DEF Viewpoint Viewpoint {
   orientation -1 4.5317877835753625e-14 9.448830298683955e-15 0.670000000000022
   position -0.05097664811755035 1.4872131100190586 1.6276952609407322
 }
@@ -1204,7 +1204,7 @@ DEF MAINSUPERVISOR Robot {
     }
   ]
   controller "MainSupervisor"
-  customData "480"
+  customData "480,bottom"
   supervisor TRUE
   showWindow TRUE
   window "MainSupervisorWindow"
