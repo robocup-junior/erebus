@@ -397,7 +397,7 @@ PROTO worldTile [
 							}
 				%{end}%
 				%{if fields.curveDir.value > 0 then}%
-					DEF CURVED curvedWall {
+					curvedWall {
 						rot %{= fields.curveDir.value}%
 						isHalf %{= fields.isHalf.value and "TRUE" or "FALSE"}%
 					}
