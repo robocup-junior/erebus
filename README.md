@@ -50,8 +50,12 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.1) - 2021-05-01
+## [Release v21.1.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.0) - 2021-05-08
+
+### Added
+- Automatic adjustment of the camera angle(viewpoint)
+- Ability to record games
+- Give-up button
 
 ### Changed
-- Changed Lidar field of view from 90 to 360 degrees
-- Addresses the problem of robots firing like rocket :rocket: near the swamps in some environments.
+- Fixed missing bounding objects for curved walls
