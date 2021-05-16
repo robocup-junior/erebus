@@ -248,8 +248,8 @@ function runPressed(){
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
 	
-	//setEnableButton("load1", false);
-	//setEnableButton("unload1", false);
+	setEnableButton("load1", false);
+	setEnableButton("unload1", false);
 	//When the run button is pressed
 	//Disable the run button
 	setEnableButton("runButton", false);
