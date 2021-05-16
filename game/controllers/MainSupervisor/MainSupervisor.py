@@ -1699,13 +1699,6 @@ def generate_robot_proto(robot_json):
         
         if(robot_json[component]["name"] == "Colour sensor"):
             proto_code += f"""
-            SpotLight {{
-            attenuation      0 0 12.56
-            intensity   0.01
-            location    {x} {y} {z}
-            direction   0 -1 0
-            cutOffAngle 0.3
-            }}
             Transform {{
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
@@ -1715,6 +1708,12 @@ def generate_robot_proto(robot_json):
                 rotation 0 1 0 -1.57
                 width 1
                 height 1
+                }}
+                SpotLight {{
+                attenuation 0 0 12.56
+                intensity   0.01
+                direction   1 0 0
+                cutOffAngle 0.3
                 }}
             ]
             }}
