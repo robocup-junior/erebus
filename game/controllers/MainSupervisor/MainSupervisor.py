@@ -411,9 +411,9 @@ class StartTile(Tile):
         self.wb_node = wb_node
 
 
-def resetControllerFile() -> None:
+def resetControllerFile(manual=False) -> None:
     '''Remove the controller'''
-    if configData[0]:
+    if configData[0] and not manual:
       return
     path = os.path.dirname(os.path.abspath(__file__))
 
@@ -429,10 +429,10 @@ def resetControllerFile() -> None:
 
 def resetController(num: int) -> None:
     '''Send message to robot window to say that controller has been unloaded'''
-    resetControllerFile()
+    resetControllerFile(True)
     supervisor.wwiSendText("unloaded"+str(num))
 
-def resetRobotProto() -> None:
+def resetRobotProto(manual=False) -> None:
     '''
     - Send message to robot window to say that robot has been reset
     - Reset robot proto file back to default
@@ -448,7 +448,7 @@ def resetRobotProto() -> None:
       
     try:
         if os.path.isfile(robot_proto):
-          if configData[0]:
+          if configData[0] and not manual:
             return
           shutil.copyfile(default_robot_proto, robot_proto)
         else:
@@ -2383,7 +2383,7 @@ if __name__ == '__main__':
                 if parts[0] == "robot1Unload":
                     # Remove the robot proto
                     if not gameStarted:
-                        resetRobotProto()
+                        resetRobotProto(True)
 
                 if parts[0] == 'relocate':
                     data = message.split(",", 1)
