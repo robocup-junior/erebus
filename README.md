@@ -50,12 +50,12 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.1.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.0) - 2021-05-08
+## [Release v21.1.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.1) - 2021-05-16
 
 ### Added
-- Automatic adjustment of the camera angle(viewpoint)
-- Ability to record games
-- Give-up button
+- 🎨: Display platform version at the start of recording
 
 ### Changed
-- Fixed missing bounding objects for curved walls
+- 🐛: Position of the spotlight for the colour sensor on custom robots
+- 🐛: UNLOAD button for custom robot does not work under some conditions
+- 🐛: Disable the custom robot button(LOAD/UNLOAD) at the start of the game

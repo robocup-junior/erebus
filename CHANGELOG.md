@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Removed
 
+
+## [Release v21.1.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.1) - 2021-05-16
+
+### Added
+- 🎨: Display platform version at the start of recording
+
+### Changed
+- 🐛: Position of the spotlight for the colour sensor on custom robots
+- 🐛: UNLOAD button for custom robot does not work under some conditions
+- 🐛: Disable the custom robot button(LOAD/UNLOAD) at the start of the game
+
 ## [Release v21.1.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.0) - 2021-05-08
 
 ### Added
