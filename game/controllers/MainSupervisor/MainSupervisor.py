@@ -2062,6 +2062,7 @@ if __name__ == '__main__':
                   path, width=1280, height=720, quality=70,
                   codec=0, acceleration=1, caption=False,
               )
+              supervisor.setLabel(0, f'Platform Version: {version}' , 0, 0,0.05, 0xdff9fb, 0)
               wait(0.5)
               supervisor.setLabel(4, "3", 0.4, 0,0.7, 0xe74c3c, 0)
               wait(1)
@@ -2071,6 +2072,8 @@ if __name__ == '__main__':
               wait(1)
               supervisor.setLabel(4, "START", 0.2, 0,0.7, 0xe74c3c, 0)
               wait(1)
+              supervisor.setLabel(0, "Score: " + str(0), 0.15, 0,0.15, 0x4cd137, 0)
+              supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(2) + ":"+ str(int(int(maxTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
             # Get the robot nodes by their DEF names
             robot0 = supervisor.getFromDef("ROBOT0")
             # Add robot into world
