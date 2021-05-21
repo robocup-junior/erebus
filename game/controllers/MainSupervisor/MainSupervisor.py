@@ -2245,6 +2245,15 @@ if __name__ == '__main__':
                         except Exception as e:
                           print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
                           print(cl.colored(e, "red"))
+                    
+                    elif r0_message[0] == 'L':
+                      relocate(robot0, robot0Obj)
+                      robot0Obj.robot_timeStopped = 0
+                      robot0Obj.stopped = False
+                      robot0Obj.stoppedTime = None
+
+                    elif r0_message[0] == 'G':
+                      emitter.send(struct.pack("c f i", bytes("G", "utf-8"), round(robot0Obj.getScore(),2), maxTime - int(timeElapsed)))
 
                     # If robot stopped for 1 second
                     elif robot0Obj.timeStopped() >= 1.0:

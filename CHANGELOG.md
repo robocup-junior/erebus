@@ -11,7 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Removed
 
-## [Release v21.1.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.2) - 2021-05-17
+## [Release v21.1.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.2) - 2021-05-21
+
+### Added
+- ✨: Added the ability to request LoPs autonomously
+- ✨: Added the ability to request game information (score and time remaining) autonomously
 
 ### Removed
 - 🗑️: "using detection api" flag from ther default robot
