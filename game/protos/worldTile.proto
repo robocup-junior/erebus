@@ -94,6 +94,7 @@ PROTO worldTile [
 									geometry DEF FLOORBOX Box {
 										size %{=x_size}% %{=tileThickness}% %{=z_size}%
 									}
+									isPickable  FALSE
 								}
 							]
 						}
@@ -108,6 +109,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -125,6 +127,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -144,6 +147,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -181,6 +185,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 								size %{=wallThickness}% %{=y_size}% %{=z_size}%
 								}
+								isPickable  FALSE
 							}
 						]
 					}
@@ -222,6 +227,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 								size %{=x_size}% %{=y_size}% %{=wallThickness}%
 								}
+								isPickable  FALSE
 							}
 						]
 					}
@@ -236,9 +242,10 @@ PROTO worldTile [
 											diffuseColor 0.2 0.466667 0.521569
 										}
 									}
-								geometry DEF BACKWALLBOX Box {
-									size %{=wallThickness}% %{=tileThickness}% %{=wallThickness}%
-								}
+									geometry DEF BACKWALLBOX Box {
+										size %{=wallThickness}% %{=tileThickness}% %{=wallThickness}%
+									}
+									isPickable  FALSE
 								}
 							]
 					}
@@ -277,9 +284,10 @@ PROTO worldTile [
 											diffuseColor 0.2 0.466667 0.521569
 										}
 									}
-								geometry DEF BACKWALLBOX Box {
-									size %{=x_size}% %{=y_size}% %{=wallThickness}%
-								}
+									geometry DEF BACKWALLBOX Box {
+										size %{=x_size}% %{=y_size}% %{=wallThickness}%
+									}
+									isPickable  FALSE
 								}
 							]
 					}
@@ -318,9 +326,10 @@ PROTO worldTile [
 												diffuseColor 0.2 0.466667 0.521569
 											}
 										}
-									geometry DEF BACKWALLBOX Box {
-										size %{=z_size}% %{=y_size}% %{=wallThickness}%
-									}
+										geometry DEF BACKWALLBOX Box {
+											size %{=z_size}% %{=y_size}% %{=wallThickness}%
+										}
+										isPickable  FALSE
 									}
 								]
 					}
@@ -339,6 +348,7 @@ PROTO worldTile [
 										geometry DEF FLOORBOX Box {
 											size 0.3 0.02 0.3
 										}
+										isPickable  FALSE
 									}
 								]
 							}
@@ -356,6 +366,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -368,6 +379,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -380,6 +392,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -392,6 +405,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
