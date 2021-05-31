@@ -1399,21 +1399,37 @@ def generate_robot_proto(robot_json):
           }
           
 	Solid {
+        name "ballCaster1"
 	  	  contactMaterial "NO_FRIC"
-            translation 0 .0052 0
-            children [
-            DEF BATTERY_BOX Shape {
-              geometry Box {
-                size 0.04 0.01 0.05
-              }
-              }
-            ]
-            boundingObject USE BATTERY_BOX
+            translation 0 .003 -0.025
+            boundingObject Transform {
+              children [
+                Sphere {
+                  radius .003
+                }
+              ]
+            }
             physics Physics {
-          density -1
-  	  mass 0.1
-  	  
-        }
+              density -1
+              mass 0.1
+            }
+          }
+  Solid {
+    name "ballCaster2"
+	  	  contactMaterial "NO_FRIC"
+            translation 0 .003 0.025
+
+            boundingObject Transform {
+              children [
+                Sphere {
+                  radius .003
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 0.1
+            }
           }
           
         """
