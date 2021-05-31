@@ -2,6 +2,17 @@
 WorldInfo {
   basicTimeStep 16
   coordinateSystem "NUE"
+  contactProperties [
+    ContactProperties {
+      material1  "TILE"
+      material2  "NO_FRIC"
+      coulombFriction 0
+      bounce 0
+      bumpSound ""
+      rollSound ""
+      slideSound ""
+    }
+  ]
 }
 DEF Viewpoint Viewpoint {
   orientation -1 4.5317877835753625e-14 9.448830298683955e-15 0.670000000000022

@@ -51,6 +51,7 @@ PROTO worldTile [
 
 	  translation %{=x}% 0 %{=z}%
 	  scale %{=scaleX}% %{=scaleY}% %{=scaleZ}%
+	  contactMaterial "TILE"
 
       children[
 		  DEF TILE_SHAPES_GROUP Group {
