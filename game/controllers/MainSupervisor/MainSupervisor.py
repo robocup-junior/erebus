@@ -2214,9 +2214,9 @@ if __name__ == '__main__':
                         finished = True
                         supervisor.wwiSendText("ended")
                         if robot0Obj.victimIdentified:
-                          robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
+                          robot0Obj.increaseScore("Exit Bonus", robot0Obj.getScore() * 0.1)
                         else:
-                          robot0Obj.history.enqueue("No exit bonus")
+                          robot0Obj.history.enqueue("No Exit Bonus")
                         add_map_multiplier()
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
