@@ -95,6 +95,7 @@ PROTO worldTile [
 									geometry DEF FLOORBOX Box {
 										size %{=x_size}% %{=tileThickness}% %{=z_size}%
 									}
+									isPickable  FALSE
 								}
 							]
 						}
@@ -109,6 +110,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -126,6 +128,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -145,6 +148,7 @@ PROTO worldTile [
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
 											}
+											isPickable  FALSE
 										}
 									]
 						}
@@ -182,6 +186,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 								size %{=wallThickness}% %{=y_size}% %{=z_size}%
 								}
+								isPickable  FALSE
 							}
 						]
 					}
@@ -223,6 +228,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 								size %{=x_size}% %{=y_size}% %{=wallThickness}%
 								}
+								isPickable  FALSE
 							}
 						]
 					}
@@ -240,6 +246,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 									size %{=wallThickness}% %{=tileThickness}% %{=wallThickness}%
 								}
+								isPickable  FALSE
 								}
 							]
 					}
@@ -281,6 +288,7 @@ PROTO worldTile [
 								geometry DEF BACKWALLBOX Box {
 									size %{=x_size}% %{=y_size}% %{=wallThickness}%
 								}
+								isPickable  FALSE
 								}
 							]
 					}
@@ -322,6 +330,7 @@ PROTO worldTile [
 									geometry DEF BACKWALLBOX Box {
 										size %{=z_size}% %{=y_size}% %{=wallThickness}%
 									}
+									isPickable  FALSE
 									}
 								]
 					}
@@ -340,6 +349,7 @@ PROTO worldTile [
 										geometry DEF FLOORBOX Box {
 											size 0.3 0.02 0.3
 										}
+										isPickable  FALSE
 									}
 								]
 							}
@@ -357,6 +367,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -369,6 +380,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -381,6 +393,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -393,6 +406,7 @@ PROTO worldTile [
 								  geometry DEF TRAPEDGEBOX Box {
 									size 0.04 0.12 0.3
 								  }
+								  isPickable  FALSE
 								}
 							  ]
 							}
@@ -409,5 +423,7 @@ PROTO worldTile [
 				%{if not(fields.topWall.value == 0) or not(fields.rightWall.value == 0) or not(fields.bottomWall.value==0) or not(fields.leftWall.value==0) or not(fields.floor.value==false) then}%
 					boundingObject USE TILE_SHAPES_GROUP
 				%{end}%
+
+				
       }
 }

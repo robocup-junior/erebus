@@ -58,6 +58,7 @@ PROTO HazardMap [
                         geometry DEF VICTIMPLANE Plane {
                             size 0.016 0.016
                         }
+                        isPickable  FALSE
                     }
                 ]
                 name IS name

@@ -68,6 +68,7 @@ PROTO Victim [
                         geometry DEF VICTIMPLANE Box {
                             size 0.016 0.001 0.016
                         }
+                        isPickable  FALSE
                     }
                 ]
                 name IS name
