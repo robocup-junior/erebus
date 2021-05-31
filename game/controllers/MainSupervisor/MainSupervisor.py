@@ -2251,6 +2251,8 @@ if __name__ == '__main__':
                       robot0Obj.robot_timeStopped = 0
                       robot0Obj.stopped = False
                       robot0Obj.stoppedTime = None
+                      if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
                     elif r0_message[0] == 'G':
                       emitter.send(struct.pack("c f i", bytes("G", "utf-8"), round(robot0Obj.getScore(),2), maxTime - int(timeElapsed)))
@@ -2312,6 +2314,8 @@ if __name__ == '__main__':
               if robot0Obj.timeStopped() >= 20:
                   if not configData[1]:
                     relocate(robot0, robot0Obj)
+                    if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
                   robot0Obj.robot_timeStopped = 0
                   robot0Obj.stopped = False
                   robot0Obj.stoppedTime = None
@@ -2319,6 +2323,8 @@ if __name__ == '__main__':
               if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
                   if not configData[1]:
                     relocate(robot0, robot0Obj)
+                    if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
                   robot0Obj.robot_timeStopped = 0
                   robot0Obj.stopped = False
                   robot0Obj.stoppedTime = None
@@ -2402,6 +2408,8 @@ if __name__ == '__main__':
                     if len(data) > 1:
                         if int(data[1]) == 0:
                             relocate(robot0, robot0Obj)
+                            if configData[3] and viewpoint_node:
+                              setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
                 if parts[0] == 'quit':
                     data = message.split(",", 1)
