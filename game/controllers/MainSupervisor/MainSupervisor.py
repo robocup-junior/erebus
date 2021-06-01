@@ -4,7 +4,7 @@
 
 from controller import Supervisor
 import os
-import random
+import shutil
 import struct
 import math
 import datetime
@@ -421,11 +421,9 @@ def resetControllerFile(manual=False) -> None:
       path = os.path.join(path, "controllers/robot0Controller")
     else:
       path = os.path.join(path, "../robot0Controller")
-    path = os.path.join(path, "robot0Controller.*")
-    print(path)
-
-    for file in glob.glob(path):
-        os.remove(file)
+    
+    shutil.rmtree(path)
+    os.mkdir(path)
 
 def resetController(num: int) -> None:
     '''Send message to robot window to say that controller has been unloaded'''
@@ -456,7 +454,7 @@ def resetRobotProto(manual=False) -> None:
           supervisor.worldReload()
         supervisor.wwiSendText("unloaded1")
     except:
-        print('Error resetting robot proto')
+      print(cl.colored(f"Error resetting robot proto", "red"))
 
 def getHumans(humans, numberOfHumans):
     '''Get humans in simulation'''
@@ -555,7 +553,7 @@ def getObstacles():
             allObstaclesData.append(obstacleData)
         except:
             #If an error occured then it was not a proto obstacle
-            print("Invalid obstacle found, it could not be tested")
+            print(cl.colored(f"Invalid obstacle found, it could not be tested", "red"))
     
     return allObstaclesData
 
@@ -597,10 +595,10 @@ def deactivateObstacles(allowedObstacles):
             node.getField("conical").setSFBool(False)
             node.getField("spherical").setSFBool(False)
             #Message to console that it has been removed
-            print("Obstacle {0} removed, insufficient clearance to walls.".format(nodeData[1]))
+            print(cl.colored(f"Obstacle {nodeData[1]} removed, insufficient clearance to walls.", "orange"))
         except:
             #It was not a proto obstacle so it was ignored
-            print("Invalid obstacle found, could not remove.")     
+            print(cl.colored(f"Invalid obstacle found, could not remove.", "red"))
 
 def getTiles(grid=False):
     '''Returns list containing all tile positions and which walls are present, if grid is true it will be arranged as a 2d array not a list'''
@@ -759,6 +757,7 @@ def robot_quit(robotObj, num, timeup):
         # Update history event whether its manual or via exit message
         if not timeup:
             robotObj.history.enqueue("Successful Exit")
+        write_log()
 
 def add_robot():
     '''Add robot via .wbo file'''
@@ -808,7 +807,7 @@ def write_log():
 
     # Create file name using date and time
     file_date = datetime.datetime.now()
-    logFileName = file_date.strftime("log %m-%d-%y %H,%M,%S")
+    logFileName = file_date.strftime("gameLog %m-%d-%y %H,%M,%S")
 
     filePath = os.path.join(filePath, logFileName + ".txt")
 
@@ -819,7 +818,7 @@ def write_log():
         logsFile.close()
     except:
         # If write file fails, most likely due to missing logs dir
-        print("Couldn't write log file, no log directory " + filePath)
+        print(cl.colored(f"Couldn't write log file, no log directory: {filePath}", "red"))
 
 def set_robot_start_pos():
     '''Set robot starting position'''
@@ -1398,39 +1397,7 @@ def generate_robot_proto(robot_json):
             channel IS emitter_channel
           }
           
-	Solid {
-        name "ballCaster1"
-	  	  contactMaterial "NO_FRIC"
-            translation 0 .003 -0.025
-            boundingObject Transform {
-              children [
-                Sphere {
-                  radius .003
-                }
-              ]
-            }
-            physics Physics {
-              density -1
-              mass 0.1
-            }
-          }
-  Solid {
-    name "ballCaster2"
-	  	  contactMaterial "NO_FRIC"
-            translation 0 .003 0.025
 
-            boundingObject Transform {
-              children [
-                Sphere {
-                  radius .003
-                }
-              ]
-            }
-            physics Physics {
-              density -1
-              mass 0.1
-            }
-          }
           
         """
     
@@ -1661,7 +1628,7 @@ def generate_robot_proto(robot_json):
                 %{{ if kinematic == false then }}%
                 physics DEF EPUCK_WHEEL_PHYSICS Physics {{
                     density -1
-                    mass 0.8
+                    mass 0.005
                 }}
                 %{{ end }}%
             }}
@@ -1818,16 +1785,23 @@ def generate_robot_proto(robot_json):
               }
             ]
           }
-
+          Transform {
+            translation 0 0.0051 0
+            children [
+              Box {
+                size 0.04 0.01 0.05
+              }
+            ]
+          }
         ]
       }
       %{ if kinematic == false then }%
         physics Physics {
           density -1
           %{ if v2 then }%
-            mass 0.1
+            mass 0.13
           %{ else }%
-            mass 0.1
+            mass 0.15
           %{ end }%
           centerOfMass [0 0.015 0]
           inertiaMatrix [8.74869e-05 9.78585e-05 8.64333e-05, 0 0 0]
@@ -2239,9 +2213,9 @@ if __name__ == '__main__':
                         finished = True
                         supervisor.wwiSendText("ended")
                         if robot0Obj.victimIdentified:
-                          robot0Obj.increaseScore("Exit bonus", robot0Obj.getScore() * 0.1)
+                          robot0Obj.increaseScore("Exit Bonus", robot0Obj.getScore() * 0.1)
                         else:
-                          robot0Obj.history.enqueue("No exit bonus")
+                          robot0Obj.history.enqueue("No Exit Bonus")
                         add_map_multiplier()
                         # Update score and history
                         robot_quit(robot0Obj, 0, False)
@@ -2276,6 +2250,8 @@ if __name__ == '__main__':
                       robot0Obj.robot_timeStopped = 0
                       robot0Obj.stopped = False
                       robot0Obj.stoppedTime = None
+                      if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
                     elif r0_message[0] == 'G':
                       emitter.send(struct.pack("c f i", bytes("G", "utf-8"), round(robot0Obj.getScore(),2), maxTime - int(timeElapsed)))
@@ -2337,6 +2313,8 @@ if __name__ == '__main__':
               if robot0Obj.timeStopped() >= 20:
                   if not configData[1]:
                     relocate(robot0, robot0Obj)
+                    if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
                   robot0Obj.robot_timeStopped = 0
                   robot0Obj.stopped = False
                   robot0Obj.stoppedTime = None
@@ -2344,6 +2322,8 @@ if __name__ == '__main__':
               if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
                   if not configData[1]:
                     relocate(robot0, robot0Obj)
+                    if configData[3] and viewpoint_node:
+                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
                   robot0Obj.robot_timeStopped = 0
                   robot0Obj.stopped = False
                   robot0Obj.stoppedTime = None
@@ -2427,6 +2407,8 @@ if __name__ == '__main__':
                     if len(data) > 1:
                         if int(data[1]) == 0:
                             relocate(robot0, robot0Obj)
+                            if configData[3] and viewpoint_node:
+                              setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
                 if parts[0] == 'quit':
                     data = message.split(",", 1)
@@ -2434,11 +2416,11 @@ if __name__ == '__main__':
                         if int(data[1]) == 0:
                             if gameStarted:
                                 add_map_multiplier()
+                                robot0Obj.history.enqueue("Give up!")
                                 robot_quit(robot0Obj, 0, True)
                                 finished = True
                                 last = True
                                 supervisor.wwiSendText("ended")
-                                robot0Obj.history.enqueue("Give up!")
                 
                 if parts[0] == 'robotJson':
                     data = message.split(",", 1)
@@ -2467,8 +2449,6 @@ if __name__ == '__main__':
             if step == -1:
                 # Stop simulating
                 finished = True
-                if  timeElapsed > 0:
-                  #write log for game if the game ran for more than 0 seconds
-                  write_log()
+                  
         elif first or last or finished:
             supervisor.step(32)            

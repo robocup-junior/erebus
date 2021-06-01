@@ -79,9 +79,6 @@ def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> floa
                 else:
                     incorrect += 1
 
-
-    print("correct: ", correct)
-    print("incorrect: ", incorrect)
     # Calculate completeness as a ratio of the correct count over the sum of the correct count and incorrect count 
     return (correct / (correct + incorrect))
 
