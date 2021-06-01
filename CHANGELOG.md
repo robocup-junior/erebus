@@ -16,6 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Changed
 - ⚡️: Make objects in the world unpickable
 - 🐛: Reset the camera location when LoP occurs
+- 🐛: Controller remove function
+- 🐛: The log export function does not work properly
+
+### Removed
+- 🔇: Some unnessesary logging
+- 🗑️: Unused supervisor code
 
 ## [Release v21.1.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.2) - 2021-05-21
 
