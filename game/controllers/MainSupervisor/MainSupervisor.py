@@ -454,7 +454,7 @@ def resetRobotProto(manual=False) -> None:
           supervisor.worldReload()
         supervisor.wwiSendText("unloaded1")
     except:
-        print('Error resetting robot proto')
+      print(cl.colored(f"Error resetting robot proto", "red"))
 
 def getHumans(humans, numberOfHumans):
     '''Get humans in simulation'''
@@ -553,7 +553,7 @@ def getObstacles():
             allObstaclesData.append(obstacleData)
         except:
             #If an error occured then it was not a proto obstacle
-            print("Invalid obstacle found, it could not be tested")
+            print(cl.colored(f"Invalid obstacle found, it could not be tested", "red"))
     
     return allObstaclesData
 
@@ -595,10 +595,10 @@ def deactivateObstacles(allowedObstacles):
             node.getField("conical").setSFBool(False)
             node.getField("spherical").setSFBool(False)
             #Message to console that it has been removed
-            print("Obstacle {0} removed, insufficient clearance to walls.".format(nodeData[1]))
+            print(cl.colored(f"Obstacle {nodeData[1]} removed, insufficient clearance to walls.", "orange"))
         except:
             #It was not a proto obstacle so it was ignored
-            print("Invalid obstacle found, could not remove.")     
+            print(cl.colored(f"Invalid obstacle found, could not remove.", "red"))
 
 def getTiles(grid=False):
     '''Returns list containing all tile positions and which walls are present, if grid is true it will be arranged as a 2d array not a list'''
@@ -817,7 +817,7 @@ def write_log():
         logsFile.close()
     except:
         # If write file fails, most likely due to missing logs dir
-        print("Couldn't write log file, no log directory " + filePath)
+        print(cl.colored(f"Couldn't write log file, no log directory: {filePath}", "red"))
 
 def set_robot_start_pos():
     '''Set robot starting position'''
