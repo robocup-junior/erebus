@@ -4,7 +4,7 @@
 
 from controller import Supervisor
 import os
-import random
+import shutil
 import struct
 import math
 import datetime
@@ -421,11 +421,9 @@ def resetControllerFile(manual=False) -> None:
       path = os.path.join(path, "controllers/robot0Controller")
     else:
       path = os.path.join(path, "../robot0Controller")
-    path = os.path.join(path, "robot0Controller.*")
-    print(path)
-
-    for file in glob.glob(path):
-        os.remove(file)
+    
+    shutil.rmtree(path)
+    os.mkdir(path)
 
 def resetController(num: int) -> None:
     '''Send message to robot window to say that controller has been unloaded'''
