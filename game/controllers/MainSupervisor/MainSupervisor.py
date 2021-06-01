@@ -757,6 +757,7 @@ def robot_quit(robotObj, num, timeup):
         # Update history event whether its manual or via exit message
         if not timeup:
             robotObj.history.enqueue("Successful Exit")
+        write_log()
 
 def add_robot():
     '''Add robot via .wbo file'''
@@ -806,7 +807,7 @@ def write_log():
 
     # Create file name using date and time
     file_date = datetime.datetime.now()
-    logFileName = file_date.strftime("log %m-%d-%y %H,%M,%S")
+    logFileName = file_date.strftime("gameLog %m-%d-%y %H,%M,%S")
 
     filePath = os.path.join(filePath, logFileName + ".txt")
 
@@ -2415,11 +2416,11 @@ if __name__ == '__main__':
                         if int(data[1]) == 0:
                             if gameStarted:
                                 add_map_multiplier()
+                                robot0Obj.history.enqueue("Give up!")
                                 robot_quit(robot0Obj, 0, True)
                                 finished = True
                                 last = True
                                 supervisor.wwiSendText("ended")
-                                robot0Obj.history.enqueue("Give up!")
                 
                 if parts[0] == 'robotJson':
                     data = message.split(",", 1)
@@ -2448,8 +2449,6 @@ if __name__ == '__main__':
             if step == -1:
                 # Stop simulating
                 finished = True
-                if  timeElapsed > 0:
-                  #write log for game if the game ran for more than 0 seconds
-                  write_log()
+                  
         elif first or last or finished:
             supervisor.step(32)            
