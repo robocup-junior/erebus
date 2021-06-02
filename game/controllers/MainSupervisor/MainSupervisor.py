@@ -1365,7 +1365,7 @@ def generate_robot_proto(robot_json):
                   metalness 0
                   baseColorMap ImageTexture {
                     url [
-                      "textures/gctronic_logo.png"
+                      "textures/rescue.png"
                     ]
                   }
                 }
