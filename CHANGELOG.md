@@ -11,14 +11,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Removed
 
-## [Release v21.1.3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.3) - 2021-**-**
+## [Release v21.2.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.0) - 2021-06-02
+
+### Added
+- ✨: Reflects the loading status of the controller program and custom robots in the GUI after reset it
 
 ### Changed
 - ⚡️: Make objects in the world unpickable
 - 🐛: Reset the camera location when LoP occurs
 - 🐛: Controller remove function
 - 🐛: The log export function does not work properly
-- 🐛: Reduce the frequency of Physics Issues
+- ⚡️: Reduce the frequency of Physics Issues
+- 🐛: The colour of the load button does not change even after loading the custom robot
+- ⚡️:  Make the robot model simpler
 
 ### Removed
 - 🔇: Some unnessesary logging
