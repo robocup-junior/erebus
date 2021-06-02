@@ -1446,11 +1446,11 @@ def generate_robot_proto(robot_json):
                     rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
                     children [
                     Shape {{
-                        appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {{
-                        baseColor 0.5 0.5 0.5
-                        transparency 0
-                        roughness 0.5
-                        metalness 0
+                        appearance PBRAppearance {{
+                          baseColor 1 0.7 0
+                          transparency 0
+                          roughness 0.5
+                          metalness 0
                         }}
                         geometry Cylinder {{
                         height 0.003
@@ -1482,7 +1482,12 @@ def generate_robot_proto(robot_json):
                         translation 0 0.0035 0
                         children [
                         Shape {{
-                            appearance USE EPUCK_TRANSPARENT_APPEARANCE
+                            appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {{
+                              baseColor 0.5 0.5 0.5
+                              transparency 0
+                              roughness 0.5
+                              metalness 0
+                            }}
                             geometry Cylinder {{
                             height 0.004
                             radius 0.005

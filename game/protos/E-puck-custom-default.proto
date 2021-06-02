@@ -70,8 +70,8 @@ Robot {
             rotation 0 0 1 1.57
             children [
               Shape {
-                appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {
-                  baseColor 0.5 0.5 0.5
+                appearance PBRAppearance {
+                  baseColor 1 0.7 0
                   transparency 0
                   roughness 0.5
                   metalness 0
@@ -107,7 +107,12 @@ Robot {
                 translation 0 0.0035 0
                 children [
                   Shape {
-                    appearance USE EPUCK_TRANSPARENT_APPEARANCE
+                    appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {
+                      baseColor 0.5 0.5 0.5
+                      transparency 0
+                      roughness 0.5
+                      metalness 0
+                    }
                     geometry Cylinder {
                       height 0.004
                       radius 0.005
