@@ -917,6 +917,7 @@ def generate_robot_proto(robot_json):
                 height 0.04
                 radius 0.005
               }
+              castShadows FALSE
             }
             Shape {
               appearance PBRAppearance {
@@ -926,6 +927,7 @@ def generate_robot_proto(robot_json):
                 height 0.02
                 radius 0.0053
               }
+              castShadows FALSE
             }
           ]
         }
@@ -951,6 +953,7 @@ def generate_robot_proto(robot_json):
                 ]
                 creaseAngle 0.785398
               }
+              castShadows FALSE
             }
             Shape {
               appearance PBRAppearance {
@@ -1043,6 +1046,7 @@ def generate_robot_proto(robot_json):
                 ]
                 creaseAngle 0.5
               }
+              castShadows FALSE
             }
             Shape {
               appearance PBRAppearance {
@@ -1057,6 +1061,7 @@ def generate_robot_proto(robot_json):
                   1, 17, 13, -1, 74, 72, 68, -1, 70, 68, 49, -1, 50, 33, 67, -1, 67, 71, 73, -1, 50, 49, 33, -1, 5, 4, 20, -1, 20, 2, 0, -1, 0, 3, 1, -1, 31, 30, 29, -1, 20, 0, 1, -1, 31, 29, 28, -1, 5, 20, 1, -1, 31, 28, 27, -1, 6, 5, 1, -1, 31, 27, 26, -1, 7, 6, 1, -1, 31, 26, 25, -1, 8, 7, 1, -1, 31, 25, 24, -1, 9, 8, 1, -1, 32, 31, 24, -1, 10, 9, 1, -1, 1, 32, 24, -1, 24, 23, 22, -1, 22, 21, 19, -1, 19, 18, 17, -1, 17, 16, 15, -1, 15, 14, 13, -1, 13, 12, 11, -1, 11, 10, 1, -1, 1, 24, 22, -1, 22, 19, 17, -1, 17, 15, 13, -1, 13, 11, 1, -1, 1, 22, 17, -1, 70, 74, 68, -1, 51, 70, 49, -1, 69, 50, 67, -1, 69, 67, 73, -1, 66, 65, 64, -1, 37, 36, 35, -1, 66, 64, 63, -1, 38, 37, 35, -1, 66, 63, 62, -1, 39, 38, 35, -1, 66, 62, 61, -1, 40, 39, 35, -1, 66, 61, 60, -1, 41, 40, 35, -1, 66, 60, 59, -1, 42, 41, 35, -1, 66, 59, 58, -1, 43, 42, 35, -1, 66, 58, 57, -1, 44, 43, 35, -1, 66, 57, 56, -1, 45, 44, 35, -1, 66, 56, 55, -1, 46, 45, 35, -1, 66, 55, 54, -1, 47, 46, 35, -1, 66, 54, 53, -1, 47, 35, 34, -1, 66, 53, 52, -1, 47, 34, 33, -1, 66, 52, 51, -1, 48, 47, 33, -1, 50, 66, 51, -1, 49, 48, 33, -1, 50, 51, 49, -1
                 ]
               }
+              castShadows FALSE
             }
             Shape {
               appearance PBRAppearance {
@@ -1074,6 +1079,7 @@ def generate_robot_proto(robot_json):
                 ]
                 creaseAngle 1
               }
+              castShadows FALSE
             }
           ]
         }
@@ -1121,6 +1127,7 @@ def generate_robot_proto(robot_json):
                   coordIndex [ 33 0 17 -1 17 0 37 -1 0 1 37 -1 37 1 36 -1 1 2 36 -1 2 38 36 -1 2 3 38 -1 3 18 38 -1 3 4 18 -1 4 28 18 -1 4 5 28 -1 5 27 28 -1 5 6 27 -1 6 19 27 -1 6 39 19 -1 7 34 20 -1 39 20 19 -1 6 15 16 -1 13 9 16 -1 25 30 29 -1 30 27 29 -1 7 20 39 -1 6 5 15 -1 8 16 9 -1 15 14 35 -1 35 13 15 -1 12 11 10 -1 10 9 12 -1 16 15 13 -1 13 12 9 -1 29 21 22 -1 22 32 24 -1 23 24 32 -1 25 31 30 -1 26 30 31 -1 29 22 25 -1 24 25 22 -1 30 28 27 -1 ]
                   creaseAngle 0.785398
                 }
+                castShadows FALSE
               }
               Shape {
                 appearance USE EPUCK_SIDE_PRINT_APPEARANCE
@@ -1135,6 +1142,7 @@ def generate_robot_proto(robot_json):
                   ]
                   creaseAngle 0.785398
                 }
+                castShadows FALSE
               }
             ]
           }
@@ -1237,6 +1245,7 @@ def generate_robot_proto(robot_json):
                 geometry Sphere {
                   radius 0.0025
                 }
+                castShadows FALSE
               }
             ]
             name "led9"
@@ -1276,6 +1285,7 @@ def generate_robot_proto(robot_json):
                     0, 1, 2, 3
                   ]
                 }
+                castShadows FALSE
               }
             ]
           }
@@ -1441,6 +1451,7 @@ def generate_robot_proto(robot_json):
                         radius 0.02
                         subdivision 24
                         }}
+                        castShadows FALSE
                     }}
                     Shape {{
                         appearance PBRAppearance {{
@@ -1459,6 +1470,7 @@ def generate_robot_proto(robot_json):
                         top FALSE
                         bottom FALSE
                         }}
+                        castShadows FALSE
                     }}
                     Transform {{
                         translation 0 0.0035 0
@@ -1469,6 +1481,7 @@ def generate_robot_proto(robot_json):
                             height 0.004
                             radius 0.005
                             }}
+                            castShadows FALSE
                         }}
                         ]
                     }}
@@ -1482,6 +1495,7 @@ def generate_robot_proto(robot_json):
                             radius 0.003
                             subdivision 6
                             }}
+                            castShadows FALSE
                         }}
                         ]
                     }}
@@ -1498,6 +1512,7 @@ def generate_robot_proto(robot_json):
                             height 0.0001
                             radius 0.002
                             }}
+                            castShadows FALSE
                         }}
                         ]
                     }}
