@@ -1732,6 +1732,7 @@ def generate_robot_proto(robot_json):
 
       with open(path, 'w') as robot_file:
           robot_file.write(proto_code)
+      supervisor.wwiSendText("loaded1")
     else:
       print(cl.colored("Your custom robot generation has been cancelled.", "red"))
 
