@@ -49,6 +49,14 @@ function receive (message){
 				//Robot 1's controller has been unloaded
 				unloadedController(1);
 				break;
+			case "loaded0":
+				//Robot 0's controller has been unloaded
+				loadedController(0);
+				break;
+			case "loaded1":
+				//Robot 1's controller has been unloaded
+				loadedController(1);
+				break;
 			case "ended":
 				//The game is over
 				endGame();
@@ -403,7 +411,6 @@ function openJsonFile(){
 					return function(){
 						//Send the signal to the supervisor with the data from the file
 						window.robotWindow.send("robotJson," + reader.result);
-						loadedController(1)
 					}
 				})(reader);
 				

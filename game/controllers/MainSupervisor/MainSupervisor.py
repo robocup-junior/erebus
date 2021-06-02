@@ -20,6 +20,7 @@ import MapScorer
 import obstacleCheck
 import glob
 import json
+import filecmp
 import obstacleCheck
 import mapAnswer
 
@@ -413,14 +414,17 @@ class StartTile(Tile):
 
 def resetControllerFile(manual=False) -> None:
     '''Remove the controller'''
-    if configData[0] and not manual:
-      return
     path = os.path.dirname(os.path.abspath(__file__))
-
     if path[-4:] == "game":
       path = os.path.join(path, "controllers/robot0Controller")
     else:
       path = os.path.join(path, "../robot0Controller")
+
+    if configData[0] and not manual:
+      files = glob.glob(os.path.join(path, "*"))
+      if len(files) > 0:
+        supervisor.wwiSendText("loaded0")
+      return
     
     shutil.rmtree(path)
     os.mkdir(path)
@@ -447,6 +451,8 @@ def resetRobotProto(manual=False) -> None:
     try:
         if os.path.isfile(robot_proto):
           if configData[0] and not manual:
+            if not filecmp.cmp(default_robot_proto, robot_proto):
+              supervisor.wwiSendText("loaded1")
             return
           shutil.copyfile(default_robot_proto, robot_proto)
         else:
@@ -1787,6 +1793,8 @@ def process_robot_json(json_data):
 # CODED LOADED BEFORE GAME STARTS
 
 if __name__ == '__main__':
+    # Send message to robot window to perform setup
+    supervisor.wwiSendText("startup")
 
     if supervisor.getCustomData() != '':
         customData = supervisor.getCustomData().split(',')
@@ -1905,9 +1913,6 @@ if __name__ == '__main__':
     # How long the game has been running for
     timeElapsed = 0
     lastTime = -1
-
-    # Send message to robot window to perform setup
-    supervisor.wwiSendText("startup")
 
     # For checking the first update with the game running
     first = True
