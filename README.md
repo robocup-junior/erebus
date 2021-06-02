@@ -50,11 +50,21 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v21.1.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.1.2) - 2021-05-21
+## [Release v21.2.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.0) - 2021-06-02
 
 ### Added
-- ✨: Added the ability to request LoPs autonomously
-- ✨: Added the ability to request game information (score and time remaining) autonomously
+- ✨: Reflects the loading status of the controller program and custom robots in the GUI after reset it
+
+### Changed
+- ⚡️: Make objects in the world unpickable
+- 🐛: Reset the camera location when LoP occurs
+- 🐛: Controller remove function
+- 🐛: The log export function does not work properly
+- ⚡️: Reduce the frequency of Physics Issues
+- 🐛: The colour of the load button does not change even after loading the custom robot
+- ⚡️:  Make the robot model simpler
 
 ### Removed
-- 🗑️: "using detection api" flag from ther default robot
+- 🔇: Some unnessesary logging
+- 🗑️: Unused supervisor code
+- 🔥: World generator
