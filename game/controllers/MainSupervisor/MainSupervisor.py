@@ -1396,6 +1396,41 @@ def generate_robot_proto(robot_json):
           DEF EPUCK_EMITTER Emitter {
             channel IS emitter_channel
           }
+
+        Solid {
+          name "ballCaster1"
+          contactMaterial "NO_FRIC"
+          translation 0 .003 -0.025
+          boundingObject Transform {
+            children [
+              Sphere {
+                radius .003
+              }
+            ]
+          }
+          physics Physics {
+            density -1
+            mass 0.1
+          }
+        }
+        Solid {
+          name "ballCaster2"
+	  	    contactMaterial "NO_FRIC"
+          translation 0 .003 0.025
+
+          boundingObject Transform {
+            children [
+              Sphere {
+                radius .003
+              }
+            ]
+          }
+          physics Physics {
+            density -1
+            mass 0.1
+          }
+        }
+
           
 
           
@@ -1628,7 +1663,7 @@ def generate_robot_proto(robot_json):
                 %{{ if kinematic == false then }}%
                 physics DEF EPUCK_WHEEL_PHYSICS Physics {{
                     density -1
-                    mass 0.005
+                    mass 0.8
                 }}
                 %{{ end }}%
             }}
@@ -1782,14 +1817,6 @@ def generate_robot_proto(robot_json):
                 height 0.045
                 radius 0.037
                 subdivision 24
-              }
-            ]
-          }
-          Transform {
-            translation 0 0.0051 0
-            children [
-              Box {
-                size 0.04 0.01 0.05
               }
             ]
           }
