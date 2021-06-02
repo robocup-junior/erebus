@@ -192,7 +192,7 @@ Robot {
         %{ if kinematic == false then }%
           physics DEF EPUCK_WHEEL_PHYSICS Physics {
             density -1
-            mass 0.005
+            mass 0.8
           }
         %{ end }%
       }

@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - 🐛: Reset the camera location when LoP occurs
 - 🐛: Controller remove function
 - 🐛: The log export function does not work properly
+- 🐛: Reduce the frequency of Physics Issues
 
 ### Removed
 - 🔇: Some unnessesary logging
