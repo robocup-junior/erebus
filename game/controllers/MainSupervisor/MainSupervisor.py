@@ -1697,7 +1697,8 @@ if __name__ == '__main__':
     robotInitialized = False
 
     #Calculate the solution arrays for the map layout
-    mapSolution = mapAnswer.generateAnswer(supervisor)
+    MapAnswer = mapAnswer.MapAnswer(supervisor)
+    mapSolution = MapAnswer.generateAnswer()
     #for m in mapSolution:
     #  print(f"{m},")
     
