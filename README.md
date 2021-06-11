@@ -50,6 +50,11 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
+## [Release v21.2.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.1) - 2021-06-11
+
+### Changed
+- 🐛: The map answer generator did not work correctly under some conditions
+
 ## [Release v21.2.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.0) - 2021-06-02
 
 ### Added
