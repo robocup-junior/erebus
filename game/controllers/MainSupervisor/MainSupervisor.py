@@ -26,7 +26,7 @@ import mapAnswer
 
 # Version info
 stream = 21
-version = "21.2.0"
+version = "21.2.1"
 
 
 # Create the instance of the supervisor class
