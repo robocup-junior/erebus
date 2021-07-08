@@ -121,8 +121,28 @@ function receive (message){
 				document.getElementById("versionInfo").style.color = "#e67e22";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]} (Unreleased)`;
 				break;
+
+			case "worlds":
+				updateWorld(parts.slice(1));
 		}
 	}
+}
+
+function updateWorld(worlds_str){
+	var worlds_array_str = String(worlds_str)
+	let worlds = worlds_array_str.split(",");
+	for (let i = 0; i < worlds.length; i ++){
+		let button = document.createElement("button");
+		
+		button.innerHTML = worlds[i];
+		button.onclick = function(){
+			window.robotWindow.send(`loadWorld,${worlds[i]}`);
+		};
+
+		document.getElementById("worlds_div").appendChild(button);
+		
+	}
+	document.getElementById("worldloader").remove();
 }
 
 function robotQuitColour(id){

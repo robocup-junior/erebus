@@ -44,6 +44,7 @@ DEFAULT_MAX_VELOCITY = 6.28
 #Room multipliers
 roomMult = [1, 1.25, 1.5]
 
+
 class Queue:
     #Simple queue data structure
     def __init__(self):
@@ -226,6 +227,49 @@ class Robot:
 
         self.rotation = [0,1,0,direction]
 
+class Tile():
+    '''Tile object holding the boundaries'''
+
+    def __init__(self, min: list, max: list, center: list):
+        '''Initialize the maximum and minimum corners for the tile'''
+        self.min = min
+        self.max = max
+        self.center = center
+
+    def checkPosition(self, pos: list) -> bool:
+        '''Check if a position is in this checkpoint'''
+        # If the x position is within the bounds
+        if pos[0] >= self.min[0] and pos[0] <= self.max[0]:
+            # if the z position is within the bounds
+            if pos[2] >= self.min[1] and pos[2] <= self.max[1]:
+                # It is in this checkpoint
+                return True
+
+        # It is not in this checkpoint
+        return False
+
+
+class Checkpoint(Tile):
+    '''Checkpoint object holding the boundaries'''
+
+    def __init__(self, min: list, max: list, center=None):
+        super().__init__(min, max, center)
+
+
+class Swamp(Tile):
+    '''Swamp object holding the boundaries'''
+
+    def __init__(self, min: list, max: list, center=None):
+        super().__init__(min, max, center)
+
+
+class StartTile(Tile):
+    '''StartTile object holding the boundaries'''
+
+    def __init__(self, min: list, max: list, wb_node, center=None):
+        super().__init__(min, max, center)
+        self.wb_node = wb_node
+
 class VictimObject():
     '''Victim object holding the boundaries'''
 
@@ -367,50 +411,6 @@ class HazardMap(VictimObject):
     
     def get_simple_type(self):
         return self._victim_type
-  
-class Tile():
-    '''Tile object holding the boundaries'''
-
-    def __init__(self, min: list, max: list, center: list):
-        '''Initialize the maximum and minimum corners for the tile'''
-        self.min = min
-        self.max = max
-        self.center = center
-
-    def checkPosition(self, pos: list) -> bool:
-        '''Check if a position is in this checkpoint'''
-        # If the x position is within the bounds
-        if pos[0] >= self.min[0] and pos[0] <= self.max[0]:
-            # if the z position is within the bounds
-            if pos[2] >= self.min[1] and pos[2] <= self.max[1]:
-                # It is in this checkpoint
-                return True
-
-        # It is not in this checkpoint
-        return False
-
-
-class Checkpoint(Tile):
-    '''Checkpoint object holding the boundaries'''
-
-    def __init__(self, min: list, max: list, center=None):
-        super().__init__(min, max, center)
-
-
-class Swamp(Tile):
-    '''Swamp object holding the boundaries'''
-
-    def __init__(self, min: list, max: list, center=None):
-        super().__init__(min, max, center)
-
-
-class StartTile(Tile):
-    '''StartTile object holding the boundaries'''
-
-    def __init__(self, min: list, max: list, wb_node, center=None):
-        super().__init__(min, max, center)
-        self.wb_node = wb_node
-
 
 def resetControllerFile(manual=False) -> None:
     '''Remove the controller'''
@@ -535,7 +535,6 @@ def getCheckpoints(checkpoints, numberOfCheckpoints):
         # Create a checkpoint object using the min and max (x,z)
         checkpointObj = Checkpoint([minPos[0], minPos[2]], [maxPos[0], maxPos[2]], centerPos)
         checkpoints.append(checkpointObj)
-
 
 def getObstacles():
     '''Returns list containing all obstacle positions and dimensions'''
@@ -712,7 +711,6 @@ def getTiles(grid=False):
     else:
         return allTilesGrid
 
-
 def checkObstacles():
     '''Performs a test on each obstacle's placement and if it does not have sufficient clearance the obstacle is removed (only works on proto obstacles)'''
     #Get the data for all the obstacles
@@ -726,12 +724,10 @@ def checkObstacles():
         #Deactivate the appropriate obstacles
         deactivateObstacles(results)
 
-
 def resetVictimsTextures():
     # Iterate for each victim
     for i in range(numberOfHumans):
         humans[i].identified = False
-
 
 def relocate(robot, robotObj):
     '''Relocate robot to last visited checkpoint'''
@@ -786,7 +782,6 @@ def add_robot():
         # Update robot window to say robot is in simulation
         supervisor.wwiSendText("robotInSimulation0")
 
-
 def create_log_str():
     '''Create log text for log file'''
     # Get robot events
@@ -830,7 +825,6 @@ def set_robot_start_pos():
     '''Set robot starting position'''
 
     starting_tile_node = supervisor.getFromDef("START_TILE")
-
 
     # Get the starting tile minimum node and translation
     starting_PointMin = supervisor.getFromDef("start0min")
@@ -1508,7 +1502,6 @@ def generate_robot_proto(robot_json):
     else:
       print(cl.colored("Your custom robot generation has been cancelled.", "red"))
 
-
 def setViewPoint(robotObj, viewpoint_node, dir):
     if dir == "top":
       vp = [
@@ -1543,18 +1536,39 @@ def setViewPoint(robotObj, viewpoint_node, dir):
 
 def wait(sec):
   first = supervisor.getTime()
-  while 1:
+  while True:
     supervisor.step(32)
     if supervisor.getTime() - first > sec:
       break
   return
     
-
 def process_robot_json(json_data):
     '''Process json file to generate robot file'''
     robot_json = json.loads(json_data)
     generate_robot_proto(robot_json)
 
+
+def get_worlds():
+    path = os.path.dirname(os.path.abspath(__file__))
+
+    if path[-4:] == "game":
+        path = os.path.join(path, "worlds")
+    else:
+        path = os.path.join(path, "../../worlds")
+
+    files = [ file for file in os.listdir(path) if file[-3:] == 'wbt']
+    return ','.join(files)
+
+def load_world(world):
+    path = os.path.dirname(os.path.abspath(__file__))
+
+    if path[-4:] == "game":
+        path = os.path.join(path, "worlds")
+    else:
+        path = os.path.join(path, "../../worlds")
+
+    path = os.path.join(path, world)
+    supervisor.worldLoad(path)
 # -------------------------------
 # CODED LOADED BEFORE GAME STARTS
 
@@ -1702,11 +1716,14 @@ if __name__ == '__main__':
     #for m in mapSolution:
     #  print(f"{m},")
     
+    supervisor.wwiSendText(f'worlds,{str(get_worlds())}')
+    
     # -------------------------------
 
     # Until the match ends (also while paused)
     while simulationRunning or last == True:
         
+        # If last frame
         if last == True:
             last = -1
             finished = True
@@ -1721,28 +1738,31 @@ if __name__ == '__main__':
 
         # The first frame of the game running only
         if first and currentlyRunning:
+            
+            # If recording
             if configData[2]:
-              path = os.path.dirname(os.path.abspath(__file__))
-              if path[-4:] == "game":
-                path = os.path.join(path, "../recording.mp4")
-              else:
-                path = os.path.join(path, "../../../recording.mp4")
-              supervisor.movieStartRecording(
-                  path, width=1280, height=720, quality=70,
-                  codec=0, acceleration=1, caption=False,
-              )
-              supervisor.setLabel(0, f'Platform Version: {version}' , 0, 0,0.05, 0xdff9fb, 0)
-              wait(0.5)
-              supervisor.setLabel(4, "3", 0.4, 0,0.7, 0xe74c3c, 0)
-              wait(1)
-              supervisor.setLabel(4, "2", 0.4, 0,0.7, 0xe74c3c, 0)
-              wait(1)
-              supervisor.setLabel(4, "1", 0.4, 0,0.7, 0xe74c3c, 0)
-              wait(1)
-              supervisor.setLabel(4, "START", 0.2, 0,0.7, 0xe74c3c, 0)
-              wait(1)
-              supervisor.setLabel(0, "Score: " + str(0), 0.15, 0,0.15, 0x4cd137, 0)
-              supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(2) + ":"+ str(int(int(maxTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
+                path = os.path.dirname(os.path.abspath(__file__))
+                if path[-4:] == "game":
+                    path = os.path.join(path, "../recording.mp4")
+                else:
+                    path = os.path.join(path, "../../../recording.mp4")
+                supervisor.movieStartRecording(
+                    path, width=1280, height=720, quality=70,
+                    codec=0, acceleration=1, caption=False,
+                )
+                supervisor.setLabel(0, f'Platform Version: {version}' , 0, 0,0.05, 0xdff9fb, 0)
+                wait(0.5)
+                supervisor.setLabel(4, "3", 0.4, 0,0.7, 0xe74c3c, 0)
+                wait(1)
+                supervisor.setLabel(4, "2", 0.4, 0,0.7, 0xe74c3c, 0)
+                wait(1)
+                supervisor.setLabel(4, "1", 0.4, 0,0.7, 0xe74c3c, 0)
+                wait(1)
+                supervisor.setLabel(4, "START", 0.2, 0,0.7, 0xe74c3c, 0)
+                wait(1)
+                supervisor.setLabel(0, "Score: " + str(0), 0.15, 0,0.15, 0x4cd137, 0)
+                supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(2) + ":"+ str(int(int(maxTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
+            
             # Get the robot nodes by their DEF names
             robot0 = supervisor.getFromDef("ROBOT0")
             # Add robot into world
@@ -1758,31 +1778,29 @@ if __name__ == '__main__':
             # Reset physics
             robot0.resetPhysics()
 
-            
+            # If automatic camera
             if configData[3] and viewpoint_node:
                 viewpoint_node.getField('follow').setSFString("e-puck 0")
                 setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
-
-            # Restart controller code
-            # robot0.restartController()
             first = False
             if configData[2]:
               supervisor.setLabel(4, "", 0.2, 0,0.4, 0xe74c3c, 0)
-            #robot0Obj.increaseScore("Debug", 100)
 
             lastTime = supervisor.getTime()
 
         if robot0Obj.inSimulation:
+            # Automatic camera movement
             if configData[3] and viewpoint_node:
-              nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
-              if len(nearVictims) > 0:
-                if(len(nearVictims) > 1):
-                  nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
-                side = nearVictims[0].getSide()
-                if side != nowSide:
-                  setViewPoint(robot0Obj, viewpoint_node, side)
-                  nowSide = side
+                nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
+                if len(nearVictims) > 0:
+                    if(len(nearVictims) > 1):
+                        nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
+                    side = nearVictims[0].getSide()
+                    if side != nowSide:
+                        setViewPoint(robot0Obj, viewpoint_node, side)
+                    nowSide = side
+            
             # Test if the robots are in checkpoints
             checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
             if len(checkpoint):
@@ -1906,7 +1924,6 @@ if __name__ == '__main__':
                               robot0Obj.sent_maps = True
                               
                               robot0Obj.map_data = np.array([])
-                              # Do something...
                             else:
                               print(cl.colored(f"The map has already been evaluated.", "red"))
                           else:
@@ -2102,6 +2119,10 @@ if __name__ == '__main__':
                   f = open(configFilePath, 'w')
                   f.write(','.join(message.split(",")[1:]))
                   f.close()
+                  
+                if parts[0] == 'loadWorld':
+                    load_world(parts[1])
+                  
 
         
 
@@ -2119,6 +2140,7 @@ if __name__ == '__main__':
             if step == -1:
                 # Stop simulating
                 finished = True
-                  
+       
         elif first or last or finished:
-            supervisor.step(32)            
+            # Step simulation
+            supervisor.step(32)       
