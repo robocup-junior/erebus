@@ -22,10 +22,6 @@ AutoInstall._import("np", "numpy")
 AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
 
-from Tile import *
-from Victim import *
-from Robot import *
-
 # Version info
 stream = 21
 version = "21.2.1"
@@ -1574,11 +1570,12 @@ def getSimulationVersion():
         supervisor.wwiSendText(f"version,{version}")
 
 def processMessage(robotMessage):
+    global lastFrame, gameState
     # If exit message is correct
     if robotMessage[0] == 'E':
         # Check robot position is on starting tile
         if robot0Obj.startingTile.checkPosition(robot0Obj.position):
-            gameState == MATCH_FINISHED
+            gameState = MATCH_FINISHED
             supervisor.wwiSendText("ended")
             if robot0Obj.victimIdentified:
                 robot0Obj.increaseScore(
@@ -1668,7 +1665,7 @@ def processMessage(robotMessage):
             robot0Obj.increaseScore(f"Misidentification of {name}", -5)
 
 def receive(message):
-    global gameState
+    global gameState, lastFrame, config
     
     parts = message.split(",")
 
@@ -1728,8 +1725,8 @@ def receive(message):
                         add_map_multiplier()
                         robot0Obj.history.enqueue("Give up!")
                         robot_quit(robot0Obj, 0, True)
-                        gameState == MATCH_FINISHED
-                        last = True
+                        gameState = MATCH_FINISHED
+                        lastFrame = True
                         supervisor.wwiSendText("ended")
 
         if parts[0] == 'robotJson':
@@ -1755,6 +1752,32 @@ def getConfig():
     configData = list(map((lambda x: int(x)), configData))
     
     return Config(configData)
+
+def startRecording():
+    path = os.path.dirname(os.path.abspath(__file__))
+    if path[-4:] == "game":
+        path = os.path.join(path, "../recording.mp4")
+    else:
+        path = os.path.join(path, "../../../recording.mp4")
+        
+    supervisor.movieStartRecording(
+        path, width=1280, height=720, quality=70,
+        codec=0, acceleration=1, caption=False,
+    )
+    
+    supervisor.setLabel(
+        0, f'Platform Version: {version}', 0, 0, 0.05, 0xdff9fb, 0)
+    wait(0.5)
+    supervisor.setLabel(4, "3", 0.4, 0, 0.7, 0xe74c3c, 0)
+    wait(1)
+    supervisor.setLabel(4, "2", 0.4, 0, 0.7, 0xe74c3c, 0)
+    wait(1)
+    supervisor.setLabel(4, "1", 0.4, 0, 0.7, 0xe74c3c, 0)
+    wait(1)
+    supervisor.setLabel(4, "START", 0.2, 0, 0.7, 0xe74c3c, 0)
+    wait(1)
+    supervisor.setLabel(0, "Score: " + str(0),0.15, 0, 0.15, 0x4cd137, 0)
+    supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(2) + ":" + str(int(int(maxTime) % 60)).zfill(2), 0.4, 0, 0.15, 0x4cd137, 0)
 
 # -------------------------------------------
 #       CODED LOADED BEFORE GAME STARTS
@@ -1887,30 +1910,7 @@ if __name__ == '__main__':
 
             # If recording
             if config.recording:
-                path = os.path.dirname(os.path.abspath(__file__))
-                if path[-4:] == "game":
-                    path = os.path.join(path, "../recording.mp4")
-                else:
-                    path = os.path.join(path, "../../../recording.mp4")
-                supervisor.movieStartRecording(
-                    path, width=1280, height=720, quality=70,
-                    codec=0, acceleration=1, caption=False,
-                )
-                supervisor.setLabel(
-                    0, f'Platform Version: {version}', 0, 0, 0.05, 0xdff9fb, 0)
-                wait(0.5)
-                supervisor.setLabel(4, "3", 0.4, 0, 0.7, 0xe74c3c, 0)
-                wait(1)
-                supervisor.setLabel(4, "2", 0.4, 0, 0.7, 0xe74c3c, 0)
-                wait(1)
-                supervisor.setLabel(4, "1", 0.4, 0, 0.7, 0xe74c3c, 0)
-                wait(1)
-                supervisor.setLabel(4, "START", 0.2, 0, 0.7, 0xe74c3c, 0)
-                wait(1)
-                supervisor.setLabel(0, "Score: " + str(0),
-                                    0.15, 0, 0.15, 0x4cd137, 0)
-                supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(
-                    2) + ":" + str(int(int(maxTime) % 60)).zfill(2), 0.4, 0, 0.15, 0x4cd137, 0)
+                startRecording()
 
             # Get the robot nodes by their DEF names
             robot0 = supervisor.getFromDef("ROBOT0")
