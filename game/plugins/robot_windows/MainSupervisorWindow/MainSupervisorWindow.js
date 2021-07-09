@@ -138,6 +138,7 @@ function updateWorld(worlds_str){
 		button.onclick = function(){
 			window.robotWindow.send(`loadWorld,${worlds[i]}`);
 		};
+		button.setAttribute("class","btn-world");
 
 		document.getElementById("worlds_div").appendChild(button);
 		

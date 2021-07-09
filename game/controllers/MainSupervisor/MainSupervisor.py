@@ -51,18 +51,21 @@ MATCH_RUNNING = 'MATCH_RUNNING'
 MATCH_FINISHED = 'MATCH_FINISHED'
 MATCH_PAUSED = 'MATCH_PAUSED'
 
-
-# The simulation is running
-# finished = False
-
-lastFrame = False
-# For checking the first update with the game running
-firstFrame = True
-
 gameState = MATCH_NOT_STARTED
 
-configData = None
 
+lastFrame = False
+firstFrame = True
+
+
+configFilePath = os.path.dirname(os.path.abspath(__file__))
+if configFilePath[-4:] == "game":
+    configFilePath = os.path.join(
+        configFilePath, "controllers/MainSupervisor/config.txt")
+else:
+    configFilePath = os.path.join(configFilePath, "config.txt")
+        
+config = None
 
 class Queue:
     #Simple queue data structure
@@ -96,7 +99,7 @@ class RobotHistory(Queue):
         histories = list(reversed(self.master_history))
         for h in range(min(len(histories),5)):
             hisT = "[" + histories[h][0] + "] " + histories[h][1] + "\n" + hisT
-        if configData[2]:
+        if config.recording:
           supervisor.setLabel(2, hisT, 0.7, 0,0.05, 0xfbc531, 0.2)
 
     def update_master_history(self, data):
@@ -197,6 +200,11 @@ class Robot:
                 self.robot_timeStopped = 0
 
         return self.robot_timeStopped
+    
+    def resetTimeStopped(self):
+        self.robot_timeStopped = 0
+        self.stopped = False
+        self.stoppedTime = None
 
     def increaseScore(self, message: str, score: int, multiplier = 1) -> None:
       point = round(score * multiplier, 2)
@@ -243,6 +251,85 @@ class Robot:
                 break
 
         self.rotation = [0,1,0,direction]
+        
+    def updateCheckpoints(self, checkpoint):
+        self.lastVisitedCheckPointPosition = checkpoint.center
+        alreadyVisited = False
+
+        # Dont update if checkpoint is already visited
+        if not any([c == checkpoint.center for c in self.visitedCheckpoints]):
+            # Update robot's points and history
+            self.visitedCheckpoints.append(checkpoint.center)
+            grid = coord2grid(checkpoint.center)
+            roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+            self.increaseScore("Found checkpoint", 10, roomMult[roomNum])
+            
+    def updateInSwamp(self, inSwamp):
+        # Check if robot is in swamp
+        if self.inSwamp != inSwamp:
+            self.inSwamp = inSwamp
+            if self.inSwamp:
+                # Cap the robot's velocity to 2
+                self.setMaxVelocity(2)
+                # Reset physics
+                self.wb_node.resetPhysics()
+                # Update history
+                self.history.enqueue("Entered swamp")
+            else:
+                # If not in swamp, reset max velocity to default
+                self.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+                # Reset physics
+                self.wb_node.resetPhysics()
+                # Update history
+                self.history.enqueue("Exited swamp")
+                
+    def setMessage(self, receivedData):
+        # Get length of bytes
+        rDataLen = len(receivedData)
+        try:
+            if rDataLen == 1:
+                tup = struct.unpack('c', receivedData)
+                self.message = [tup[0].decode("utf-8")]
+            # Victim identification bytes data should be of length = 9
+            elif rDataLen == 9:
+                # Unpack data
+                tup = struct.unpack('i i c', receivedData)
+
+                # Get data in format (est. x position, est. z position, est. victim type)
+                x = tup[0]
+                z = tup[1]
+
+                estimated_victim_position = (x / 100, 0, z / 100)
+
+                victimType = tup[2].decode("utf-8")
+
+                # Store data recieved
+                self.message = [estimated_victim_position, victimType]
+            else:
+                """
+                    For map data, the format sent should be:
+
+                    receivedData = b'_____ _________________'
+                                    ^          ^
+                                    shape     map data
+                """
+                # Shape data should be two bytes (2 integers)
+                shape_bytes = receivedData[:8]  # Get shape of matrix
+                data_bytes = receivedData[8::]  # Get data of matrix
+
+                # Get shape data
+                shape = struct.unpack('2i', shape_bytes)
+                # Size of flattened 2d array
+                shape_size = shape[0] * shape[1]
+                # Get map data
+                map_data = data_bytes.decode('utf-8').split(',')
+                # Reshape data using the shape data given
+                reshaped_data = np.array(map_data).reshape(shape)
+
+                self.map_data = reshaped_data
+        except Exception as e:
+            print(cl.colored("Incorrect data format sent", "red"))
+            print(cl.colored(e, "red"))
 
 class VictimObject():
     '''Victim object holding the boundaries'''
@@ -844,7 +931,7 @@ def resetVictimsTextures():
         humans[i].identified = False
 
 
-def relocate(robot, robotObj):
+def relocate(robot, robotObj, camera):
     '''Relocate robot to last visited checkpoint'''
     # Get last checkpoint visited
     relocatePosition = robotObj.lastVisitedCheckPointPosition
@@ -861,6 +948,9 @@ def relocate(robot, robotObj):
 
     # Update history with event
     robotObj.increaseScore("Lack of Progress", -5)
+    
+    if config.automatic_camera and camera.wb_viewpoint_node:
+        camera.setViewPoint(robot0Obj)
 
 def lack_of_progress(robot, robotObj):
     pass
@@ -1004,234 +1094,16 @@ def generate_robot_proto(robot_json):
     }
 
     component_counts = {}
+    
+    templatePath = os.path.dirname(os.path.abspath(__file__))
+    if templatePath[-4:] == "game":
+        templatePath = os.path.join(templatePath, "controllers/MainSupervisor/protoHeaderTemplate.txt")
+    else:
+        templatePath = os.path.join(templatePath, "protoHeaderTemplate.txt")
 
-    proto_code = """
-    PROTO custom_robot [
-      field SFVec3f            translation                  0 0 0
-      field SFRotation         rotation                     0 1 0 0
-      field SFString           name                         "e-puck"
-      field SFString           controller                   ""
-      field MFString           controllerArgs               ""
-      field SFString           customData                   ""
-      field SFBool             supervisor                   FALSE
-      field SFBool             synchronization              TRUE
-      field SFString{"1"}      version                      "1"
-      field SFFloat            camera_fieldOfView           0.84
-      field SFInt32            camera_width                 52
-      field SFInt32            camera_height                39
-      field SFBool             camera_antiAliasing          FALSE
-      field SFRotation         camera_rotation              1 0 0 0
-      field SFFloat            camera_noise                 0.0
-      field SFFloat            camera_motionBlur            0.0
-      field SFInt32            emitter_channel              1
-      field SFInt32            receiver_channel             1
-      field MFFloat            battery                      []
-      field MFNode             turretSlot                   []
-      field MFNode             groundSensorsSlot            []
-      field SFBool             kinematic                    FALSE
-      hiddenField  SFFloat            max_velocity                 6.28
-    ]
-    {
-    %{
-      local v1 = fields.version.value:find("^1") ~= nil
-      local v2 = fields.version.value:find("^2") ~= nil
-      local kinematic = fields.kinematic.value
-    }%
-    Robot {
-      translation IS translation
-      rotation IS rotation
-      children [
-        DEF EPUCK_PLATE Transform {
-          translation 0.0002 0.037 0
-          rotation 0 1 0 3.14159
-          children [
-            Shape {
-              appearance PBRAppearance {
-                baseColorMap ImageTexture {
-                  url [
-                    %{ if v2 then }%
-                      "textures/e-puck2_plate.jpg"
-                    %{ else }%
-                      "textures/e-puck1_plate_base_color.jpg"
-                    %{ end }%
-                  ]
-                }
-                roughnessMap ImageTexture {
-                  url [
-                    %{ if v2 then }%
-                      "textures/e-puck2_plate.jpg"
-                    %{ else }%
-                      "textures/e-puck1_plate_roughness.jpg"
-                    %{ end }%
-                  ]
-                }
-                metalnessMap ImageTexture {
-                  url [
-                    %{ if v2 then }%
-                      "textures/e-puck2_plate.jpg"
-                    %{ else }%
-                      "textures/e-puck1_plate_metalness.jpg"
-                    %{ end }%
-                  ]
-                }
-                normalMap ImageTexture {
-                  url [
-                    %{ if v2 then }%
-                      "textures/e-puck2_plate.jpg"
-                    %{ else }%
-                      "textures/e-puck1_plate_normal.jpg"
-                    %{ end }%
-                  ]
-                }
-                occlusionMap ImageTexture {
-                  url [
-                    %{ if v2 then }%
-                      "textures/e-puck2_plate.jpg"
-                    %{ else }%
-                      "textures/e-puck1_plate_occlusion.jpg"
-                    %{ end }%
-                  ]
-                }
-              }
-              geometry  Cylinder {
-                height 0.00001
-                radius 0.035
-              }
-            }
-          ]
-        }
-          DEF EPUCK_BODY_LED LED {
-            rotation 0 1 0 4.712399693899575
-            children [
-              Shape {
-                appearance PBRAppearance {
-                  baseColor 0.5 0.5 0.5
-                  transparency 0
-                  roughness 0.5
-                  metalness 0
-                  emissiveIntensity 0.2
-                }
-                geometry IndexedFaceSet {
-                  coord Coordinate {
-                    point [
-                      0 0 0, 0.031522 0.025 0.015211, 0.031522 0.009 0.015211, 0.020982 0.00775 0.022017, 0.033472 0.006 0.009667, 0.029252 0.009825 0.018942, 0.016991 0.00101 0.022014, -0.022019 0.037 0.021983, -0.022018 0.025 0.021982, 0.02707 0.001064 0.00781, 0.027116 0.037 0.00781, -0.034656 0.031 0.003517, 0.026971 0.025 0.022022, 0.02707 0.01 0.022022, -0.027018 0.001 0.021978, -0.034312 0.031 0.005972, -0.034677 0.02633 0.003018, 0.035 0.037 2.9e-05, -0.031546 0.001 0.015161, -0.027018 0.037 0.021981, -0.027018 0.025 0.02198, -0.034312 0.025 0.005972, -0.034312 0.001 0.005972, -0.035 0.001 -2.7e-05, -0.035 0.025 -2.7e-05, -0.031312 0.025 0.005974, -0.031312 0.031 0.005974, -0.031656 0.031 0.00352, -0.032002 0.02633 0.003, -0.026442 0.025 -2.4e-05, -0.031546 0.037 0.015161, -0.031546 0.025 0.015161, 0.034116 0.001 0.007816, 0.034116 0.037 0.007816, 0.034116 0.025 0.007816, 0.035 0.001 2.9e-05, 0.034129 0.025 -0.007759, 0.034129 0.037 -0.007759, 0.034129 0.001 -0.007759, -0.031522 0.025 -0.015209, -0.031522 0.037 -0.015209, -0.031998 0.02633 -0.003049, -0.031651 0.031 -0.003568, -0.031302 0.031 -0.006022, -0.031302 0.025 -0.006022, -0.034302 0.001 -0.006024, -0.034302 0.025 -0.006024, -0.021982 0.025 -0.022015, -0.026983 0.025 -0.022021, -0.031522 0.001 -0.015209, -0.026983 0.001 -0.022019, -0.034672 0.02633 -0.003071, -0.034302 0.031 -0.006024, -0.026983 0.037 -0.022022, 0.031546 0.025 -0.015158, 0.031546 0.009 -0.015158, 0.027018 0.01 -0.021976, 0.026971 0.025 -0.021976, -0.034651 0.031 -0.00357, 0.027129 0.037 -0.007764, 0.02707 0.001064 -0.007764, -0.021983 0.037 -0.022015, 0.017026 0.00101 -0.021984, 0.029282 0.009825 -0.018893, 0.033487 0.006 -0.009611, 0.021018 0.00775 -0.021981, -0.022012 0.001029 0.021984, -0.021988 0.001029 -0.022017, -0.022012 0.002114 0.020705, -0.021988 0.002114 -0.020739, 0.020982 0.007866 0.021216, 0.02707 0.006116 0.009667, 0.02707 0.009941 0.018942, 0.016991 0.001125 0.021213, 0.02707 0.010116 0.021221, 0.02707 0.009116 0.015211, -0.026411 0.037 -0.020914, 0.02707 0.010116 -0.021175, 0.017026 0.001125 -0.021183, 0.02707 0.009941 -0.018893, 0.02707 0.006116 -0.009611, 0.021018 0.007866 -0.02118, 0.02707 0.009116 -0.015158, 0.026971 0.025 0.02126, 0.026971 0.025 0.015211, 0.027032 0.024944 0.007813, 0.027035 0.024936 -0.007761, 0.026971 0.025 -0.021174, 0.026971 0.025 -0.015158, -0.022018 0.025 0.020881, -0.022019 0.037 0.020881, -0.021982 0.025 -0.020913, -0.021983 0.037 -0.020914, -0.022012 0.001029 0.020691, -0.021988 0.001029 -0.020724, -0.030453 0.025 0.014633, -0.030453 0.03692 0.014633, -0.030444 0.03692 -0.01468, -0.030444 0.025 -0.01468, -0.026555 0.037 0.02095, -0.026555 0.02482 0.02095, -0.026442 0.001685 0.014633, -0.026555 0.001504 0.02095, -0.026411 0.025004 -0.020914, -0.026442 0.001774 -0.01468, -0.026411 0.001778 -0.020914, -0.028504 0.03696 0.017791, -0.029479 0.03694 0.016212, -0.028427 0.03696 -0.017797, -0.026442 0.036868 -0.01468, -0.029436 0.03694 -0.016239, -0.026442 0.036868 0.014633, -0.026442 0.025 0.014633, -0.026442 0.025 -0.01468, -0.026426 0.036934 -0.017797, -0.026498 0.036934 0.017791, 0.030629 0.037 -0.007761, 0.027122 0.037 2.3e-05, 0.031064 0.037 -0.003868
-                    ]
-                  }
-                  coordIndex [
-                    36, 38, 64, -1, 29, 41, 24, -1, 51, 24, 41, -1, 51, 41, 58, -1, 42, 58, 41, -1, 51, 58, 46, -1, 52, 46, 58, -1, 44, 46, 43, -1, 52, 43, 46, -1, 49, 40, 50, -1, 53, 50, 40, -1, 54, 55, 57, -1, 63, 57, 55, -1, 56, 57, 63, -1, 17, 35, 37, -1, 65, 62, 48, -1, 56, 65, 48, -1, 38, 37, 36, -1, 57, 56, 48, -1, 49, 45, 46, -1, 45, 23, 24, -1, 42, 43, 52, -1, 51, 46, 24, -1, 35, 38, 36, -1, 35, 36, 37, -1, 33, 34, 35, -1, 34, 32, 35, -1, 24, 21, 16, -1, 15, 26, 27, -1, 23, 22, 21, -1, 22, 18, 31, -1, 20, 13, 12, -1, 34, 33, 10, -1, 37, 36, 116, -1, 20, 3, 13, -1, 20, 6, 3, -1, 6, 20, 14, -1, 33, 35, 17, -1, 5, 12, 13, -1, 21, 26, 15, -1, 26, 21, 25, -1, 11, 21, 15, -1, 21, 11, 16, -1, 28, 11, 27, -1, 11, 28, 16, -1, 28, 24, 16, -1, 24, 28, 29, -1, 4, 32, 34, -1, 1, 2, 4, -1, 1, 4, 34, -1, 28, 26, 25, -1, 42, 41, 43, -1, 69, 68, 66, -1, 63, 79, 77, -1, 56, 77, 81, -1, 78, 62, 65, -1, 74, 72, 5, -1, 13, 3, 70, -1, 73, 70, 3, -1, 81, 77, 87, -1, 81, 87, 78, -1, 74, 70, 83, -1, 73, 83, 70, -1, 87, 91, 78, -1, 83, 73, 89, -1, 73, 93, 89, -1, 66, 93, 73, -1, 67, 62, 78, -1, 78, 91, 94, -1, 60, 35, 9, -1, 9, 32, 4, -1, 72, 83, 84, -1, 75, 84, 85, -1, 71, 85, 9, -1, 36, 64, 54, -1, 64, 55, 54, -1, 47, 48, 61, -1, 53, 61, 48, -1, 50, 48, 62, -1, 2, 12, 5, -1, 12, 2, 1, -1, 20, 7, 19, -1, 7, 20, 8, -1, 30, 14, 19, -1, 14, 30, 18, -1, 22, 45, 14, -1, 67, 66, 49, -1, 1, 84, 83, -1, 85, 84, 1, -1, 54, 88, 86, -1, 87, 88, 54, -1, 64, 38, 60, -1, 55, 64, 80, -1, 82, 79, 63, -1, 2, 75, 71, -1, 5, 72, 75, -1, 82, 88, 79, -1, 92, 91, 47, -1, 87, 57, 47, -1, 7, 8, 89, -1, 83, 89, 8, -1, 96, 31, 30, -1, 97, 40, 39, -1, 98, 39, 46, -1, 95, 25, 21, -1, 76, 53, 40, -1, 61, 53, 76, -1, 99, 19, 7, -1, 107, 96, 30, -1, 99, 90, 89, -1, 113, 98, 44, -1, 105, 103, 113, -1, 102, 100, 89, -1, 103, 91, 92, -1, 98, 113, 109, -1, 91, 103, 105, -1, 113, 29, 104, -1, 101, 112, 100, -1, 29, 101, 104, -1, 118, 59, 117, -1, 39, 49, 46, -1, 46, 45, 24, -1, 58, 42, 52, -1, 11, 15, 27, -1, 24, 23, 21, -1, 21, 22, 31, -1, 28, 27, 26, -1, 25, 29, 28, -1, 44, 43, 41, -1, 41, 29, 44, -1, 69, 104, 101, -1, 67, 69, 66, -1, 56, 63, 77, -1, 65, 56, 81, -1, 81, 78, 65, -1, 13, 74, 5, -1, 74, 13, 70, -1, 6, 73, 3, -1, 6, 66, 73, -1, 94, 67, 78, -1, 32, 9, 35, -1, 60, 38, 35, -1, 71, 9, 4, -1, 84, 75, 72, -1, 72, 74, 83, -1, 71, 75, 85, -1, 49, 14, 45, -1, 18, 22, 14, -1, 23, 45, 22, -1, 14, 49, 66, -1, 50, 67, 49, -1, 12, 1, 83, -1, 34, 85, 1, -1, 36, 54, 86, -1, 57, 87, 54, -1, 80, 64, 60, -1, 82, 55, 80, -1, 55, 82, 63, -1, 4, 2, 71, -1, 2, 5, 75, -1, 80, 60, 86, -1, 87, 77, 79, -1, 82, 80, 86, -1, 87, 79, 88, -1, 86, 88, 82, -1, 61, 92, 47, -1, 91, 87, 47, -1, 90, 7, 89, -1, 12, 83, 8, -1, 95, 31, 96, -1, 98, 97, 39, -1, 44, 98, 46, -1, 31, 95, 21, -1, 108, 76, 40, -1, 92, 61, 76, -1, 90, 99, 7, -1, 19, 99, 30, -1, 100, 99, 89, -1, 111, 107, 106, -1, 93, 102, 89, -1, 76, 103, 92, -1, 109, 114, 108, -1, 29, 112, 101, -1, 94, 91, 105, -1, 10, 33, 17, -1, 118, 116, 59, -1, 103, 114, 113, -1, 112, 115, 100, -1, 95, 96, 111, -1, 25, 95, 112, -1, 37, 116, 118, -1, 17, 118, 117, -1, 86, 60, 10, -1, 59, 86, 117, -1, 34, 10, 85, -1, 60, 9, 85, -1, 30, 99, 106, -1, 106, 107, 30, -1, 29, 113, 44, -1, 104, 105, 113, -1, 97, 98, 109, -1, 102, 101, 100, -1, 102, 68, 101, -1, 69, 105, 104, -1, 101, 68, 69, -1, 40, 97, 110, -1, 110, 108, 40, -1, 106, 99, 115, -1, 115, 111, 106, -1, 96, 107, 111, -1, 110, 97, 109, -1, 76, 108, 114, -1, 110, 109, 108, -1, 109, 113, 114, -1, 103, 76, 114, -1, 99, 100, 115, -1, 112, 111, 115, -1, 112, 95, 111, -1, 29, 25, 112, -1, 17, 37, 118, -1, 10, 17, 117, -1, 117, 86, 10, -1, 36, 86, 116, -1, 59, 116, 86, -1, 10, 60, 85, -1
-                  ]
-                  creaseAngle 0.5
-                }
-              }
-            ]
-            name "led8"
-            color [
-              0 1 0
-            ]
-          }
-          DEF EPUCK_FRONT_LED LED {
-            translation 0.0125 0.0285 -0.031
-            children [
-              Shape {
-                appearance PBRAppearance { # Don't use USE/DEF here
-                  metalness 0.5
-                  baseColor 0.8 0.8 0.8
-                  transparency 0.3
-                  roughness 0.2
-                }
-                geometry Sphere {
-                  radius 0.0025
-                }
-                castShadows FALSE
-              }
-            ]
-            name "led9"
-            color [
-              1 0.3 0
-            ]
-          }
-          DEF EPUCK_SMALL_LOGO Transform {
-            translation 0 0.031 0.035
-            rotation 0 1 0 3.14159
-            children [
-              Shape {
-                appearance PBRAppearance {
-                  roughness 0.4
-                  metalness 0
-                  baseColorMap ImageTexture {
-                    url [
-                      "textures/rescue.png"
-                    ]
-                  }
-                }
-                geometry IndexedFaceSet {
-                  coord Coordinate {
-                    point [
-                      0.005 -0.005 0 -0.005 -0.005 0 -0.005 0.005 0 0.005 0.005 0
-                    ]
-                  }
-                  texCoord TextureCoordinate {
-                    point [
-                      0 0 1 0 1 1 0 1
-                    ]
-                  }
-                  coordIndex [
-                    0, 1, 2, 3
-                  ]
-                  texCoordIndex [
-                    0, 1, 2, 3
-                  ]
-                }
-                castShadows FALSE
-              }
-            ]
-          }
-          DEF EPUCK_RECEIVER Receiver {
-            channel IS receiver_channel
-          }
-          DEF EPUCK_EMITTER Emitter {
-            channel IS emitter_channel
-          }
-
-        Solid {
-          name "ballCaster1"
-          contactMaterial "NO_FRIC"
-          translation 0 .001 -0.034
-          boundingObject Transform {
-            children [
-              Sphere {
-                radius .001
-              }
-            ]
-          }
-          physics Physics {
-            density -1
-            mass 0.1
-          }
-        }
-        Solid {
-          name "ballCaster2"
-              contactMaterial "NO_FRIC"
-          translation 0 .001 0.034
-
-          boundingObject Transform {
-            children [
-              Sphere {
-                radius .001
-              }
-            ]
-          }
-          physics Physics {
-            density -1
-            mass 0.1
-          }
-        }
-
-
-
-
-        """
-
+    with open(templatePath) as protoTemplate:
+        proto_code = protoTemplate.read() 
+    
     closeBracket = "\n\t\t}\n"
 
     budget = 3000
@@ -1575,9 +1447,8 @@ def generate_robot_proto(robot_json):
       subdivision 64
       appearance USE EPUCK_TRANSPARENT_APPEARANCE
       enableBoundingObject FALSE
-    }"""
-    proto_code += "\n\t]"
-    proto_code += """
+    }
+    \n\t]
         name IS name
       %{ if v2 then }%
         model "GCtronic e-puck2"
@@ -1680,6 +1551,121 @@ def load_world(world):
     path = os.path.join(path, world)
     supervisor.worldLoad(path)
 
+def getSimulationVersion():
+    try:
+        supervisor.wwiSendText(f"version,{version}")
+        # Check updates
+        url = "https://gitlab.com/api/v4/projects/22054848/releases"
+        response = req.get(url)
+        releases = response.json()
+        releases = list(
+            filter(lambda release: release['tag_name'].startswith(f"v{stream}"), releases))
+        if len(releases) > 0:
+            if releases[0]['tag_name'].replace('_', ' ') == f'v{version}':
+                supervisor.wwiSendText(f"latest,{version}")
+            elif any([r['tag_name'].replace('_', ' ') == f'v{version}' for r in releases]):
+                supervisor.wwiSendText(
+                    f"outdated,{version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
+            else:
+                supervisor.wwiSendText(f"unreleased,{version}")
+        else:
+            supervisor.wwiSendText(f"version,{version}")
+    except:
+        supervisor.wwiSendText(f"version,{version}")
+
+def processMessage(robotMessage):
+    # If exit message is correct
+    if robotMessage[0] == 'E':
+        # Check robot position is on starting tile
+        if robot0Obj.startingTile.checkPosition(robot0Obj.position):
+            gameState == MATCH_FINISHED
+            supervisor.wwiSendText("ended")
+            if robot0Obj.victimIdentified:
+                robot0Obj.increaseScore(
+                    "Exit Bonus", robot0Obj.getScore() * 0.1)
+            else:
+                robot0Obj.history.enqueue("No Exit Bonus")
+            add_map_multiplier()
+            # Update score and history
+            robot_quit(robot0Obj, 0, False)
+            lastFrame = True
+
+    elif robotMessage[0] == 'M':
+        try:
+            # If map_data submitted
+            if robot0Obj.map_data.size != 0:
+                # If not previously evaluated
+                if not robot0Obj.sent_maps:
+                    map_score = MapScorer.calculateScore(
+                        mapSolution, robot0Obj.map_data)
+
+                    robot0Obj.history.enqueue(
+                        f"Map Correctness {str(round(map_score * 100,2))}%")
+
+                    # Add percent
+                    robot0Obj.map_score_percent = map_score
+                    robot0Obj.sent_maps = True
+
+                    robot0Obj.map_data = np.array([])
+                else:
+                    print(cl.colored(f"The map has already been evaluated.", "red"))
+            else:
+                print(cl.colored("Please send your map data before hand.", "red"))
+        except Exception as e:
+            print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
+            print(cl.colored(e, "red"))
+
+    elif robotMessage[0] == 'L':
+        relocate(robot0, robot0Obj, camera)
+        robot0Obj.resetTimeStopped()
+
+    elif robotMessage[0] == 'G':
+        emitter.send(struct.pack("c f i", bytes(
+            "G", "utf-8"), round(robot0Obj.getScore(), 2), maxTime - int(timeElapsed)))
+
+    # If robot stopped for 1 second
+    elif robot0Obj.timeStopped() >= 1.0:
+
+        # Get estimated values
+        est_vic_pos = robotMessage[0]
+        est_vic_type = robotMessage[1]
+        
+        iterator = humans
+        name = 'Victim'
+
+        if est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
+            iterator = hazards
+            name = 'Hazard'
+
+        misidentification = True
+        
+        nearby_map_issues = [h for h in iterator if h.checkPosition(robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(robot0Obj.position)]
+        
+        if len(nearby_map_issues) > 0:
+            # TODO Should it iterate through all nearby map issues or just take the first one???
+            nearby_issue = nearby_map_issues[0]
+            misidentification = False
+            # If not already identified
+            if not nearby_issue.identified:
+                # Get points scored depending on the type of victim
+                #pointsScored = nearby_issue.scoreWorth
+
+                grid = coord2grid(nearby_issue.wb_translationField.getSFVec3f())
+                roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+
+                # Update score and history
+                if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
+                    robot0Obj.increaseScore(
+                        f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
+
+                robot0Obj.increaseScore(
+                    f"Successful {name} Identification", nearby_issue.scoreWorth, roomMult[roomNum])
+                robot0Obj.victimIdentified = True
+
+                nearby_issue.identified = True
+
+        if misidentification:
+            robot0Obj.increaseScore(f"Misidentification of {name}", -5)
 
 def receive(message):
     global gameState
@@ -1732,9 +1718,7 @@ def receive(message):
             data = message.split(",", 1)
             if len(data) > 1:
                 if int(data[1]) == 0:
-                    relocate(robot0, robot0Obj)
-                    if config.automatic_camera and viewpoint_node:
-                        camera.setViewPoint(robot0Obj)
+                    relocate(robot0, robot0Obj, camera)
 
         if parts[0] == 'quit':
             data = message.split(",", 1)
@@ -1755,73 +1739,40 @@ def receive(message):
 
         if parts[0] == 'config':
             configData = list(map((lambda x: int(x)), message.split(",")[1:]))
+            config = Config(configData)
             with open(configFilePath, 'w') as f:
                 f.write(','.join(message.split(",")[1:]))
 
         if parts[0] == 'loadWorld':
             load_world(parts[1])
-    
-# -------------------------------------------
-#       CODED LOADED BEFORE GAME STARTS
-# -------------------------------------------
 
-if __name__ == '__main__':
-    
-    # TODO sort variables
-    
-    # Send message to robot window to perform setup
-    supervisor.wwiSendText("startup")
-
-    if supervisor.getCustomData() != '':
-        customData = supervisor.getCustomData().split(',')
-        maxTime = int(customData[0])
-        supervisor.wwiSendText("update," + str(0) + "," +
-                               str(0) + "," + str(maxTime))
-
-    # TODO change to separate variables or object
-    # Load settings
-    # configData
-    # [0]: Keep controller/robot files
-    # [1]: Disable auto LoP
-    # [2]: Recording
-    # [3]: Automatic camera
-
-    configFilePath = os.path.dirname(os.path.abspath(__file__))
-    if configFilePath[-4:] == "game":
-        configFilePath = os.path.join(
-            configFilePath, "controllers/MainSupervisor/config.txt")
-    else:
-        configFilePath = os.path.join(configFilePath, "config.txt")
+def getConfig():
         
     with open(configFilePath, 'r') as f:
         configData = f.read().split(',')
         
     supervisor.wwiSendText("config," + ','.join(configData))
     configData = list(map((lambda x: int(x)), configData))
-    config = Config(configData)
+    
+    return Config(configData)
 
-    # TODO version to function
+# -------------------------------------------
+#       CODED LOADED BEFORE GAME STARTS
+# -------------------------------------------
 
-    try:
-        supervisor.wwiSendText(f"version,{version}")
-        # Check updates
-        url = "https://gitlab.com/api/v4/projects/22054848/releases"
-        response = req.get(url)
-        releases = response.json()
-        releases = list(
-            filter(lambda release: release['tag_name'].startswith(f"v{stream}"), releases))
-        if len(releases) > 0:
-            if releases[0]['tag_name'].replace('_', ' ') == f'v{version}':
-                supervisor.wwiSendText(f"latest,{version}")
-            elif any([r['tag_name'].replace('_', ' ') == f'v{version}' for r in releases]):
-                supervisor.wwiSendText(
-                    f"outdated,{version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
-            else:
-                supervisor.wwiSendText(f"unreleased,{version}")
-        else:
-            supervisor.wwiSendText(f"version,{version}")
-    except:
-        supervisor.wwiSendText(f"version,{version}")
+if __name__ == '__main__':
+        
+    # Send message to robot window to perform setup
+    supervisor.wwiSendText("startup")
+
+    if supervisor.getCustomData() != '':
+        customData = supervisor.getCustomData().split(',')
+        maxTime = int(customData[0])
+        supervisor.wwiSendText("update," + str(0) + "," + str(0) + "," + str(maxTime))
+
+    config = getConfig()
+
+    getSimulationVersion()
 
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
@@ -1912,7 +1863,6 @@ if __name__ == '__main__':
 
     supervisor.wwiSendText(f'worlds,{str(get_worlds())}')
     
-    
 
     # ------------------------------------------------
     #    Until the match ends (also while paused)
@@ -1978,7 +1928,7 @@ if __name__ == '__main__':
             robot0.resetPhysics()
 
             # If automatic camera
-            if config.automatic_camera and viewpoint_node:
+            if config.automatic_camera and camera.wb_viewpoint_node:
                 camera.follow()
 
             firstFrame = False
@@ -1990,118 +1940,35 @@ if __name__ == '__main__':
         if robot0Obj.inSimulation:
 
             # Automatic camera movement
-            if config.automatic_camera and viewpoint_node:
-                nearVictims = [h for h in humans if h.checkPosition(
-                    robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
+            if config.automatic_camera and camera.wb_viewpoint_node:
+                nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
                 if len(nearVictims) > 0:
                     if(len(nearVictims) > 1):
-                        nearVictims.sort(
-                            key=lambda v: v.getDistance(robot0Obj.position))
+                        # Sort by closest
+                        nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
                     side = nearVictims[0].getSide()
                     camera.updateView(side)
 
             # Test if the robots are in checkpoints
-            checkpoint = [
-                c for c in checkpoints if c.checkPosition(robot0Obj.position)]
-
-            # TODO checkpoint.update()
+            checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
 
             # If any chechpoints
             if len(checkpoint):
-                robot0Obj.lastVisitedCheckPointPosition = checkpoint[0].center
-                alreadyVisited = False
-
-                # Dont update if checkpoint is already visited
-                if not any([c == checkpoint[0].center for c in robot0Obj.visitedCheckpoints]):
-                    # Update robot's points and history
-                    robot0Obj.visitedCheckpoints.append(checkpoint[0].center)
-                    grid = coord2grid(checkpoint[0].center)
-                    roomNum = supervisor.getFromDef("WALLTILES").getField(
-                        "children").getMFNode(grid).getField("room").getSFInt32() - 1
-                    robot0Obj.increaseScore(
-                        "Found checkpoint", 10, roomMult[roomNum])
+                robot0Obj.updateCheckpoints(checkpoint[0])
 
             # Check if the robots are in swamps
-            inSwamp = any([s.checkPosition(robot0Obj.position)
-                          for s in swamps])
+            inSwamp = any([s.checkPosition(robot0Obj.position) for s in swamps])
 
-            # TODO swamp.slowRobot()
-
-            # Check if robot is in swamp
-            if robot0Obj.inSwamp != inSwamp:
-                robot0Obj.inSwamp = inSwamp
-                if robot0Obj.inSwamp:
-                    # Cap the robot's velocity to 2
-                    robot0Obj.setMaxVelocity(2)
-                    # Reset physics
-                    robot0.resetPhysics()
-                    # Update history
-                    robot0Obj.history.enqueue("Entered swamp")
-                else:
-                    # If not in swamp, reset max velocity to default
-                    robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
-                    # Reset physics
-                    robot0.resetPhysics()
-                    # Update history
-                    robot0Obj.history.enqueue("Exited swamp")
-
-            # TODO message object
+            robot0Obj.updateInSwamp(inSwamp)
 
             # If receiver has got a message
             if receiver.getQueueLength() > 0:
                 # Get receiver data
                 receivedData = receiver.getData()
-                # Get length of bytes
-                rDataLen = len(receivedData)
-                try:
-                    if rDataLen == 1:
-                        tup = struct.unpack('c', receivedData)
-                        robot0Obj.message = [tup[0].decode("utf-8")]
-                    # Victim identification bytes data should be of length = 9
-                    elif rDataLen == 9:
-                        # Unpack data
-                        tup = struct.unpack('i i c', receivedData)
-
-                        # Get data in format (est. x position, est. z position, est. victim type)
-                        x = tup[0]
-                        z = tup[1]
-
-                        estimated_victim_position = (x / 100, 0, z / 100)
-
-                        victimType = tup[2].decode("utf-8")
-
-                        # Store data recieved
-                        robot0Obj.message = [
-                            estimated_victim_position, victimType]
-                    else:
-                        """
-                         For map data, the format sent should be:
-
-                         receivedData = b'_____ _________________'
-                                            ^          ^
-                                          shape     map data
-                        """
-                        # Shape data should be two bytes (2 integers)
-                        shape_bytes = receivedData[:8]  # Get shape of matrix
-                        data_bytes = receivedData[8::]  # Get data of matrix
-
-                        # Get shape data
-                        shape = struct.unpack('2i', shape_bytes)
-                        # Size of flattened 2d array
-                        shape_size = shape[0] * shape[1]
-                        # Get map data
-                        map_data = data_bytes.decode('utf-8').split(',')
-                        # Reshape data using the shape data given
-                        reshaped_data = np.array(map_data).reshape(shape)
-
-                        robot0Obj.map_data = reshaped_data
-                except Exception as e:
-                    print(cl.colored("Incorrect data format sent", "red"))
-                    print(cl.colored(e, "red"))
+                
+                robot0Obj.setMessage(receivedData)
 
                 receiver.nextPacket()
-
-                # TODO message.process()
 
                 # If data sent to receiver
                 if robot0Obj.message != []:
@@ -2109,131 +1976,19 @@ if __name__ == '__main__':
                     r0_message = robot0Obj.message
                     robot0Obj.message = []
 
-                    # If exit message is correct
-                    if r0_message[0] == 'E':
-                        # Check robot position is on starting tile
-                        if robot0Obj.startingTile.checkPosition(robot0Obj.position):
-                            gameState == MATCH_FINISHED
-                            supervisor.wwiSendText("ended")
-                            if robot0Obj.victimIdentified:
-                                robot0Obj.increaseScore(
-                                    "Exit Bonus", robot0Obj.getScore() * 0.1)
-                            else:
-                                robot0Obj.history.enqueue("No Exit Bonus")
-                            add_map_multiplier()
-                            # Update score and history
-                            robot_quit(robot0Obj, 0, False)
-                            lastFrame = True
-
-                    elif r0_message[0] == 'M':
-                        try:
-                            # If map_data submitted
-                            if robot0Obj.map_data.size != 0:
-                                # If not previously evaluated
-                                if not robot0Obj.sent_maps:
-                                    map_score = MapScorer.calculateScore(
-                                        mapSolution, robot0Obj.map_data)
-
-                                    robot0Obj.history.enqueue(
-                                        f"Map Correctness {str(round(map_score * 100,2))}%")
-
-                                    # Add percent
-                                    robot0Obj.map_score_percent = map_score
-                                    robot0Obj.sent_maps = True
-
-                                    robot0Obj.map_data = np.array([])
-                                else:
-                                    print(cl.colored(
-                                        f"The map has already been evaluated.", "red"))
-                            else:
-                                print(cl.colored(
-                                    "Please send your map data before hand.", "red"))
-                        except Exception as e:
-                            print(cl.colored(
-                                "Map scoring error. Please check your code. (except)", "red"))
-                            print(cl.colored(e, "red"))
-
-                    elif r0_message[0] == 'L':
-                        relocate(robot0, robot0Obj)
-                        robot0Obj.robot_timeStopped = 0
-                        robot0Obj.stopped = False
-                        robot0Obj.stoppedTime = None
-                        if config.automatic_camera and viewpoint_node:
-                            camera.setViewPoint(robot0Obj)
-
-                    elif r0_message[0] == 'G':
-                        emitter.send(struct.pack("c f i", bytes(
-                            "G", "utf-8"), round(robot0Obj.getScore(), 2), maxTime - int(timeElapsed)))
-
-                    # If robot stopped for 1 second
-                    elif robot0Obj.timeStopped() >= 1.0:
-
-                        # Get estimated values
-                        r0_est_vic_pos = r0_message[0]
-                        r0_est_vic_type = r0_message[1]
-
-                        iterator = humans
-                        name = 'Victim'
-
-                        if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
-                            iterator = hazards
-                            name = 'Hazard'
-
-                        misidentification = True
-                        for i, h in enumerate(iterator):
-                            # Check if in range
-                            if h.checkPosition(robot0Obj.position):
-                                # Check if estimated position is in range
-                                if h.checkPosition(r0_est_vic_pos):
-                                    # If robot on same side
-                                    if h.onSameSide(robot0Obj.position):
-                                        misidentification = False
-                                        # If not already identified
-                                        if not h.identified:
-                                            # Get points scored depending on the type of victim
-                                            #pointsScored = h.scoreWorth
-
-                                            grid = coord2grid(
-                                                h.wb_translationField.getSFVec3f())
-                                            roomNum = supervisor.getFromDef("WALLTILES").getField(
-                                                "children").getMFNode(grid).getField("room").getSFInt32() - 1
-
-                                            # Update score and history
-                                            if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                                robot0Obj.increaseScore(
-                                                    f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
-
-                                            robot0Obj.increaseScore(
-                                                f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
-                                            robot0Obj.victimIdentified = True
-
-                                            h.identified = True
-
-                        if misidentification:
-                            robot0Obj.increaseScore(
-                                f"Misidentification of {name}", -5)
+                    processMessage(r0_message)
 
             if gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
                 if robot0Obj.timeStopped() >= 20:
-                    # TODO lack of process relocate
                     if not config.disableLOP:
-                        relocate(robot0, robot0Obj)
-                        if config.automatic_camera and viewpoint_node:
-                            camera.setViewPoint(robot0Obj)
-                    robot0Obj.robot_timeStopped = 0
-                    robot0Obj.stopped = False
-                    robot0Obj.stoppedTime = None
+                        relocate(robot0, robot0Obj, camera)
+                    robot0Obj.resetTimeStopped()
 
                 if robot0Obj.position[1] < -0.035 and gameState == MATCH_RUNNING:
-                    # TODO lack of process relocate
                     if not config.disableLOP:
-                        relocate(robot0, robot0Obj)
-                        if config.automatic_camera and viewpoint_node:
-                            camera.setViewPoint(robot0Obj)
-                    robot0Obj.robot_timeStopped = 0
-                    robot0Obj.stopped = False
-                    robot0Obj.stoppedTime = None
+                        relocate(robot0, robot0Obj, camera)
+                    robot0Obj.resetTimeStopped()
 
             if robotInitialized:
                 # Send the update information to the robot window
