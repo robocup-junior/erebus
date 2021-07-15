@@ -197,6 +197,7 @@ function loadedController(id){
 	//Set name and toggle to unload button for robot 0
 	document.getElementById("load"+ id).style.display = "none";
 	document.getElementById("unload"+ id).style.display = "inline-block";
+	disableWhileSending(false);
 }
 
 function unloadedController(id){
@@ -361,6 +362,17 @@ function unloadPressed(id){
 	window.robotWindow.send("robot"+id+"Unload");
 }
 
+function disableWhileSending(disabled) {
+	setEnableButton("load0", !disabled);
+	setEnableButton("unload0", !disabled);
+	
+	setEnableButton("load1", !disabled);
+	setEnableButton("unload1", !disabled);
+	
+	setEnableButton("runButton", !disabled);
+}
+
+
 function fileOpened(filesId, acceptTypes, location, id){
 	//When file 0 value is changed
 	//Get the files
@@ -393,6 +405,7 @@ function fileOpened(filesId, acceptTypes, location, id){
 						loadedController(id);
 					}
 				};
+				disableWhileSending(true);
 				xmlhttp.open("POST", "http://127.0.0.1:60520/"+location+"/", true);
 				xmlhttp.send(fd);
 
@@ -437,6 +450,7 @@ function openJsonFile(){
 				
 				//Read the file as udf-8 text
 				reader.readAsText(file);
+				disableWhileSending(true);
 			}else{
 				//Tell the user to select a json file
 				alert("Please select a json file.");
