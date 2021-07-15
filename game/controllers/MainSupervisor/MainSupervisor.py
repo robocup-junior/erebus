@@ -1891,7 +1891,7 @@ if __name__ == '__main__':
     #    Until the match ends (also while paused)
     # ------------------------------------------------
     
-    while True:
+    while True: # Main loop
 
         # If last frame
         if lastFrame == True:
@@ -1951,15 +1951,21 @@ if __name__ == '__main__':
 
             # Test if the robots are in checkpoints
             checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
-
             # If any chechpoints
-            if len(checkpoint):
+            if len(checkpoint) > 0:
                 robot0Obj.updateCheckpoints(checkpoint[0])
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(robot0Obj.position) for s in swamps])
-
             robot0Obj.updateInSwamp(inSwamp)
+            
+            # BUG!!! If there are no checkpoints or the robot isn't in a swamp or there are not swamps, 
+            # and the match is paused, the simulation does no 'in webots simulation' calculations
+            # therefore, the controller runs the while loop as fast as possible (I assume), and halts
+            # the program for a while when unpausing.
+            if not inSwamp and len(checkpoint) == 0 and gameState == MATCH_PAUSED:
+                # Therefore, do SOMETHING!!!
+                receiver.getQueueLength()
 
             # If receiver has got a message
             if receiver.getQueueLength() > 0:
@@ -2009,7 +2015,7 @@ if __name__ == '__main__':
                 if timeElapsed >= maxTime and lastFrame != -1:
                     add_map_multiplier()
                     robot_quit(robot0Obj, 0, True)
-                    gameState == MATCH_FINISHED
+                    gameState = MATCH_FINISHED
                     lastFrame = True
                     supervisor.wwiSendText("ended")
 
