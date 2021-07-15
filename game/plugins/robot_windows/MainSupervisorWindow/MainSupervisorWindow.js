@@ -450,7 +450,6 @@ function openJsonFile(){
 				
 				//Read the file as udf-8 text
 				reader.readAsText(file);
-				disableWhileSending(true);
 			}else{
 				//Tell the user to select a json file
 				alert("Please select a json file.");
