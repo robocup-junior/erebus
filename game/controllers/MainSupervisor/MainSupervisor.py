@@ -1698,9 +1698,7 @@ if __name__ == '__main__':
 
     #Calculate the solution arrays for the map layout
     MapAnswer = mapAnswer.MapAnswer(supervisor)
-    mapSolution = MapAnswer.generateAnswer()
-    #for m in mapSolution:
-    #  print(f"{m},")
+    mapSolution = MapAnswer.generateAnswer(False)
     
     # -------------------------------
 

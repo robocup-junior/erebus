@@ -1,5 +1,6 @@
 import AutoInstall
 AutoInstall._import("np", "numpy")
+AutoInstall._import("cl", "termcolor")
 
 class MapAnswer:
     def __init__(self, supervisor):
@@ -22,7 +23,7 @@ class MapAnswer:
     def setAnswer(self,z,x,k):
         self.answerMatrix[z][x] = max(self.answerMatrix[z][x], k)
 
-    def generateAnswer(self):
+    def generateAnswer(self, debugPrint):
         try:
             for i in range(self.numberTiles):
                 tile = self.tileNodes.getMFNode(i)
@@ -55,9 +56,8 @@ class MapAnswer:
                     self.setAnswer(z+3, x, 1)
                     self.setAnswer(z+4, x, 1)
                 
-                room = tile.getField("room").getSFInt32()
                 ## Half wall
-                if room >= 2:
+                try:
                     if tile.getField("tile1Walls").getMFInt32(0) > 0:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z, x+1, 1)
@@ -123,8 +123,7 @@ class MapAnswer:
                         self.setAnswer(z+3, x+2, 1)
                         self.setAnswer(z+4, x+2, 1)
                 
-                # Curved walls
-                if room >= 3:
+                    # Curved walls
                     # Left top
                     lt = tile.getField("curve").getMFInt32(0)
                     if lt == 1:
@@ -232,6 +231,8 @@ class MapAnswer:
                         self.setAnswer(z+2, x+2, 0)
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
+                except:
+                    pass
                 
                 if tile.getField("trap").getSFBool():
                     self.answerMatrix[z+1][x+1] = 2
@@ -344,7 +345,57 @@ class MapAnswer:
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
             
+            if debugPrint:
+                for m in self.answerMatrix:
+                    for mm in m:
+                        if mm == '0': #Normal
+                            print(f'0', end='')
+                        elif mm == '1': #Walls
+                            print(f'{Color.BG_WHITE}{Color.BLACK}1{Color.RESET}', end='')
+                        elif mm == '2': #Holes
+                            print(f'{Color.BG_WHITE}{Color.BOLD}2{Color.RESET}', end='')
+                        elif mm == '3': #Swamps
+                            print(f'{Color.YELLOW}3{Color.RESET}', end='')
+                        elif mm == '4': #Checkpoints
+                            print(f'{Color.UNDERLINE}4{Color.RESET}', end='')
+                        elif mm == '5': #Stating tile
+                            print(f'{Color.GREEN}5{Color.RESET}', end='')
+                        elif mm == '6': #1to2
+                            print(f'{Color.BLUE}6{Color.RESET}', end='')
+                        elif mm == '7': #1to3
+                            print(f'{Color.MAGENTA}7{Color.RESET}', end='')
+                        elif mm == '8': #2to3
+                            print(f'{Color.RED}8{Color.RESET}', end='')
+                        else: #Victims
+                            print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
+                    print('')
+
             return self.answerMatrix
             
         except:
             print("Generating map answer error.")
+
+class Color:
+	BLACK          = '\033[30m'
+	RED            = '\033[31m'
+	GREEN          = '\033[32m'
+	YELLOW         = '\033[33m'
+	BLUE           = '\033[34m'
+	MAGENTA        = '\033[35m'
+	CYAN           = '\033[36m'
+	WHITE          = '\033[37m'
+	COLOR_DEFAULT  = '\033[39m'
+	BOLD           = '\033[1m'
+	UNDERLINE      = '\033[4m'
+	INVISIBLE      = '\033[08m'
+	REVERCE        = '\033[07m'
+	BG_BLACK       = '\033[40m'
+	BG_RED         = '\033[41m'
+	BG_GREEN       = '\033[42m'
+	BG_YELLOW      = '\033[43m'
+	BG_BLUE        = '\033[44m'
+	BG_MAGENTA     = '\033[45m'
+	BG_CYAN        = '\033[46m'
+	BG_WHITE       = '\033[47m'
+	BG_DEFAULT     = '\033[49m'
+	RESET          = '\033[0m'
