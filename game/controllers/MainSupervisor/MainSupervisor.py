@@ -125,6 +125,7 @@ class Game(Supervisor):
 
         # Init robot as object to hold their info
         self.robot0Obj = Robot()
+        self.robot0Obj.updateConfig(self.config)
         self.robot0Obj.controller.resetFile(self)
         self.robot0Obj.resetProto(self)
 
@@ -151,7 +152,6 @@ class Game(Supervisor):
         self.set_robot_start_pos()
         self.robot0Obj.inSimulation = True
         self.robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
-        self.robot0Obj.updateConfig(self.config)
         
         # Reset physics
         self.robot0Obj.wb_node.resetPhysics()
@@ -458,7 +458,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == "reset":
                 self.robot_quit(0, False)
                 # Reset both controller files
-                self.robot0Obj.controller.resetFile(self)
+                #self.robot0Obj.controller.resetFile(self)
                 self.robot0Obj.resetProto(self)
                 self.victimManager.resetVictimsTextures()
 
