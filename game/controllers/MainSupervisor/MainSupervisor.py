@@ -551,7 +551,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Automatic camera movement
             if self.config.automatic_camera and self.camera.wb_viewpoint_node:
-                nearVictims = [h for h in self.victimManager.humans if h.checkPosition(self.robot0Obj.position, 0.20) and h.onSameSide(self.robot0Obj.position)]
+                nearVictims = [h for h in (self.victimManager.humans + self.victimManager.hazards) if h.checkPosition(self.robot0Obj.position, 0.20) and h.onSameSide(self.robot0Obj.position)]
                 if len(nearVictims) > 0:
                     if(len(nearVictims) > 1):
                         # Sort by closest
@@ -593,7 +593,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
                 if self.robot0Obj.timeStopped(game) >= 20:
-                    if not config.disableLOP:
+                    if not self.config.disableLOP:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
 

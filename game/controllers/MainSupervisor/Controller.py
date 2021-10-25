@@ -12,7 +12,6 @@ class Controller():
     
     def resetFile(self, supervisor, manual=False) -> None:
         '''Remove the controller'''
-        print("keep controller config", self.keepController, self.keepController and not manual);
         path = os.path.dirname(os.path.abspath(__file__))
         if path[-4:] == "game":
             path = os.path.join(path, "controllers/robot0Controller")

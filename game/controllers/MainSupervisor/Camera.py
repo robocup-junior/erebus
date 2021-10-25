@@ -44,5 +44,5 @@ class Camera():
     
     def updateView(self, side, followPoint):
         if side != self.side:
+            self.side = side
             self.setViewPoint(followPoint)
-        self.side = side
