@@ -459,7 +459,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.robot_quit(0, False)
                 # Reset both controller files
                 #self.robot0Obj.controller.resetFile(self)
-                self.robot0Obj.resetProto(self)
+                #self.robot0Obj.resetProto(self)
                 self.victimManager.resetVictimsTextures()
 
                 # Reset the simulation
@@ -514,6 +514,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == 'config':
                 configData = list(map((lambda x: int(x)), message.split(",")[1:]))
                 self.config = Config(configData, self.config.path)
+                self.robot0Obj.updateConfig(self.config)
                 
                 with open(self.config.path, 'w') as f:
                     f.write(','.join(message.split(",")[1:]))
