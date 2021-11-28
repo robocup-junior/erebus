@@ -536,7 +536,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
     def update(self):
         
         # If last frame
-        if self.lastFrame:
+        if self.lastFrame == True:
             self.lastFrame = -1
             self.gameState = MATCH_FINISHED
             if self.config.recording:              
