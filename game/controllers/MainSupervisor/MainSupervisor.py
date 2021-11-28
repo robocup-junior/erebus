@@ -146,7 +146,8 @@ class Game(Supervisor):
         if robot0 == None:
             robot0 = self.add_robot()
         # Init robot as object to hold their info
-        self.robot0Obj = Robot(node=robot0)
+        # self.robot0Obj = Robot(node=robot0)
+        self.robot0Obj.add_node(robot0)
         
         # Set robots starting position in world
         self.set_robot_start_pos()

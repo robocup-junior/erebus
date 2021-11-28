@@ -62,15 +62,15 @@ class RobotHistory(Queue):
 class Robot:
     '''Robot object to hold values whether its in a base or holding a human'''
 
-    def __init__(self, node=None):
+    def __init__(self):
         '''Initialises the in a base, has a human loaded and score values'''
 
         #webots node
-        self.wb_node = node
+        # self.wb_node = node
 
-        if self.wb_node != None:
-            self.wb_translationField = self.wb_node.getField('translation')
-            self.wb_rotationField = self.wb_node.getField('rotation')
+        # if self.wb_node != None:
+        #     self.wb_translationField = self.wb_node.getField('translation')
+        #     self.wb_rotationField = self.wb_node.getField('rotation')
 
         self.inCheckpoint = True
         self.inSwamp = False
@@ -122,6 +122,11 @@ class Robot:
     @rotation.setter
     def rotation(self, pos: list) -> None:
         self.wb_rotationField.setSFRotation(pos)
+        
+    def add_node(self, node):
+        self.wb_node = node
+        self.wb_translationField = self.wb_node.getField('translation')
+        self.wb_rotationField = self.wb_node.getField('rotation')
 
     def setMaxVelocity(self, vel: float) -> None:
         self.wb_node.getField('max_velocity').setSFFloat(vel)
