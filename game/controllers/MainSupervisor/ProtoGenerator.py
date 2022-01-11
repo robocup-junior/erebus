@@ -1,5 +1,6 @@
 from Tools import *
 import AutoInstall
+import math
 
 AutoInstall._import("cl", "termcolor")
 
@@ -35,6 +36,8 @@ def generate_robot_proto(robot_json):
     }
 
     genERR = False
+    for component in robot_json:
+        robot_json[component]["rx"] -= math.pi / 2
 
     for component in robot_json:
 
@@ -164,6 +167,7 @@ def generate_robot_proto(robot_json):
                     }}
                     Transform {{
                         translation 0 0.0035 0
+                        rotation 1 0 0 1.57079
                         children [
                         Shape {{
                             appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {{
@@ -181,6 +185,7 @@ def generate_robot_proto(robot_json):
                         ]
                     }}
                     Transform {{
+                        rotation 1 0 0 1.57079
                         children [
                         Shape {{
                             appearance PBRAppearance {{
@@ -195,7 +200,8 @@ def generate_robot_proto(robot_json):
                         ]
                     }}
                     Transform {{
-                        translation 0 0.0065 0
+                        rotation 1 0 0 1.57079
+                        translation 0 0 -0.0065
                         children [
                         Shape {{
                             appearance PBRAppearance {{

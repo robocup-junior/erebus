@@ -17,6 +17,7 @@ import threading
 import shutil
 import json
 import AutoInstall
+import time
 
 from ProtoGenerator import generate_robot_proto
 from Tools import *
@@ -355,7 +356,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         if robotMessage[0] == 'E':
             # Check robot position is on starting tile
             if self.robot0Obj.startingTile.checkPosition(self.robot0Obj.position):
-                gameState = MATCH_FINISHED
+                self.gameState = MATCH_FINISHED
                 self.wwiSendText("ended")
                 if self.robot0Obj.victimIdentified:
                     self.robot0Obj.increaseScore(
@@ -398,7 +399,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         elif robotMessage[0] == 'G':
             self.emitter.send(struct.pack("c f i", bytes(
-                "G", "utf-8"), round(self.robot0Obj.getScore(), 2), self.maxTime - int(timeElapsed)))
+                "G", "utf-8"), round(self.robot0Obj.getScore(), 2), self.maxTime - int(self.timeElapsed)))
 
         # If robot stopped for 1 second
         elif self.robot0Obj.timeStopped(self) >= 1.0:
@@ -546,6 +547,9 @@ ROBOT_0: {str(self.robot0Obj.name)}
         if self.firstFrame and self.gameState == MATCH_RUNNING:
             self.game_init()
 
+        if self.gameState == MATCH_PAUSED:
+            time.sleep(0.01)
+
         # Main game loop
         if self.robot0Obj.inSimulation:
             
@@ -571,13 +575,16 @@ ROBOT_0: {str(self.robot0Obj.name)}
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
             self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_VELOCITY, game)
                         
-            # BUG!!! If there are no checkpoints or the robot isn't in a swamp or there are not swamps, 
+            # If there are no checkpoints or the robot isn't in a swamp or there are not swamps, 
             # and the match is paused, the simulation does no 'in webots simulation' calculations
-            # therefore, the controller runs the while loop as fast as possible (I assume), and halts
-            # webots / the simulation for a while when unpausing.
-            if not inSwamp and len(checkpoint) == 0 and self.gameState == MATCH_PAUSED:
-                # Therefore, do SOMETHING!?
-                foo = math.sqrt(self.robot0Obj.position[0]**2 + self.robot0Obj.position[1]**2 + self.robot0Obj.position[2]**2) # ???????????
+            # therefore, the controller runs the while loop as fast as possible and halts
+            # webots / the simulation for a while when unpausing. -- also causes major cpu usage issues
+            # if not inSwamp and len(checkpoint) == 0 and self.gameState == MATCH_PAUSED:
+            #     file = open("paused.txt", "w+")
+            #     file.write("paused\n")
+            #     file.close()
+            #     # Therefore, do SOMETHING!?
+            #     time.sleep(0.01)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
@@ -643,7 +650,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating
-                gameState = MATCH_FINISHED
+                self.gameState = MATCH_FINISHED
 
         elif self.firstFrame or self.lastFrame or self.gameState == MATCH_FINISHED:
             # Step simulation

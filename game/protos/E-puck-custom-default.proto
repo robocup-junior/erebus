@@ -64,10 +64,10 @@ Robot {
       ]
       endPoint DEF EPUCK_LEFT_WHEEL Solid {
         translation -0.026 0.02 0
-        rotation 1 0 0 0
+        rotation 1 0 0 -1.57079
         children [
           DEF EPUCK_WHEEL Transform {
-            rotation 0 0 1 1.57
+            rotation 0 1 0 1.57
             children [
               Shape {
                 appearance PBRAppearance {
@@ -104,7 +104,8 @@ Robot {
                 castShadows FALSE
               }
               Transform {
-                translation 0 0.0035 0
+                rotation 1 0 0 1.57079
+                translation 0 0 -0.0035
                 children [
                   Shape {
                     appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {
@@ -122,6 +123,7 @@ Robot {
                 ]
               }
               Transform {
+                rotation 1 0 0 1.57079
                 children [
                   Shape {
                     appearance PBRAppearance {
@@ -136,7 +138,8 @@ Robot {
                 ]
               }
               Transform {
-                translation 0 0.0065 0
+                rotation 1 0 0 1.57079
+                translation 0 0 -0.0065
                 children [
                   Shape {
                     appearance PBRAppearance {
@@ -196,7 +199,7 @@ Robot {
       ]
       endPoint DEF EPUCK_RIGHT_WHEEL Solid {
         translation 0.026 0.02 0
-        rotation 1 0 0 0
+        rotation 1 0 0 -1.57079
         children [
           Transform {
             rotation 0 1 0 3.14159
