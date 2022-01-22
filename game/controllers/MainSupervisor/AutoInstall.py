@@ -15,4 +15,4 @@ def _import(name, importModule, installModule=None, ver=None):
                 _main(['install', '{}=={}'.format(installModule, ver)])
             inspect.stack()[1][0].f_globals[name] = importlib.import_module(importModule)
         except:
-            print("can't import: {}".format(importModule))
+            print("[EREBUS IMPORT ERROR] can't import: {}".format(importModule))

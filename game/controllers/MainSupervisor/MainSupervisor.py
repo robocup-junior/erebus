@@ -1,6 +1,11 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
+import AutoInstall
+
+AutoInstall._import("np", "numpy")
+AutoInstall._import("cl", "termcolor")
+AutoInstall._import("req", "requests")
 
 import mapAnswer
 import filecmp
@@ -16,11 +21,11 @@ import datetime
 import threading
 import shutil
 import json
-import AutoInstall
 import time
 
 from ProtoGenerator import generate_robot_proto
 from Tools import *
+from ConsoleLog import Console
 
 from Camera import Camera
 from Tile import *
@@ -28,9 +33,7 @@ from Victim import *
 from Robot import *
 from Recorder import Recorder
 
-AutoInstall._import("np", "numpy")
-AutoInstall._import("cl", "termcolor")
-AutoInstall._import("req", "requests")
+
 
 
 TIME_STEP = 16
@@ -135,6 +138,8 @@ class Game(Supervisor):
         self.mapSolution = self.MapAnswer.generateAnswer()
 
         self.wwiSendText(f'worlds,{str(self.get_worlds())}')
+
+        self.update_world_thumbnail()
     
     def game_init(self):
         # If recording
@@ -261,8 +266,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             logsFile.close()
         except:
             # If write file fails, most likely due to missing logs dir
-            print(cl.colored(
-                f"Couldn't write log file, no log directory: {filePath}", "red"))
+            Console.log_err(f"Couldn't write log file, no log directory: {filePath}")
 
 
     def set_robot_start_pos(self):
@@ -314,6 +318,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.getTime() - first > sec:
                 break
         return
+
+    def update_world_thumbnail(self):
+        path = getFilePath("worlds/thumbnails", "../../worlds/thumbnails")
+        path = os.path.join(path, os.path.split(self.getWorldPath())[1][:-4]+'.png')
+        self.exportImage(path, 20)
 
     def get_worlds(self):           
         path = getFilePath("worlds", "../../worlds")    
@@ -386,12 +395,12 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
                         self.robot0Obj.map_data = np.array([])
                     else:
-                        print(cl.colored(f"The map has already been evaluated.", "red"))
+                        Console.log_err(f"The map has already been evaluated.")
                 else:
-                    print(cl.colored("Please send your map data before hand.", "red"))
+                    Console.log_err("Please send your map data before hand.")
             except Exception as e:
-                print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
-                print(cl.colored(e, "red"))
+                Console.log_err("Map scoring error. Please check your code. (except)")
+                Console.log_err(e)
 
         elif robotMessage[0] == 'L':
             self.relocate_robot()
@@ -547,8 +556,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
         if self.firstFrame and self.gameState == MATCH_RUNNING:
             self.game_init()
 
-        if self.gameState == MATCH_PAUSED:
-            time.sleep(0.01)
 
         # Main game loop
         if self.robot0Obj.inSimulation:
@@ -637,6 +644,10 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         self.receive(message)
 
+        if self.gameState == MATCH_PAUSED:
+            self.step(0)
+            time.sleep(0.01)
+
         # If the match is running
         if self.robotInitialized and self.gameState == MATCH_RUNNING:
             # Get the time since the last frame
@@ -663,4 +674,3 @@ if __name__ == '__main__':
        
     while True: # Main loop
         game.update()
-        

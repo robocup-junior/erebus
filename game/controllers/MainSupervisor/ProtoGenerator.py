@@ -1,6 +1,8 @@
 from Tools import *
 import AutoInstall
 import math
+import numpy as np
+from ConsoleLog import Console
 
 AutoInstall._import("cl", "termcolor")
 
@@ -15,7 +17,7 @@ def generate_robot_proto(robot_json):
 
     component_counts = {}
     
-    templatePath = getFilePath("controllers/MainSupervisor/protoHeaderTemplate.txt", "protoHeaderTemplate.txt")
+    templatePath = getFilePath("controllers/MainSupervisor/protoHeaderTemplateFLU.txt", "protoHeaderTemplateFLU.txt")
 
     with open(templatePath) as protoTemplate:
         proto_code = protoTemplate.read() 
@@ -36,8 +38,6 @@ def generate_robot_proto(robot_json):
     }
 
     genERR = False
-    for component in robot_json:
-        robot_json[component]["rx"] -= math.pi / 2
 
     for component in robot_json:
 
@@ -54,45 +54,40 @@ def generate_robot_proto(robot_json):
             component_max_count = component_max_counts[robot_json[component]["name"]]
             # If there are more components in json than there should be, continue
             if component_count > component_max_count:
-                print(cl.colored(
-                    f"[SKIP] The number of {robot_json[component]['name']} is limited to {component_max_count}.", "yellow"))
+                Console.log_warn(f"[SKIP] The number of {robot_json[component]['name']} is limited to {component_max_count}.")
                 continue
         else:
             # If there should only be one component
             # Skip if count is > 1
             if component_count > 1:
-                print(cl.colored(
-                    f"[SKIP] The number of {robot_json[component]['name']} is limited to only one.", "yellow"))
+                Console.log_warn(f"[SKIP] The number of {robot_json[component]['name']} is limited to only one.")
                 continue
 
         # Cost calculation
         try:
             cost += costs[robot_json[component]["name"]]
             if cost > budget:
-                print(cl.colored(
-                    "ERROR! The necessary costs exceed the budget.", "red"))
-                print(cl.colored(f"Budget: {budget}  Cost: {cost}", "red"))
+                Console.log_err("The necessary costs exceed the budget.")
+                Console.log_err(f"Budget: {budget}  Cost: {cost}")
                 genERR = True
                 break
         except KeyError as e:
-            print(cl.colored(
-                f"[SKIP] {e.args[0]} is no longer supported in this version.", "orange"))
+            Console.log_warn(f"[SKIP] {e.args[0]} is no longer supported in this version.")
             continue
 
         if robot_json[component].get("customName") is None or robot_json[component].get("customName") == "":
-            print(cl.colored(
-                f"ERROR! No tag name has been specified for {robot_json[component].get('name')}. Please specify a suitable name in the robot generator.", "red"))
+            Console.log_err(f"No tag name has been specified for {robot_json[component].get('name')}. Please specify a suitable name in the robot generator.")
             genERR = True
             break
 
         if robot_json[component].get("name") == "Wheel":
-            print(cl.colored(
-                f"Adding motor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} motor)", "blue"))
-            print(cl.colored(
-                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} sensor)", "blue"))
+            Console.log_info(
+                f"Adding motor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} motor)")
+            Console.log_info(
+                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} sensor)")
         else:
-            print(cl.colored(
-                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')})", "blue"))
+            Console.log_info(
+                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')})")
 
         # Hard coded, so if ranges change in the website,
         # I need to change them here too :(
@@ -127,9 +122,9 @@ def generate_robot_proto(robot_json):
             ]
             endPoint Solid {{
                 translation {x} {y} {z}
-                rotation 1 0 0 0
+                rotation -0.9999999999999999 0 0 1.570789969636269
                 children [
-                DEF EPUCK_WHEEL Transform {{
+                Transform {{
                     rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
                     children [
                     Shape {{
@@ -148,26 +143,22 @@ def generate_robot_proto(robot_json):
                     }}
                     Shape {{
                         appearance PBRAppearance {{
-                        metalness 0
-                        roughness 0.4
-                        %{{ if v1 then }}%
-                        baseColor 0.117647 0.815686 0.65098
-                        %{{ else }}%
-                        baseColor 0 0 0
-                        %{{ end }}%
+                            baseColor 0.117647 0.815686 0.65098
+                            roughness 0.4
+                            metalness 0
                         }}
                         geometry Cylinder {{
-                        height 0.0015
-                        radius 0.0201
-                        subdivision 24
-                        top FALSE
-                        bottom FALSE
+                            bottom FALSE
+                            height 0.0015
+                            radius 0.0201
+                            top FALSE
+                            subdivision 24
                         }}
                         castShadows FALSE
                     }}
                     Transform {{
-                        translation 0 0.0035 0
-                        rotation 1 0 0 1.57079
+                        translation 0 0 -0.0035
+                        rotation -1 0 0 6.326802116328499e-06
                         children [
                         Shape {{
                             appearance DEF EPUCK_TRANSPARENT_APPEARANCE PBRAppearance {{
@@ -185,7 +176,7 @@ def generate_robot_proto(robot_json):
                         ]
                     }}
                     Transform {{
-                        rotation 1 0 0 1.57079
+                        rotation -1 0 0 6.326802116328499e-06
                         children [
                         Shape {{
                             appearance PBRAppearance {{
@@ -200,8 +191,8 @@ def generate_robot_proto(robot_json):
                         ]
                     }}
                     Transform {{
-                        rotation 1 0 0 1.57079
                         translation 0 0 -0.0065
+                        rotation -1 0 0 6.326802116328499e-06
                         children [
                         Shape {{
                             appearance PBRAppearance {{
@@ -221,7 +212,7 @@ def generate_robot_proto(robot_json):
                 }}
                 ]
                 name "{robot_json[component]["customName"]}"
-                boundingObject DEF EPUCK_WHEEL_BOUNDING_OBJECT Transform {{
+                boundingObject Transform {{
                 rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
                 children [
                     Cylinder {{
@@ -231,12 +222,10 @@ def generate_robot_proto(robot_json):
                     }}
                 ]
                 }}
-                %{{ if kinematic == false then }}%
                 physics DEF EPUCK_WHEEL_PHYSICS Physics {{
                     density -1
                     mass 0.8
                 }}
-                %{{ end }}%
             }}
             }}
             """
@@ -249,10 +238,10 @@ def generate_robot_proto(robot_json):
             children [
                 Camera {{
                 name "{robot_json[component]["customName"]}"
-                rotation 0 1 0 -1.57
+                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
                 children [
                     Transform {{
-                    rotation 0 0.707107 0.707107 3.14159
+                    rotation 9.381865489561552e-07 -9.381865488949227e-07 0.9999999999991198 1.5707944504244395
                     children [
                         Transform {{
                         rotation IS camera_rotation
@@ -311,7 +300,7 @@ def generate_robot_proto(robot_json):
             children [
                 Camera {{
                 name "{robot_json[component]["customName"]}"
-                rotation 0 1 0 -1.57
+                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
                 width 1
                 height 1
                 }}
@@ -354,7 +343,7 @@ def generate_robot_proto(robot_json):
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
-                rotation 0 1 0 -1.57
+                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
                 fieldOfView 6.2832
                 }}
             ]
@@ -362,6 +351,7 @@ def generate_robot_proto(robot_json):
 
     proto_code += """DEF EPUCK_RING SolidPipe {
     translation 0 0.0393 0
+    rotation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0943951023931953
     height 0.007
     radius 0.0356
     thickness 0.004
@@ -371,16 +361,13 @@ def generate_robot_proto(robot_json):
     }
     \n\t]
         name IS name
-    %{ if v2 then }%
-        model "GCtronic e-puck2"
-    %{ else }%
         model "GCtronic e-puck"
-    %{ end }%
     description "Educational robot designed at EPFL"
     boundingObject Group {
         children [
         Transform {
             translation 0 0.025 0
+            rotation -1 0 0 1.5707963267948966
             children [
             Cylinder {
                 height 0.045
@@ -391,33 +378,27 @@ def generate_robot_proto(robot_json):
         }
         ]
     }
-    %{ if kinematic == false then }%
-        physics Physics {
+    physics Physics {
         density -1
-        %{ if v2 then }%
-            mass 0.13
-        %{ else }%
-            mass 0.15
-        %{ end }%
-        centerOfMass [0 0.015 0]
-        inertiaMatrix [8.74869e-05 9.78585e-05 8.64333e-05, 0 0 0]
-        }
-    %{ end }%
+        mass 0.15
+        centerOfMass [
+        0 0.015 0
+        ]
+        inertiaMatrix [
+        8.74869e-05 9.78585e-05 8.64333e-05
+        0 0 0
+        ]
+    }
     controller IS controller
     controllerArgs IS controllerArgs
     customData IS customData
-    supervisor IS supervisor
-    synchronization IS synchronization
-    battery IS battery
-    cpuConsumption 1.11 # 100% to 0% in 90[s] (calibrated for the rat's life contest)
-    window IS window
     """
     proto_code += "\n}"
     proto_code += closeBracket
 
     if not genERR:
-        print(cl.colored("Your custom robot has been successfully generated!", "green"))
-        print(cl.colored(f"Budget: {budget}  Cost: {cost}", "green"))
+        Console.log_succ("Your custom robot has been successfully generated!")
+        Console.log_succ(f"Budget: {budget}  Cost: {cost}")
             
         path = getFilePath("protos", "../../protos")
         path = os.path.join(path, "custom_robot.proto")
@@ -426,5 +407,5 @@ def generate_robot_proto(robot_json):
             robot_file.write(proto_code)
         return True
     else:
-        print(cl.colored("Your custom robot generation has been cancelled.", "red"))
+        Console.log_err("Your custom robot generation has been cancelled.")
     return False

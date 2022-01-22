@@ -7,10 +7,10 @@ import glob
 import struct
 
 from Controller import Controller
+from ConsoleLog import Console
 
 AutoInstall._import("cl", "termcolor")
 AutoInstall._import("np", "numpy")
-AutoInstall._import("cl", "termcolor")
 
 class Queue:
     #Simple queue data structure
@@ -254,8 +254,8 @@ class Robot:
 
                 self.map_data = reshaped_data
         except Exception as e:
-            print(cl.colored("Incorrect data format sent", "red"))
-            print(cl.colored(e, "red"))
+            Console.log_err("Incorrect data format sent")
+            Console.log_err(e)
 
     def updateTimeElapsed(self, timeElapsed: int):
         self.timeElapsed = timeElapsed
@@ -274,11 +274,11 @@ class Robot:
 
         if path[-4:] == "game":
             default_robot_proto = os.path.join(
-                path, 'protos/E-puck-custom-default.proto')
+                path, 'protos/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, 'protos/custom_robot.proto')
         else:
             default_robot_proto = os.path.join(
-                path, '../../protos/E-puck-custom-default.proto')
+                path, '../../protos/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, '../../protos/custom_robot.proto')
 
         try:
@@ -292,5 +292,6 @@ class Robot:
                 shutil.copyfile(default_robot_proto, robot_proto)
                 supervisor.worldReload()
             supervisor.wwiSendText("unloaded1")
-        except:
-            print(cl.colored(f"Error resetting robot proto", "red"))
+        except Exception as e:
+            Console.log_err(f"Error resetting robot proto")
+            Console.log_err(e)

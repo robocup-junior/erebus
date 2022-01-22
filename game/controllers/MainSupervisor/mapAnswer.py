@@ -1,6 +1,8 @@
 import AutoInstall
 AutoInstall._import("np", "numpy")
 
+from ConsoleLog import Console
+
 class MapAnswer:
     def __init__(self, supervisor):
         self.supervisor = supervisor
@@ -347,4 +349,4 @@ class MapAnswer:
             return self.answerMatrix
             
         except:
-            print("Generating map answer error.")
+            Console.log_err("Generating map answer error.")
