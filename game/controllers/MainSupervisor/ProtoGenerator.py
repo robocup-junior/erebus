@@ -238,7 +238,7 @@ def generate_robot_proto(robot_json):
             children [
                 Camera {{
                 name "{robot_json[component]["customName"]}"
-                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
+                rotation 1 0 0 0
                 children [
                     Transform {{
                     rotation 9.381865489561552e-07 -9.381865488949227e-07 0.9999999999991198 1.5707944504244395
@@ -298,18 +298,24 @@ def generate_robot_proto(robot_json):
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
+                Transform {{
+                    rotation 0 0 1 1.57
+                    children [
+                        SpotLight {{
+                        attenuation 0 0 12.56
+                        intensity   0.01
+                        direction   1 0 0
+                        cutOffAngle 0.3
+                        }}
+                    ]
+                }}
                 Camera {{
                 name "{robot_json[component]["customName"]}"
-                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
+                rotation 0 0 1 1.5707944504244395
                 width 1
                 height 1
                 }}
-                SpotLight {{
-                attenuation 0 0 12.56
-                intensity   0.01
-                direction   1 0 0
-                cutOffAngle 0.3
-                }}
+                
             ]
             }}
             """
@@ -343,7 +349,7 @@ def generate_robot_proto(robot_json):
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
-                rotation 0.7071067811859514 -0.7071067811859513 1.2986841949896388e-06 3.141590056252852
+                rotation 1 0 0 0
                 fieldOfView 6.2832
                 }}
             ]

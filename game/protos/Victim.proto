@@ -57,7 +57,7 @@ PROTO Victim [
         
                 }%
                 translation 0 0 0
-                rotation 0 0.707105 -0.707108 3.14159
+                rotation 0 0.707105 0.707108 3.14159
                 children [
                     Shape {
                         appearance Appearance {
