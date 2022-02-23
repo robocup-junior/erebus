@@ -768,6 +768,7 @@ def robot_quit(robotObj, num, timeup):
 def add_robot():
     '''Add robot via .wbo file'''
     global robot0
+    print('hellohellohello')
     # If robot not present
     if robot0 == None:
         # Get relative path
