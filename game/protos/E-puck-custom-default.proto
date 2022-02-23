@@ -17,13 +17,13 @@ PROTO custom_robot [
   field SFBool             supervisor                   FALSE                    # Is `Robot.supervisor`.
   field SFBool             synchronization              TRUE                     # Is `Robot.synchronization`.
   field SFString{"1"}      version                      "1"                      # Defines the e-puck version; either "1" or "2".
-  field SFFloat            camera_fieldOfView           0.84                     # Is `Camera.fieldOfView`.
-  field SFInt32            camera_width                 52                       # Is `Camera.width`.
-  field SFInt32            camera_height                39                       # Is `Camera.height`.
-  field SFBool             camera_antiAliasing          FALSE                    # Is `Camera.antiAliasing`.
-  field SFRotation         camera_rotation              1 0 0 0                  # Is `Camera.rotation`. Interesting setup: set `1 0 0 -0.47` in order to simulate the linear camera mode.
-  field SFFloat            camera_noise                 0.0                      # Is `Camera.noise`.
-  field SFFloat            camera_motionBlur            0.0                      # Is `Camera.motionBlur`.
+  field SFFloat            cam_fieldOfView           0.84                     # Is `Camera.fieldOfView`.
+  field SFInt32            cam_width                 64                       # Is `Camera.width`.
+  field SFInt32            cam_height                40                       # Is `Camera.height`.
+  field SFBool             cam_antiAliasing          FALSE                    # Is `Camera.antiAliasing`.
+  field SFRotation         cam_rotation              1 0 0 0                  # Is `Camera.rotation`. Interesting setup: set `1 0 0 -0.47` in order to simulate the linear camera mode.
+  field SFFloat            cam_noise                 0.0                      # Is `Camera.noise`.
+  field SFFloat            cam_motionBlur            0.0                      # Is `Camera.motionBlur`.
   field SFInt32            emitter_channel              1                        # Is `Emitter.channel`.
   field SFInt32            receiver_channel             1                        # Is `Receiver.channel`.
   field MFFloat            battery                      []                       # Is `Robot.battery`.
@@ -383,7 +383,7 @@ Robot {
           rotation 0 0.707107 0.707107 3.14159
           children [
             Transform {
-              rotation IS camera_rotation
+              rotation IS cam_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -409,13 +409,13 @@ Robot {
           ]
         }
       ]
-      fieldOfView IS camera_fieldOfView
-      width IS camera_width
-      height IS camera_height
+      fieldOfView IS cam_fieldOfView
+      width IS cam_width
+      height IS cam_height
       near 0.0055
-      antiAliasing IS camera_antiAliasing
-      motionBlur IS camera_motionBlur
-      noise IS camera_noise
+      antiAliasing IS cam_antiAliasing
+      motionBlur IS cam_motionBlur
+      noise IS cam_noise
       zoom Zoom {
       }
     }
@@ -428,7 +428,7 @@ Robot {
           rotation 0 0.707107 0.707107 3.14159
           children [
             Transform {
-              rotation IS camera_rotation
+              rotation IS cam_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -454,13 +454,13 @@ Robot {
           ]
         }
       ]
-      fieldOfView IS camera_fieldOfView
-      width IS camera_width
-      height IS camera_height
+      fieldOfView IS cam_fieldOfView
+      width IS cam_width
+      height IS cam_height
       near 0.0055
-      antiAliasing IS camera_antiAliasing
-      motionBlur IS camera_motionBlur
-      noise IS camera_noise
+      antiAliasing IS cam_antiAliasing
+      motionBlur IS cam_motionBlur
+      noise IS cam_noise
       zoom Zoom {
       }
     }
@@ -473,7 +473,7 @@ Robot {
           rotation 0 0.707107 0.707107 3.14159
           children [
             Transform {
-              rotation IS camera_rotation
+              rotation IS cam_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -499,13 +499,13 @@ Robot {
           ]
         }
       ]
-      fieldOfView IS camera_fieldOfView
-      width IS camera_width
-      height IS camera_height
+      fieldOfView IS cam_fieldOfView
+      width IS cam_width
+      height IS cam_height
       near 0.0055
-      antiAliasing IS camera_antiAliasing
-      motionBlur IS camera_motionBlur
-      noise IS camera_noise
+      antiAliasing IS cam_antiAliasing
+      motionBlur IS cam_motionBlur
+      noise IS cam_noise
       zoom Zoom {
       }
     }
