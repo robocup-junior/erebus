@@ -28,7 +28,7 @@ def generate_robot_proto(robot_json):
     cost = 0
     costs = {
         'Gyro': 100,
-        'Inertial unit': 100, 
+        'InertialUnit': 100, 
         'GPS': 250,
         'Camera': 500,
         'Colour sensor': 100,
