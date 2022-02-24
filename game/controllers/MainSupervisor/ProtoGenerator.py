@@ -28,6 +28,7 @@ def generate_robot_proto(robot_json):
     cost = 0
     costs = {
         'Gyro': 100,
+        'Inertial unit': 100, 
         'GPS': 250,
         'Camera': 500,
         'Colour sensor': 100,
@@ -283,7 +284,7 @@ def generate_robot_proto(robot_json):
             ]
             }}"""
 
-        if robot_json[component]["name"] in ["Gyro", "GPS"]:
+        if robot_json[component]["name"] in ["Gyro", "GPS", "Inertial unit"]:
             proto_code += f"""
             {robot_json[component]["name"]} {{
             translation {x} {y} {z}
