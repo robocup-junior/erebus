@@ -284,7 +284,7 @@ def generate_robot_proto(robot_json):
             ]
             }}"""
 
-        if robot_json[component]["name"] in ["Gyro", "GPS", "Inertial unit"]:
+        if robot_json[component]["name"] in ["Gyro", "GPS", "InertialUnit"]:
             proto_code += f"""
             {robot_json[component]["name"]} {{
             translation {x} {y} {z}
