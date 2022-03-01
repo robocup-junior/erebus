@@ -129,12 +129,14 @@ class Robot:
         self.wb_rotationField = self.wb_node.getField('rotation')
 
     def setMaxVelocity(self, vel: float) -> None:
-        self.wb_node.getField('max_velocity').setSFFloat(vel)
+        # self.wb_node.getField('max_velocity').setSFFloat(vel)
+        # self.wb_node.getField('robot_mass').setSFFloat(vel)
+        self.wb_node.getField('wheel_mult').setSFFloat(vel)
+        # self.wb_node.getField('wheel_mass').setSFFloat(vel)
 
     def _isStopped(self) -> bool:
         vel = self.wb_node.getVelocity()
         return all(abs(ve) < 0.1 for ve in vel)
-
 
     def timeStopped(self, supervisor) -> float:
         self.stopped = self._isStopped()

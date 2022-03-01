@@ -133,8 +133,8 @@ function updateWorld(worlds_str){
 	let worlds = worlds_array_str.split(",");
 	for (let i = 0; i < worlds.length; i ++){
 		let button = document.createElement("button");
-		let world_thumb = "../../../worlds/thumbnails/"+worlds[i].substring(0,worlds[i].length-4)+".png";
-		button.innerHTML = worlds[i] + '<br><img src="'+world_thumb+'" class="world_thumb" onerror="this.style.display=\'none\'"/>';
+		// let world_thumb = "../../../worlds/thumbnails/"+worlds[i].substring(0,worlds[i].length-4)+".png";
+		button.innerHTML = worlds[i];
 		button.onclick = function(){
 			window.robotWindow.send(`loadWorld,${worlds[i]}`);
 		};

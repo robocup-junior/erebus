@@ -39,6 +39,7 @@ from Recorder import Recorder
 TIME_STEP = 16
 
 DEFAULT_MAX_VELOCITY = 6.28
+DEFAULT_MAX_MULT = 1.0
 
 MATCH_NOT_STARTED = 'MATCH_NOT_STARTED'
 MATCH_RUNNING = 'MATCH_RUNNING'
@@ -94,6 +95,8 @@ class Game(Supervisor):
                 
         # Maximum time for a match
         self.maxTime = 8 * 60
+        
+        self.sWarnCooldown = False
 
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
@@ -139,7 +142,7 @@ class Game(Supervisor):
 
         self.wwiSendText(f'worlds,{str(self.get_worlds())}')
 
-        self.update_world_thumbnail()
+        # self.update_world_thumbnail()
     
     def game_init(self):
         # If recording
@@ -158,7 +161,7 @@ class Game(Supervisor):
         # Set robots starting position in world
         self.set_robot_start_pos()
         self.robot0Obj.inSimulation = True
-        self.robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+        self.robot0Obj.setMaxVelocity(DEFAULT_MAX_MULT)
         
         # Reset physics
         self.robot0Obj.wb_node.resetPhysics()
@@ -560,6 +563,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
         # Main game loop
         if self.robot0Obj.inSimulation:
             
+            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_LEFT_WHEEL").addTorque([-0.2,0,0,0,0,0], True))
+            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_RIGHT_WHEEL").addTorque([-0.2,0,0,0,0,0], True))
+            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_LEFT_WHEEL").setVelocity([0,-0.2,0,0,0,0]))
+            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_RIGHT_WHEEL").setVelocity([0,-0.2,0,0,0,0]))
+            
             self.robot0Obj.updateTimeElapsed(self.timeElapsed)
 
             # Automatic camera movement
@@ -581,17 +589,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
             self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_VELOCITY, game)
-                        
-            # If there are no checkpoints or the robot isn't in a swamp or there are not swamps, 
-            # and the match is paused, the simulation does no 'in webots simulation' calculations
-            # therefore, the controller runs the while loop as fast as possible and halts
-            # webots / the simulation for a while when unpausing. -- also causes major cpu usage issues
-            # if not inSwamp and len(checkpoint) == 0 and self.gameState == MATCH_PAUSED:
-            #     file = open("paused.txt", "w+")
-            #     file.write("paused\n")
-            #     file.close()
-            #     # Therefore, do SOMETHING!?
-            #     time.sleep(0.01)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
@@ -612,6 +609,10 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     if not self.config.disableLOP:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
+                elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
+                    if not self.sWarnCooldown:
+                        self.sWarnCooldown = True
+                        Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every frame.\nSee Erebus 22.0.0 changelog for more details.")
 
                 if self.robot0Obj.position[1] < -0.035 and self.gameState == MATCH_RUNNING:
                     if not self.config.disableLOP:

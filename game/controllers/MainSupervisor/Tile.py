@@ -47,6 +47,7 @@ class StartTile(Tile):
 class TileManager():
     # Room multipliers
     ROOM_MULT = [1, 1.25, 1.5]
+    SWAMP_SLOW_MULT = 0.32
     
     def __init__(self):
         self.numberOfSwamps = 0
@@ -123,14 +124,16 @@ class TileManager():
             robotObj.inSwamp = inSwamp
             if robotObj.inSwamp:
                 # Cap the robot's velocity to 2
-                robotObj.setMaxVelocity(2)
+                # robotObj.setMaxVelocity(2)
+                robotObj.setMaxVelocity(TileManager.SWAMP_SLOW_MULT)
                 # Reset physics
                 robotObj.wb_node.resetPhysics()
                 # Update history
                 robotObj.history.enqueue("Entered swamp", supervisor)
             else:
                 # If not in swamp, reset max velocity to default
-                robotObj.setMaxVelocity(max_velocity)
+                # robotObj.setMaxVelocity(max_velocity)
+                robotObj.setMaxVelocity(1)
                 # Reset physics
                 robotObj.wb_node.resetPhysics()
                 # Update history
