@@ -115,6 +115,7 @@ def generate_robot_proto(robot_json):
                 name "{robot_json[component]["customName"]} motor"
                 consumptionFactor -0.001 # small trick to encourage the movement (calibrated for the rat's life contest)
                 maxVelocity IS max_velocity
+                multiplier IS wheel_mult
                 }}
                 PositionSensor {{
                 name "{robot_json[component]["customName"]} sensor"

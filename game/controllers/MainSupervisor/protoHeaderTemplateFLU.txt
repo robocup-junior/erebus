@@ -16,6 +16,7 @@ PROTO custom_robot [
     field SFString           controller                   ""
     field MFString           controllerArgs               ""
     field SFString           customData                   ""
+    hiddenField SFFloat            wheel_mult           1.0
     hiddenField  SFFloat            max_velocity                 6.28
 
 ]

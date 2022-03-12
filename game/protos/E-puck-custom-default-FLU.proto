@@ -16,6 +16,7 @@ PROTO custom_robot [
     field SFString           controller                   ""
     field MFString           controllerArgs               ""
     field SFString           customData                   ""
+    hiddenField SFFloat            wheel_mult           1.0
     hiddenField  SFFloat            max_velocity                 6.28
 
 ]
@@ -35,6 +36,7 @@ Robot {
           name "wheel1 motor"
           consumptionFactor -0.001
           maxVelocity IS max_velocity
+          multiplier IS wheel_mult
         }
         PositionSensor {
           name "wheel1 sensor"
@@ -160,6 +162,7 @@ Robot {
           name "wheel2 motor"
           consumptionFactor -0.001
           maxVelocity IS max_velocity
+          multiplier IS wheel_mult
         }
         PositionSensor {
           name "wheel2 sensor"
