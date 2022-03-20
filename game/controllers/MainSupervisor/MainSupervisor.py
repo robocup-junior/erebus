@@ -32,6 +32,7 @@ from Tile import *
 from Victim import *
 from Robot import *
 from Recorder import Recorder
+from Test import TestRunner
 
 
 
@@ -141,6 +142,9 @@ class Game(Supervisor):
         self.mapSolution = self.MapAnswer.generateAnswer()
 
         self.wwiSendText(f'worlds,{str(self.get_worlds())}')
+        
+        self.testRunner = TestRunner(self)
+        self.runTests = False
 
         # self.update_world_thumbnail()
     
@@ -339,6 +343,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         path = os.path.join(path, world)
         self.worldLoad(path)
+        
+    def load_test_script(self):
+        path = getFilePath("controllers/MainSupervisor/tests.py", "tests.py")
+        dest = getFilePath("controllers/robot0Controller/robot0Controller.py", "../robot0Controller/robot0Controller.py")
+        shutil.copyfile(path, dest)
 
     def getSimulationVersion(self):
         try:
@@ -535,6 +544,13 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             if parts[0] == 'loadWorld':
                 self.load_world(parts[1])
+                
+            if parts[0] == 'runTest':
+                self.load_test_script()
+            if parts[0] == 'runTest':
+                self.gameState = MATCH_RUNNING
+                self.runTests = True
+                self.config.disableLOP = True
 
     def getConfig(self, configFilePath):
             
@@ -559,6 +575,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
         if self.firstFrame and self.gameState == MATCH_RUNNING:
             self.game_init()
 
+        if self.runTests:
+            self.testRunner.run(self)
 
         # Main game loop
         if self.robot0Obj.inSimulation:
@@ -594,8 +612,13 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.receiver.getQueueLength() > 0:
                 # Get receiver data
                 receivedData = self.receiver.getData()
-                self.robot0Obj.setMessage(receivedData)
-                self.receiver.nextPacket()
+                testMsg = False
+                if self.runTests:
+                    testMsg = self.testRunner.getStage(receivedData)
+                    self.receiver.nextPacket()
+                if not testMsg:
+                    self.robot0Obj.setMessage(receivedData)
+                    self.receiver.nextPacket()
 
                 # If data sent to receiver
                 if self.robot0Obj.message != []:

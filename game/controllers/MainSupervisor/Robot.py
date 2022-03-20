@@ -257,7 +257,7 @@ class Robot:
                 self.map_data = reshaped_data
         except Exception as e:
             Console.log_err("Incorrect data format sent")
-            Console.log_err(e)
+            Console.log_err(str(e))
 
     def updateTimeElapsed(self, timeElapsed: int):
         self.timeElapsed = timeElapsed

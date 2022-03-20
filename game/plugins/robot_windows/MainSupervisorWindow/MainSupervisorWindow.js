@@ -273,7 +273,7 @@ function calculateTimeRemaining(done){
 	return mins + ":" + seconds;
 }
 
-function runPressed(){
+function preRun() {
 	//Disable all the loading buttons (cannot change loaded controllers once simulation starts)
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
@@ -291,6 +291,10 @@ function runPressed(){
 	setEnableButton('lopButton', true)
 
 	setEnableButton("giveupB", true);
+}
+
+function runPressed(){
+	preRun();
 	window.robotWindow.send("run");
 }
 
@@ -311,6 +315,12 @@ function resetPressed(){
 	setEnableButton('lopButton', false)
 	//Send signal to reset everything
 	window.robotWindow.send("reset");
+}
+
+function testPressed() {
+	preRun();
+	window.robotWindow.send("loadTest");
+	window.robotWindow.send("runTest")
 }
 
 function giveupPressed(){

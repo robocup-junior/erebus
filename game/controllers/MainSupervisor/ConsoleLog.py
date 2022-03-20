@@ -2,6 +2,8 @@ import AutoInstall
 AutoInstall._import("cl", "termcolor")
 
 class Console:
+    PREFIX_PASS: str = "EREBUS PASS"
+    PREFIX_FAIL: str = "EREBUS FAIL"
     PREFIX_ERROR: str = "EREBUS ERROR"
     PREFIX_WARN: str = "EREBUS WARNING"
     PREFIX_SUCC: str = "EREBUS"
@@ -15,6 +17,14 @@ class Console:
     @staticmethod
     def log_err(msg: str) -> None:
         Console._log(Console.PREFIX_ERROR, msg, Console.COLOR_ERROR)
+    
+    @staticmethod
+    def log_fail(msg: str) -> None:
+        Console._log(Console.PREFIX_FAIL, msg, Console.COLOR_ERROR)
+        
+    @staticmethod
+    def log_pass(msg: str) -> None:
+        Console._log(Console.PREFIX_PASS, msg, Console.COLOR_SUCC)
     
     @staticmethod
     def log_succ(msg: str) -> None:

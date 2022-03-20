@@ -55,7 +55,7 @@ class VictimObject():
         self.wb_foundField.setSFBool(idfy)
         
     def get_simple_type(self):
-        # Will be overloaded
+        # Will be overrided
         pass
 
     def checkPosition(self, pos: list, radius:float = 0.09) -> bool:
