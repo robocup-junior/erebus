@@ -765,7 +765,7 @@ def robot_quit(robotObj, num, timeup):
             robotObj.history.enqueue("Successful Exit")
         write_log()
 
-def add_robot():
+def add_robot(num):
     '''Add robot via .wbo file'''
     global robot0
     # If robot not present
@@ -778,11 +778,11 @@ def add_robot():
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
-          root_children_field.importMFNode(12, os.path.join(filePath,'nodes/robot0.wbo'))
+          root_children_field.importMFNode(12, os.path.join(filePath,'nodes/robot'+str(num)+'.wbo'))
         else:
-          root_children_field.importMFNode(12, os.path.join(filePath, '../../nodes/robot0.wbo'))
+          root_children_field.importMFNode(12, os.path.join(filePath, '../../nodes/robot'+str(num)+'.wbo'))
         # Update robot0 variable
-        robot0 = supervisor.getFromDef("ROBOT0")
+        robot0 = supervisor.getFromDef("ROBOT"+str(num))
         # Update robot window to say robot is in simulation
         supervisor.wwiSendText("robotInSimulation0")
 
@@ -826,18 +826,21 @@ def write_log():
         # If write file fails, most likely due to missing logs dir
         print(cl.colored(f"Couldn't write log file, no log directory: {filePath}", "red"))
 
-def set_robot_start_pos():
+def set_robot_start_pos(num, robot):
     '''Set robot starting position'''
 
-    starting_tile_node = supervisor.getFromDef("START_TILE")
+    if (num == 0):
+      starting_tile_node = supervisor.getFromDef("START_TILE")
+    else:
+      starting_tile_node = supervisor.getFromDef("R2START_TILE")
 
 
     # Get the starting tile minimum node and translation
-    starting_PointMin = supervisor.getFromDef("start0min")
+    starting_PointMin = supervisor.getFromDef("start"+str(num)+"min")
     starting_minPos = starting_PointMin.getField("translation")
 
     # Get maximum node and translation
-    starting_PointMax = supervisor.getFromDef("start0max")
+    starting_PointMax = supervisor.getFromDef("start"+str(num)+"max")
     starting_maxPos = starting_PointMax.getField("translation")
 
     # Get the vector positons
@@ -847,13 +850,13 @@ def set_robot_start_pos():
 
     startingTileObj = StartTile([starting_minPos[0], starting_minPos[2]], [starting_maxPos[0], starting_maxPos[2]], starting_tile_node, center=starting_centerPos,)
 
-    robot0Obj.startingTile = startingTileObj
-    robot0Obj.lastVisitedCheckPointPosition = startingTileObj.center
-    robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
-    robot0Obj.visitedCheckpoints.append(startingTileObj.center)
+    robot.startingTile = startingTileObj
+    robot.lastVisitedCheckPointPosition = startingTileObj.center
+    robot.startingTile.wb_node.getField("start").setSFBool(False)
+    robot.visitedCheckpoints.append(startingTileObj.center)
 
-    robot0Obj.position = [startingTileObj.center[0], startingTileObj.center[1], startingTileObj.center[2]]
-    robot0Obj.set_starting_orientation()
+    robot.position = [startingTileObj.center[0], startingTileObj.center[1], startingTileObj.center[2]]
+    robot.set_starting_orientation()
 
 def clamp(n, minn, maxn):
     '''Simple clamp function that limits a number between a specified range'''
@@ -1607,6 +1610,13 @@ if __name__ == '__main__':
     uploader = threading.Thread(target=ControllerUploader.start)
     uploader.setDaemon(True)
     uploader.start()
+    
+    superteam = False
+    st_r1_fin = False
+    if supervisor.getFromDef("R2START_TILE") != None:
+      superteam = True
+
+    
 
     # Empty list to contain checkpoints
     checkpoints = []
@@ -1690,6 +1700,10 @@ if __name__ == '__main__':
 
     # Init robot as object to hold their info
     robot0Obj = Robot()
+    
+    robots = [robot0Obj]
+    if superteam:
+      robots.append(Robot())
 
     lastSentScore = 0
     lastSentTime = 0
@@ -1741,281 +1755,306 @@ if __name__ == '__main__':
               wait(1)
               supervisor.setLabel(0, "Score: " + str(0), 0.15, 0,0.15, 0x4cd137, 0)
               supervisor.setLabel(1, "Clock: " + str(int(int(maxTime)/60)).zfill(2) + ":"+ str(int(int(maxTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
-            # Get the robot nodes by their DEF names
-            robot0 = supervisor.getFromDef("ROBOT0")
-            # Add robot into world
-            add_robot()
-            # Init robot as object to hold their info
-            robot0Obj = Robot(robot0)
-            # Set robots starting position in world
-            set_robot_start_pos()
-            robot0Obj.inSimulation = True
-            robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
-            robotInitialized = True
+              
+            for i in range(len(robots)):
+              # Get the robot nodes by their DEF names
+              robot0 = supervisor.getFromDef("ROBOT"+str(i))
+              # Add robot into world
+              add_robot(i)
+              # Init robot as object to hold their info
+              robots[i] = Robot(robot0)
+              # Set robots starting position in world
+              set_robot_start_pos(i, robots[i])
+              robots[i].inSimulation = True
+              robots[i].setMaxVelocity(DEFAULT_MAX_VELOCITY)
+              robotInitialized = True
 
-            # Reset physics
-            robot0.resetPhysics()
+              # Reset physics
+              robots[i].wb_node.resetPhysics()
 
+              
+              #if configData[3] and viewpoint_node:
+              #    viewpoint_node.getField('follow').setSFString("e-puck 0")
+              #    setViewPoint(robots[i], viewpoint_node, nowSide)
+
+
+              # Restart controller code
+              # robot0.restartController()
+              first = False
+              if configData[2]:
+                supervisor.setLabel(4, "", 0.2, 0,0.4, 0xe74c3c, 0)
+              #robot0Obj.increaseScore("Debug", 100)
+
+              lastTime = supervisor.getTime()
             
-            if configData[3] and viewpoint_node:
-                viewpoint_node.getField('follow').setSFString("e-puck 0")
-                setViewPoint(robot0Obj, viewpoint_node, nowSide)
+            if superteam:
+              configData[1] = True
 
+        for rb_num, robot in enumerate(robots):
+          if robot.inSimulation:
+              print("RUNNING", rb_num)
+              if rb_num == 0 and st_r1_fin:
+                robot.setMaxVelocity(0)
+              if rb_num == 1 and not st_r1_fin:
+                robot.setMaxVelocity(0)
+              if rb_num == 1 and st_r1_fin:
+                robot.setMaxVelocity(6.28)
+            
+              # if configData[3] and viewpoint_node:
+              #   nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
+              #   if len(nearVictims) > 0:
+              #     if(len(nearVictims) > 1):
+              #       nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
+              #     side = nearVictims[0].getSide()
+              #     if side != nowSide:
+              #       setViewPoint(robot0Obj, viewpoint_node, side)
+              #       nowSide = side
+              
+              # Test if the robots are in checkpoints
+              checkpoint = [c for c in checkpoints if c.checkPosition(robot.position)]
+              if len(checkpoint):
+                robot.lastVisitedCheckPointPosition = checkpoint[0].center
+                alreadyVisited = False
 
-            # Restart controller code
-            # robot0.restartController()
-            first = False
-            if configData[2]:
-              supervisor.setLabel(4, "", 0.2, 0,0.4, 0xe74c3c, 0)
-            #robot0Obj.increaseScore("Debug", 100)
-
-            lastTime = supervisor.getTime()
-
-        if robot0Obj.inSimulation:
-            if configData[3] and viewpoint_node:
-              nearVictims = [h for h in humans if h.checkPosition(robot0Obj.position, 0.20) and h.onSameSide(robot0Obj.position)]
-              if len(nearVictims) > 0:
-                if(len(nearVictims) > 1):
-                  nearVictims.sort(key=lambda v: v.getDistance(robot0Obj.position))
-                side = nearVictims[0].getSide()
-                if side != nowSide:
-                  setViewPoint(robot0Obj, viewpoint_node, side)
-                  nowSide = side
-            # Test if the robots are in checkpoints
-            checkpoint = [c for c in checkpoints if c.checkPosition(robot0Obj.position)]
-            if len(checkpoint):
-              robot0Obj.lastVisitedCheckPointPosition = checkpoint[0].center
-              alreadyVisited = False
-
-              # Dont update if checkpoint is already visited
-              if not any([c == checkpoint[0].center for c in robot0Obj.visitedCheckpoints]):
-                  # Update robot's points and history
-                  robot0Obj.visitedCheckpoints.append(checkpoint[0].center)
-                  grid = coord2grid(checkpoint[0].center)
-                  roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-                  robot0Obj.increaseScore("Found checkpoint", 10, roomMult[roomNum])
-
-            # Check if the robots are in swamps
-            inSwamp = any([s.checkPosition(robot0Obj.position) for s in swamps])
-            # Check if robot is in swamp
-            if robot0Obj.inSwamp != inSwamp:
-                robot0Obj.inSwamp = inSwamp
-                if robot0Obj.inSwamp:
-                    # Cap the robot's velocity to 2
-                    robot0Obj.setMaxVelocity(2)
-                    # Reset physics
-                    robot0.resetPhysics()
-                    # Update history
-                    robot0Obj.history.enqueue("Entered swamp")
-                else:
-                    # If not in swamp, reset max velocity to default
-                    robot0Obj.setMaxVelocity(DEFAULT_MAX_VELOCITY)
-                    # Reset physics
-                    robot0.resetPhysics()
-                    # Update history
-                    robot0Obj.history.enqueue("Exited swamp")
-
-            # If receiver has got a message
-            if receiver.getQueueLength() > 0:
-                # Get receiver data
-                receivedData = receiver.getData()
-                # Get length of bytes
-                rDataLen = len(receivedData)
-                try:
-                    if rDataLen == 1:
-                      tup = struct.unpack('c', receivedData)
-                      robot0Obj.message = [tup[0].decode("utf-8")]
-                    # Victim identification bytes data should be of length = 9
-                    elif rDataLen == 9:
-                        # Unpack data
-                        tup = struct.unpack('i i c', receivedData)
-
-                        # Get data in format (est. x position, est. z position, est. victim type)
-                        x = tup[0]
-                        z = tup[1]
-
-                        estimated_victim_position = (x / 100, 0, z / 100)
-
-                        victimType = tup[2].decode("utf-8")
-
-                        # Store data recieved
-                        robot0Obj.message = [estimated_victim_position, victimType]
-                    else:
-                        """
-                         For map data, the format sent should be:
-                        
-                         receivedData = b'_____ _________________'
-                                            ^          ^
-                                          shape     map data
-                        """
-                        # Shape data should be two bytes (2 integers)
-                        shape_bytes = receivedData[:8] # Get shape of matrix
-                        data_bytes = receivedData[8::] # Get data of matrix
-
-                        # Get shape data
-                        shape = struct.unpack('2i',shape_bytes)
-                        # Size of flattened 2d array
-                        shape_size = shape[0] * shape[1]
-                        # Get map data
-                        map_data = data_bytes.decode('utf-8').split(',')
-                        # Reshape data using the shape data given
-                        reshaped_data = np.array(map_data).reshape(shape)
-                        
-                        robot0Obj.map_data = reshaped_data
-                except Exception as e:
-                    print(cl.colored("Incorrect data format sent", "red"))
-                    print(cl.colored(e, "red"))
-
-                receiver.nextPacket()
-
-                # If data sent to receiver
-                if robot0Obj.message != []:
-
-                    r0_message = robot0Obj.message
-                    robot0Obj.message = []
-
-                    # If exit message is correct
-                    if r0_message[0] == 'E':
-                      # Check robot position is on starting tile
-                      if robot0Obj.startingTile.checkPosition(robot0Obj.position):
+                # Dont update if checkpoint is already visited
+                if not any([c == checkpoint[0].center for c in robot.visitedCheckpoints]):
+                    if superteam:
+                      st_r1_fin = True
+                      if rb_num == 1:
+                        #robot_quit(robots[1], 1, True)
+                        #robot_quit(robots[0], 0, True)
+                        robot.inSimulation = False
                         finished = True
-                        supervisor.wwiSendText("ended")
-                        if robot0Obj.victimIdentified:
-                          robot0Obj.increaseScore("Exit Bonus", robot0Obj.getScore() * 0.1)
-                        else:
-                          robot0Obj.history.enqueue("No Exit Bonus")
-                        add_map_multiplier()
-                        # Update score and history
-                        robot_quit(robot0Obj, 0, False)
                         last = True
-                            
-                    elif r0_message[0] == 'M':
-                        try:
-                          # If map_data submitted
-                          if robot0Obj.map_data.size != 0:
-                            # If not previously evaluated
-                            if not robot0Obj.sent_maps: 
-                              map_score = MapScorer.calculateScore(mapSolution, robot0Obj.map_data)
-                                                      
-                              robot0Obj.history.enqueue(f"Map Correctness {str(round(map_score * 100,2))}%")
-                              
-                              # Add percent
-                              robot0Obj.map_score_percent = map_score
-                              robot0Obj.sent_maps = True
-                              
-                              robot0Obj.map_data = np.array([])
-                              # Do something...
-                            else:
-                              print(cl.colored(f"The map has already been evaluated.", "red"))
+                        supervisor.wwiSendText("ended")
+                      
+                    # Update robot's points and history
+                    robot.visitedCheckpoints.append(checkpoint[0].center)
+                    grid = coord2grid(checkpoint[0].center)
+                    roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                    robot.increaseScore("Found checkpoint", 10, roomMult[roomNum])
+
+              # Check if the robots are in swamps
+              inSwamp = any([s.checkPosition(robot.position) for s in swamps])
+              # Check if robot is in swamp
+              if robot.inSwamp != inSwamp:
+                  robot.inSwamp = inSwamp
+                  if robot.inSwamp:
+                      # Cap the robot's velocity to 2
+                      robot.setMaxVelocity(2)
+                      # Reset physics
+                      robot.wb_node.resetPhysics()
+                      # Update history
+                      robot.history.enqueue("Entered swamp")
+                  else:
+                      # If not in swamp, reset max velocity to default
+                      robot.setMaxVelocity(DEFAULT_MAX_VELOCITY)
+                      # Reset physics
+                      robot.wb_node.resetPhysics()
+                      # Update history
+                      robot.history.enqueue("Exited swamp")
+
+              # If receiver has got a message
+              if receiver.getQueueLength() > 0:
+                  # Get receiver data
+                  receivedData = receiver.getData()
+                  # Get length of bytes
+                  rDataLen = len(receivedData)
+                  try:
+                      if rDataLen == 1:
+                        tup = struct.unpack('c', receivedData)
+                        robot.message = [tup[0].decode("utf-8")]
+                      # Victim identification bytes data should be of length = 9
+                      elif rDataLen == 9:
+                          # Unpack data
+                          tup = struct.unpack('i i c', receivedData)
+
+                          # Get data in format (est. x position, est. z position, est. victim type)
+                          x = tup[0]
+                          z = tup[1]
+
+                          estimated_victim_position = (x / 100, 0, z / 100)
+
+                          victimType = tup[2].decode("utf-8")
+
+                          # Store data recieved
+                          robot.message = [estimated_victim_position, victimType]
+                      else:
+                          """
+                          For map data, the format sent should be:
+                          
+                          receivedData = b'_____ _________________'
+                                              ^          ^
+                                            shape     map data
+                          """
+                          # Shape data should be two bytes (2 integers)
+                          shape_bytes = receivedData[:8] # Get shape of matrix
+                          data_bytes = receivedData[8::] # Get data of matrix
+
+                          # Get shape data
+                          shape = struct.unpack('2i',shape_bytes)
+                          # Size of flattened 2d array
+                          shape_size = shape[0] * shape[1]
+                          # Get map data
+                          map_data = data_bytes.decode('utf-8').split(',')
+                          # Reshape data using the shape data given
+                          reshaped_data = np.array(map_data).reshape(shape)
+                          
+                          robot.map_data = reshaped_data
+                  except Exception as e:
+                      print(cl.colored("Incorrect data format sent", "red"))
+                      print(cl.colored(e, "red"))
+
+                  receiver.nextPacket()
+
+                  # If data sent to receiver
+                  if robot.message != []:
+
+                      r0_message = robot.message
+                      robot.message = []
+
+                      # If exit message is correct
+                      if r0_message[0] == 'E':
+                        # Check robot position is on starting tile
+                        if robot.startingTile.checkPosition(robot.position):
+                          finished = True
+                          supervisor.wwiSendText("ended")
+                          if robot.victimIdentified:
+                            robot.increaseScore("Exit Bonus", robot.getScore() * 0.1)
                           else:
-                            print(cl.colored("Please send your map data before hand.", "red"))
-                        except Exception as e:
-                          print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
-                          print(cl.colored(e, "red"))
-                    
-                    elif r0_message[0] == 'L':
-                      relocate(robot0, robot0Obj)
-                      robot0Obj.robot_timeStopped = 0
-                      robot0Obj.stopped = False
-                      robot0Obj.stoppedTime = None
+                            robot.history.enqueue("No Exit Bonus")
+                          add_map_multiplier()
+                          # Update score and history
+                          robot_quit(robot, 0, False)
+                          last = True
+                              
+                      elif r0_message[0] == 'M':
+                          try:
+                            # If map_data submitted
+                            if robot.map_data.size != 0:
+                              # If not previously evaluated
+                              if not robot.sent_maps: 
+                                map_score = MapScorer.calculateScore(mapSolution, robot.map_data)
+                                                        
+                                robot.history.enqueue(f"Map Correctness {str(round(map_score * 100,2))}%")
+                                
+                                # Add percent
+                                robot.map_score_percent = map_score
+                                robot.sent_maps = True
+                                
+                                robot.map_data = np.array([])
+                                # Do something...
+                              else:
+                                print(cl.colored(f"The map has already been evaluated.", "red"))
+                            else:
+                              print(cl.colored("Please send your map data before hand.", "red"))
+                          except Exception as e:
+                            print(cl.colored("Map scoring error. Please check your code. (except)", "red"))
+                            print(cl.colored(e, "red"))
+                      
+                      elif r0_message[0] == 'L':
+                        relocate(robot.wb_node, robot)
+                        robot.robot_timeStopped = 0
+                        robot.stopped = False
+                        robot.stoppedTime = None
+                        if configData[3] and viewpoint_node:
+                          setViewPoint(robot, viewpoint_node, nowSide)
+
+                      elif r0_message[0] == 'G':
+                        emitter.send(struct.pack("c f i", bytes("G", "utf-8"), round(robot.getScore(),2), maxTime - int(timeElapsed)))
+
+                      # If robot stopped for 1 second
+                      elif robot.timeStopped() >= 1.0:
+
+                          # Get estimated values
+                          r0_est_vic_pos = r0_message[0]
+                          r0_est_vic_type = r0_message[1]
+
+                          # For each human
+                          # TODO optimise
+                          
+                          def toLower(s):
+                              return s.lower()
+                          
+                          iterator = humans
+                          name = 'Victim'
+                          
+                          if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
+                              iterator = hazards
+                              name = 'Hazard'
+                              
+                          misidentification = True
+                          for i, h in enumerate(iterator):
+                              # Check if in range
+                              if h.checkPosition(robot.position):
+                                  # Check if estimated position is in range
+                                  if h.checkPosition(r0_est_vic_pos):
+                                      # If robot on same side
+                                      if h.onSameSide(robot.position):
+                                          misidentification = False
+                                          # If not already identified
+                                          if not h.identified:
+                                              # Get points scored depending on the type of victim
+                                              #pointsScored = h.scoreWorth
+
+                                              grid = coord2grid(h.wb_translationField.getSFVec3f())
+                                              roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+
+                                              # Update score and history
+                                              if r0_est_vic_type.lower() == h.simple_victim_type.lower():
+                                                  robot.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
+
+                                              robot.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
+                                              robot.victimIdentified = True
+
+                                              h.identified = True
+
+                          if misidentification:
+                              robot.increaseScore(f"Misidentification of {name}", -5)
+
+              
+              
+
+              if currentlyRunning and not finished:
+                # Relocate robot if stationary for 20 sec
+                if robot.timeStopped() >= 20:
+                    if not configData[1]:
+                      relocate(robot.wb_node, robot)
                       if configData[3] and viewpoint_node:
-                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
+                          setViewPoint(robot, viewpoint_node, nowSide)
+                    robot.robot_timeStopped = 0
+                    robot.stopped = False
+                    robot.stoppedTime = None
 
-                    elif r0_message[0] == 'G':
-                      emitter.send(struct.pack("c f i", bytes("G", "utf-8"), round(robot0Obj.getScore(),2), maxTime - int(timeElapsed)))
-
-                    # If robot stopped for 1 second
-                    elif robot0Obj.timeStopped() >= 1.0:
-
-                        # Get estimated values
-                        r0_est_vic_pos = r0_message[0]
-                        r0_est_vic_type = r0_message[1]
-
-                        # For each human
-                        # TODO optimise
-                        
-                        def toLower(s):
-                            return s.lower()
-                        
-                        iterator = humans
-                        name = 'Victim'
-                        
-                        if r0_est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
-                            iterator = hazards
-                            name = 'Hazard'
-                            
-                        misidentification = True
-                        for i, h in enumerate(iterator):
-                            # Check if in range
-                            if h.checkPosition(robot0Obj.position):
-                                # Check if estimated position is in range
-                                if h.checkPosition(r0_est_vic_pos):
-                                    # If robot on same side
-                                    if h.onSameSide(robot0Obj.position):
-                                        misidentification = False
-                                        # If not already identified
-                                        if not h.identified:
-                                            # Get points scored depending on the type of victim
-                                            #pointsScored = h.scoreWorth
-
-                                            grid = coord2grid(h.wb_translationField.getSFVec3f())
-                                            roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-
-                                            # Update score and history
-                                            if r0_est_vic_type.lower() == h.simple_victim_type.lower():
-                                                robot0Obj.increaseScore(f"Successful {name} Type Correct Bonus", 10, roomMult[roomNum])
-
-                                            robot0Obj.increaseScore(f"Successful {name} Identification", h.scoreWorth, roomMult[roomNum])
-                                            robot0Obj.victimIdentified = True
-
-                                            h.identified = True
-
-                        if misidentification:
-                            robot0Obj.increaseScore(f"Misidentification of {name}", -5)
-
-            
-            
-
-            if currentlyRunning and not finished:
-              # Relocate robot if stationary for 20 sec
-              if robot0Obj.timeStopped() >= 20:
-                  if not configData[1]:
-                    relocate(robot0, robot0Obj)
-                    if configData[3] and viewpoint_node:
-                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
-                  robot0Obj.robot_timeStopped = 0
-                  robot0Obj.stopped = False
-                  robot0Obj.stoppedTime = None
-
-              if robot0Obj.position[1] < -0.035 and currentlyRunning and not finished:
-                  if not configData[1]:
-                    relocate(robot0, robot0Obj)
-                    if configData[3] and viewpoint_node:
-                        setViewPoint(robot0Obj, viewpoint_node, nowSide)
-                  robot0Obj.robot_timeStopped = 0
-                  robot0Obj.stopped = False
-                  robot0Obj.stoppedTime = None
+                if robot.position[1] < -0.035 and currentlyRunning and not finished:
+                    if not configData[1]:
+                      relocate(robot.wb_node, robot)
+                      if configData[3] and viewpoint_node:
+                          setViewPoint(robot, viewpoint_node, nowSide)
+                    robot.robot_timeStopped = 0
+                    robot.stopped = False
+                    robot.stoppedTime = None
 
 
-            if robotInitialized:
-              # Send the update information to the robot window
-              nowScore = robot0Obj.getScore()
-              if lastSentScore != nowScore or lastSentTime != int(timeElapsed):
-                  supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(int(timeElapsed)) + "," + str(maxTime))
-                  lastSentScore = nowScore
-                  lastSentTime = int(timeElapsed)
-                  if configData[2]:
-                    supervisor.setLabel(0, "Score: " + str(round(nowScore,2)), 0.15, 0,0.15, 0x4cd137, 0)
-                    remainTime = maxTime - int(timeElapsed)
-                    supervisor.setLabel(1, "Clock: " + str(int(int(remainTime)/60)).zfill(2) + ":"+ str(int(int(remainTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
+              if robotInitialized:
+                # Send the update information to the robot window
+                nowScore = robot.getScore()
+                if lastSentScore != nowScore or lastSentTime != int(timeElapsed):
+                    supervisor.wwiSendText("update," + str(round(nowScore,2)) + "," + str(int(timeElapsed)) + "," + str(maxTime))
+                    lastSentScore = nowScore
+                    lastSentTime = int(timeElapsed)
+                    if configData[2]:
+                      supervisor.setLabel(0, "Score: " + str(round(nowScore,2)), 0.15, 0,0.15, 0x4cd137, 0)
+                      remainTime = maxTime - int(timeElapsed)
+                      supervisor.setLabel(1, "Clock: " + str(int(int(remainTime)/60)).zfill(2) + ":"+ str(int(int(remainTime)%60)).zfill(2), 0.4, 0,0.15, 0x4cd137, 0)
 
-              # If the time is up
-              if timeElapsed >= maxTime and last != -1:
-                  add_map_multiplier()
-                  robot_quit(robot0Obj, 0, True)
-                  finished = True
-                  last = True
-                  supervisor.wwiSendText("ended")
+                # If the time is up
+                if timeElapsed >= maxTime and last != -1:
+                    add_map_multiplier()
+                    robot_quit(robot, 0, True)
+                    finished = True
+                    last = True
+                    supervisor.wwiSendText("ended")
 
         # If the running state changes
         if previousRunState != currentlyRunning:
@@ -2074,7 +2113,7 @@ if __name__ == '__main__':
                     data = message.split(",", 1)
                     if len(data) > 1:
                         if int(data[1]) == 0:
-                            relocate(robot0, robot0Obj)
+                            relocate(robot0Obj.wb_node, robot0Obj)
                             if configData[3] and viewpoint_node:
                               setViewPoint(robot0Obj, viewpoint_node, nowSide)
 
