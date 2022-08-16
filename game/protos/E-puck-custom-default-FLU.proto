@@ -6,7 +6,7 @@ PROTO custom_robot [
     field SFString           name                         "e-puck"                 # Is `Solid.name`.
     field SFFloat            camera_fieldOfView           0.84
     field SFInt32            camera_width                 64
-    field SFInt32            camera_height                60
+    field SFInt32            camera_height                40
     field SFBool             camera_antiAliasing          FALSE
     field SFRotation         camera_rotation              1 0 0 0
     field SFFloat            camera_noise                 0.0
@@ -360,8 +360,8 @@ Robot {
       ]
       name "camera_left"
       fieldOfView 1
-      width 128
-      height 128
+      width IS camera_width
+      height IS camera_height
       near 0.0055
       zoom Zoom {
       }
@@ -402,8 +402,8 @@ Robot {
       ]
       name "camera_right"
       fieldOfView 1
-      width 128
-      height 128
+      width IS camera_width
+      height IS camera_height
       near 0.0055
       zoom Zoom {
       }
@@ -444,8 +444,8 @@ Robot {
       ]
       name "camera_centre"
       fieldOfView 1
-      width 128
-      height 128
+      width IS camera_width
+      height IS camera_height
       near 0.0055
       zoom Zoom {
       }

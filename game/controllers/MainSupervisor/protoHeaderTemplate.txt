@@ -10,7 +10,7 @@ PROTO custom_robot [
     field SFString{"1"}      version                      "1"
     field SFFloat            camera_fieldOfView           0.84
     field SFInt32            camera_width                 64
-    field SFInt32            camera_height                60
+    field SFInt32            camera_height                40
     field SFBool             camera_antiAliasing          FALSE
     field SFRotation         camera_rotation              1 0 0 0
     field SFFloat            camera_noise                 0.0

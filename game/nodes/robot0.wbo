@@ -5,6 +5,6 @@ DEF ROBOT0 custom_robot {
   name "e-puck 0"
   controller "robot0Controller"
   camera_fieldOfView 1
-  camera_width 128
-  camera_height 128
+  camera_width 64
+  camera_height 40
 }

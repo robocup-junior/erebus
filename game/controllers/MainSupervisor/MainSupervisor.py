@@ -139,7 +139,7 @@ class Game(Supervisor):
 
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
-        self.mapSolution = self.MapAnswer.generateAnswer()
+        self.mapSolution = self.MapAnswer.generateAnswer(False)
 
         self.wwiSendText(f'worlds,{str(self.get_worlds())}')
         
