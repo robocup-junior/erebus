@@ -144,13 +144,13 @@ span{
 	stroke: black;
   }
 
-  .svg-icon {
+  .png-icon {
   fill: black;
   stroke: black;
   stroke-width: 1px;
   }
 
-  .svg-button{
+  .png-button{
   fill: black;
   stroke: black;
   }
@@ -243,7 +243,7 @@ span{
 
 
 .btn-reset {
-  background: #fff url('reset.svg') no-repeat top left;
+  background: #fff url('reset.png') no-repeat top left;
   background-size: 20px 20px;
   padding-left: 23px;
   padding-right: 5px;
@@ -255,7 +255,7 @@ span{
 }
 
 .btn-settings {
-  background: #fff url('settings.svg') no-repeat top left;
+  background: #fff url('settings.png') no-repeat top left;
   background-size: 20px 20px;
   padding-left: 23px;
   padding-right: 5px;
@@ -290,7 +290,7 @@ span{
 }
 
 .btn-giveup {
-  background: #fff url('exit.svg') no-repeat top left;
+  background: #fff url('exit.png') no-repeat top left;
   background-size: 20px 20px;
   padding-left: 23px;
   padding-right: 5px;
@@ -302,7 +302,7 @@ span{
 }
 
 .btn-giveupD {
-  background: #888 url('exit.svg') no-repeat top left;
+  background: #888 url('exit.png') no-repeat top left;
   background-size: 20px 20px;
   padding-left: 23px;
   padding-right: 5px;

@@ -21,7 +21,7 @@ class Controller():
         if self.keepController and not manual:
             files = glob.glob(os.path.join(path, "*"))
             if len(files) > 0:
-                supervisor.wwiSendText("loaded0")
+                supervisor.rws.send(self, "loaded0")
             return
 
         shutil.rmtree(path)
@@ -30,4 +30,4 @@ class Controller():
     def reset(self, supervisor) -> None:
         '''Send message to robot window to say that controller has been unloaded'''
         self.resetFile(supervisor, True)
-        supervisor.wwiSendText("unloaded0")
+        supervisor.rws.send(self, "unloaded0")

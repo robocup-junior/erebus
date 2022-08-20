@@ -1,5 +1,4 @@
-#VRML_OBJ R2022a utf8
-
+#VRML_SIM R2022b utf8
 PROTO custom_robot [
     field SFVec3f            translation                  0 0 0                    # Is `Transform.translation`.
     field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
@@ -332,7 +331,7 @@ Robot {
           rotation 9.381865489561552e-07 -9.381865488949227e-07 0.9999999999991198 1.5707944504244395
           children [
             Transform {
-              rotation 1 0 0 0
+              rotation IS camera_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -359,12 +358,14 @@ Robot {
         }
       ]
       name "camera_left"
-      fieldOfView 1
+      fieldOfView IS camera_fieldOfView
       width IS camera_width
       height IS camera_height
       near 0.0055
-      zoom Zoom {
-      }
+      antiAliasing IS camera_antiAliasing
+      motionBlur IS camera_motionBlur
+      noise IS camera_noise
+      zoom Zoom {}
     }
     DEF EPUCK_CAMERA_RIGHT Camera {
       translation 0.01 0.028 -0.033
@@ -374,7 +375,7 @@ Robot {
           rotation 9.381865489561552e-07 -9.381865488949227e-07 0.9999999999991198 1.5707944504244395
           children [
             Transform {
-              rotation 1 0 0 0
+              rotation IS camera_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -401,12 +402,14 @@ Robot {
         }
       ]
       name "camera_right"
-      fieldOfView 1
+      fieldOfView IS camera_fieldOfView
       width IS camera_width
       height IS camera_height
       near 0.0055
-      zoom Zoom {
-      }
+      antiAliasing IS camera_antiAliasing
+      motionBlur IS camera_motionBlur
+      noise IS camera_noise
+      zoom Zoom {}
     }
     DEF EPUCK_CAMERA_CENTRE Camera {
       translation 0 0.028 -0.035
@@ -416,7 +419,7 @@ Robot {
           rotation 9.381865489561552e-07 -9.381865488949227e-07 0.9999999999991198 1.5707944504244395
           children [
             Transform {
-              rotation 1 0 0 0
+              rotation IS camera_rotation
               children [
                 Shape {
                   appearance PBRAppearance {
@@ -443,12 +446,14 @@ Robot {
         }
       ]
       name "camera_centre"
-      fieldOfView 1
+      fieldOfView IS camera_fieldOfView
       width IS camera_width
       height IS camera_height
       near 0.0055
-      zoom Zoom {
-      }
+      antiAliasing IS camera_antiAliasing
+      motionBlur IS camera_motionBlur
+      noise IS camera_noise
+      zoom Zoom {}
     }
     DEF EPUCK_LED0 LED {
       translation 0 0.041 -0.0337
@@ -716,11 +721,11 @@ Robot {
     }
     DEF EPUCK_RECEIVER Receiver {
       rotation -0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.0943951023931953
-      channel 1
+      channel IS emitter_channel
     }
     DEF EPUCK_EMITTER Emitter {
       rotation -0.5773502691896258 -0.5773502691896258 -0.5773502691896258 2.0943951023931953
-      channel 1
+      channel IS receiver_channel
     }
     Solid {
       translation 0 0.001 -0.034
@@ -764,39 +769,38 @@ Robot {
       rotation 0 0 1 -1.57
     }
   ]
-  name "e-puck 0"
+  name IS name
   model "GCtronic e-puck"
   description "Educational robot designed at EPFL"
   boundingObject Group {
-    children [
+      children [
       Transform {
-        translation 0 0.025 0
-        rotation -1 0 0 1.5707963267948966
-        children [
+          translation 0 0.025 0
+          rotation -1 0 0 1.5707963267948966
+          children [
           Cylinder {
-            height 0.045
-            radius 0.037
-            subdivision 24
+              height 0.045
+              radius 0.037
+              subdivision 24
           }
-        ]
+          ]
       }
-    ]
+      ]
   }
   physics Physics {
-    density -1
-    mass 0.15
-    centerOfMass [
+      density -1
+      mass 0.15
+      centerOfMass [
       0 0.015 0
-    ]
-    inertiaMatrix [
+      ]
+      inertiaMatrix [
       8.74869e-05 9.78585e-05 8.64333e-05
       0 0 0
-    ]
+      ]
   }
-  controller "robot0Controller"
-  controllerArgs [
-    ""
-  ]
+  controller IS controller
+  controllerArgs IS controllerArgs
+  customData IS customData
   cpuConsumption 1.11
   linearVelocity 7.351019224865691e-08 -1.2877454905293263e-05 7.839837759367915e-09
   angularVelocity 2.563290017415191e-07 -3.0095317104110234e-11 -1.050015312560003e-05
