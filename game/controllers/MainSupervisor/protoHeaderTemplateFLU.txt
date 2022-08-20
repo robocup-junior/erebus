@@ -3,7 +3,7 @@
 PROTO custom_robot [
     field SFVec3f            translation                  0 0 0                    # Is `Transform.translation`.
     field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
-    field SFString           name                         "e-puck"                 # Is `Solid.name`.
+    field SFString           name                         "Erebus_Bot"                 # Is `Solid.name`.
     field SFFloat            camera_fieldOfView           0.84
     field SFInt32            camera_width                 64
     field SFInt32            camera_height                40

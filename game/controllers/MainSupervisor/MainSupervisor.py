@@ -233,10 +233,10 @@ class Game(Supervisor):
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus Bot" controller "<extern>" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "robot0controller" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         else:
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus Bot" controller "<extern>" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "robot0controller" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
         self.rws.send(self, "robotInSimulation0")
 
