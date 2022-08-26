@@ -105,10 +105,18 @@ def generate_robot_proto(robot_json):
 
         if(robot_json[component]["name"] == "Wheel"):
             proto_code += f"""
+            Transform {{
+            translation {x} {y} {z}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
+            children [
+            Transform {{
+            translation 0 0 0
+            rotation 0.57735 0.57735 0.57735 2.09
+            children [
             HingeJoint {{
             jointParameters HingeJointParameters {{
-                axis {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["rx"]}
-                anchor {x} {y} {z}
+                axis -1 0 0
+                anchor 0 0 0
             }}
             device [
                 RotationalMotor {{
@@ -123,11 +131,11 @@ def generate_robot_proto(robot_json):
                 }}
             ]
             endPoint Solid {{
-                translation {x} {y} {z}
-                rotation -0.9999999999999999 0 0 1.570789969636269
+                translation 0 0 0
+                rotation 0.707388 0 -0.707388 3.14
                 children [
                 Transform {{
-                    rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+                   rotation 0 0 0 0
                     children [
                     Shape {{
                         appearance PBRAppearance {{
@@ -215,7 +223,6 @@ def generate_robot_proto(robot_json):
                 ]
                 name "{robot_json[component]["customName"]}"
                 boundingObject Transform {{
-                rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
                 children [
                     Cylinder {{
                     height 0.005
@@ -230,6 +237,11 @@ def generate_robot_proto(robot_json):
                 }}
             }}
             }}
+            ]
+            }}
+            ]
+            }}
+            
             """
 
         if(robot_json[component]["name"] == "Camera"):
