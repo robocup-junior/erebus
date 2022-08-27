@@ -11,30 +11,28 @@ class Camera():
                 robotObj.position[1] + 0.8,
                 robotObj.position[2] - 0.8
             ]
-            vo = [0.0, 0.9235793898666079, 0.3834072386035822, 3.141592653589793]
+            vo = [-0.301184, -0.299742, -0.905231, 1.66967]
         elif self.side == "right":
             vp = [
                 robotObj.position[0] + 0.8,
                 robotObj.position[1] + 0.8,
                 robotObj.position[2]
             ]
-            vo = [-0.357996176885067, 0.8623673664230065,
-                0.357996176885067, 1.7183320854248436]
+            vo = [0.326219, -0.668033, -0.668814, 2.50804]
         elif self.side == "bottom":
             vp = [
                 robotObj.position[0],
                 robotObj.position[1] + 0.8,
                 robotObj.position[2] + 0.8
             ]
-            vo = [1.0, 0.0, 0.0, 5.4962200048483485]
+            vo = [-0.683263, 0.683263, 0.257493, 2.63756]
         elif self.side == "left":
             vp = [
                 robotObj.position[0] - 0.8,
                 robotObj.position[1] + 0.8,
                 robotObj.position[2]
             ]
-            vo = [0.357996176885067, 0.8623673664230065,
-                0.357996176885067, 4.564853221754743]
+            vo = [-0.794909, 0.429338, -0.428705, 1.79875]
         self.wb_viewpoint_node.getField('position').setSFVec3f(vp)
         self.wb_viewpoint_node.getField('orientation').setSFRotation(vo)    
     
