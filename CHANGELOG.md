@@ -28,7 +28,7 @@ That being said, your team's **custom robot JSON files will have to be re-create
 
 Since this is a large update to the erebus code base, there may be some bugs. Please feel free to create bug issues on the respective Gitlab repos to help us fix any major issues:
 - [Erebus issues](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
-- [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
+- [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
 
 ## [Release v21.2.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.1) - 2021-06-11
 
