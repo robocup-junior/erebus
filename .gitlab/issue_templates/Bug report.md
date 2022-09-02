@@ -5,7 +5,7 @@ A summary of the issue.
 ## Environments
 * OS:
 * Webots version: 
-* Python version:
+* Python version (or language version + compiler):
 * Erebus version:
 
 ## Expected Behavior
