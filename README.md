@@ -50,6 +50,8 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
+## [Unreleased]() v22.0.0 - 2022-xx-xx
+
 ## [Release v21.2.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.1) - 2021-06-11
 
 ### Changed

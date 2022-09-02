@@ -3,17 +3,32 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased] v22.0.0 - 2022-xx-xx
+## [Unreleased]() v22.0.0 - 2022-xx-xx
 
 ### Added
 - ✨: Added world selector
 
 ### Changed
+- ❗: Erebus must be run with Webots version 2022a. Download [here](https://github.com/cyberbotics/webots/releases/tag/R2022a).
+- ❗: Old custom robot JSON files will no longer work and have to be recreated using the robot customization v22.0.0
 - ⚡️: Reworked internal code
 - ⚡️: Updated code to align with [new Webots coordinate changes](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a).
 - ⚡️: Obstacles not implemented properly
 ### Removed
 - 🗑️: Unused obstacle code
+
+### Extra notes
+
+The changes to the coordinate system within Webots 2022a can be viewed [here](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a), but as a simple summary:
+> Before, Webots was using NUE as the global coordinate system and we switched it to be new ENU by default.
+
+We've worked hard to ensure your code isn't be affected by the changes of the new Webots client version, and you shouldn't see any difference to how Erebus runs.
+
+That being said, your team's **custom robot JSON files will have to be re-created** due to the changes to the custom robot generator to accommodate the new coordinate system using the new robot customization v22.0.0.
+
+Since this is a large update to the erebus code base, there may be some bugs. Please feel free to create bug issues on the respective Gitlab repos to help us fix any major issues:
+- [Erebus issues](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
+- [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
 
 ## [Release v21.2.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.1) - 2021-06-11
 
@@ -120,6 +135,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Release v21.0.0 Beta-1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.0.0_Beta-1) - 2021-04-05
 - First Beta release
-
-[Unreleased]: https://gitlab.com/rcj-rescue-tc/erebus/erebus  
-<!-- [Release v21.0.0 Beta-1]: URL HERE!!  -->
