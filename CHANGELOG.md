@@ -22,7 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 The changes to the coordinate system within Webots 2022a can be viewed [here](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a), but as a simple summary:
 > Before, Webots was using NUE as the global coordinate system and we switched it to be new ENU by default.
 
-We've worked hard to ensure your code isn't be affected by the changes of the new Webots client version, and you shouldn't see any difference to how Erebus runs.
+> The object's axis system of Webots is now FLU (x-Forward, y-Left, z-Up).
+
+We are continuing to use the NUE global coordinate system so you shouldn't notice a difference in how your team's code will run. However, internal Erebus code had to be changed to accommodate the new FLU object axis system change.
 
 That being said, your team's **custom robot JSON files will have to be re-created** due to the changes to the custom robot generator to accommodate the new coordinate system using the new robot customization v22.0.0.
 

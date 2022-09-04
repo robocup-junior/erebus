@@ -412,7 +412,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     Console.log_err("Please send your map data before hand.")
             except Exception as e:
                 Console.log_err("Map scoring error. Please check your code. (except)")
-                Console.log_err(e)
+                Console.log_err(str(e))
 
         elif robotMessage[0] == 'L':
             self.relocate_robot()
