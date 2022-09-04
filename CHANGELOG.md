@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added
 - ✨: Added world selector
+- ✨: Added a new warning within the swamp when Erebus detects that a team's controller may not be setting it's wheel velocities every frame.
 
 ### Changed
 - ❗: Erebus must be run with Webots version 2022a. Download [here](https://github.com/cyberbotics/webots/releases/tag/R2022a).
@@ -14,17 +15,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - ⚡️: Reworked internal code
 - ⚡️: Updated code to align with [new Webots coordinate changes](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a).
 - ⚡️: Obstacles not implemented properly
+- ⚡️: Reworked how the swamp slows the robot
+
 ### Removed
 - 🗑️: Unused obstacle code
 
 ### Extra notes
+
+#### Swamp warning
+
+A new warning message may appear when a robot stops in the swamp:
+
+```
+[EREBUS WARNING] Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every frame.
+[EREBUS WARNING] See Erebus 22.0.0 changelog for more details.
+```
+
+Under some conditions, the robot can stop when entering the swamp if you're not setting the robot's wheel's velocities very time step.
+
+**Please note: Teams can be disqualified if their robot doesn't slow down when entering a swamp, by avoiding the slow penalty in any way.** 
+
+#### New coordinate changes
 
 The changes to the coordinate system within Webots 2022a can be viewed [here](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a), but as a simple summary:
 > Before, Webots was using NUE as the global coordinate system and we switched it to be new ENU by default.
 
 > The object's axis system of Webots is now FLU (x-Forward, y-Left, z-Up).
 
-We are continuing to use the NUE global coordinate system so you shouldn't notice a difference in how your team's code will run. However, internal Erebus code had to be changed to accommodate the new FLU object axis system change.
+We are continuing to use the NUE global coordinate system as we did before. However, internal Erebus code had to be changed to accommodate the new FLU object axis system change, therefore your team's code may experience axis sign (+/-) inversions in your sensor readings.
 
 That being said, your team's **custom robot JSON files will have to be re-created** due to the changes to the custom robot generator to accommodate the new coordinate system using the new robot customization v22.0.0.
 

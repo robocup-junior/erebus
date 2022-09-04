@@ -606,7 +606,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_VELOCITY, game)
+            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, game)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
