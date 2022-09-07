@@ -6,18 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [Release v22.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v22.0.0) - 2022-09-07
 
 ### Added
-- ✨: Added world selector
+
+- ✨: Added a world selector.
 - ✨: Added a new warning within the swamp when Erebus detects that a team's controller may not be setting it's wheel velocities every time step.
 
 ### Changed
+
 - ❗: Erebus must be run with Webots version 2022a. Download [here](https://github.com/cyberbotics/webots/releases/tag/R2022a).
-- ❗: Old custom robot JSON files will no longer work and have to be recreated using the new robot customization v22.0.0
-- ⚡️: Reworked internal code
+- ❗: Old custom robot JSON files will no longer work and have to be recreated using the new robot customization v22.0.0.
+- ⚡️: Reworked internal code.
 - ⚡️: Updated code to align with [new Webots coordinate changes](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a).
-- ⚡️: Reworked how the swamp slows the robot
-- 🐛: Obstacles not implemented properly
+- ⚡️: Reworked how swamps slow the robot.
+- ⚡️: Improved the look of Erebus console outputs to help distinguish them from Webots warnings/errors.
+- 🐛: Obstacles not implemented properly.
 
 ### Removed
+
 - 🗑️: Unused obstacle code
 
 ### Extra notes
@@ -26,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 A new warning message may appear when a robot stops in the swamp:
 
-```
+```text
 [EREBUS WARNING] Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every frame.
 [EREBUS WARNING] See Erebus 22.0.0 changelog for more details.
 ```
@@ -45,6 +49,7 @@ We are continuing to use the NUE global coordinate system as we did before. Howe
 That being said, your team's **custom robot JSON files will have to be re-created** due to the changes to the custom robot generator to accommodate the new coordinate system using the new robot customization v22.0.0.
 
 Since this is a large update to the erebus code base, there may be some bugs. Please feel free to create bug issues on the respective Gitlab repos to help us fix any issues:
+
 - [Erebus issues](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
 - [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
 
