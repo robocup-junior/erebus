@@ -635,7 +635,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
-                        Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every frame.\nSee Erebus 22.0.0 changelog for more details.")
+                        Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
 
                 if self.robot0Obj.position[1] < -0.035 and self.gameState == MATCH_RUNNING:
                     if not self.config.disableLOP:
