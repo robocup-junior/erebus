@@ -1,4 +1,4 @@
-#VRML_SIM R2021a utf8
+#VRML_SIM R2022a utf8
 # tags: static
 
 PROTO HazardMap [
@@ -47,7 +47,7 @@ PROTO HazardMap [
             Solid {
                
                 translation 0 0 0
-                rotation 0 0.707105 -0.707108 3.14159
+                rotation 0 1 0 3.14159
                 children [
                     Shape {
                         appearance Appearance {

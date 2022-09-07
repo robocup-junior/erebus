@@ -266,6 +266,29 @@ span{
   color: #4b4b4b;
 }
 
+.btn-worlds {
+  background: #fff;
+  background-size: 20px 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 24px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #4b4b4b;
+}
+
+.btn-world {
+  background: #fff;
+  background-size: 20px 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #4b4b4b;
+}
+
 .btn-giveup {
   background: #fff url('exit.svg') no-repeat top left;
   background-size: 20px 20px;
@@ -290,21 +313,50 @@ span{
   color: #4b4b4b;
 }
 
+.btn-test {
+  background: #fff;
+  background-size: 20px 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #4b4b4b;
+}
+
 .hidden_box input {
   display: none;
 }
 
 .hidden_show {
-  height: 0;
+  max-height: 0;
   padding: 0;
   overflow: hidden;
   opacity: 0;
-  transition: 0.8s;
+  transition: 0.6s;
 }
 
 .hidden_box input:checked ~ .hidden_show {
   padding: 10px 0;
-  height: auto;
+  max-height: 500px;
+  opacity: 1;
+}
+
+.hidden_box_worlds input {
+  display: none;
+}
+
+.hidden_show_worlds {
+  max-height: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: 0.6s;
+}
+
+.hidden_box_worlds input:checked ~ .hidden_show_worlds {
+  padding: 10px 0;
+  max-height: 500px;
   opacity: 1;
 }
 
@@ -379,4 +431,8 @@ span{
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.world_thumb {
+  width: 70px;
 }

@@ -14,16 +14,19 @@ PROTO worldTile [
 	  field SFBool trap FALSE
 	  field SFBool checkpoint FALSE
 	  field SFBool swamp FALSE
+	  field SFBool obstacle FALSE
+	  field SFRotation obstacleRotation 0 1 0 2.477
+	  field SFVec2f obstacleOffset 0 0
 	  field SFFloat width 0.0
 	  field SFFloat height 0.0
 	  field SFString id ""
 	  field SFFloat xScale 1.0
 	  field SFFloat zScale 1.0
 	  field SFFloat yScale 1.0
-	 field SFColor tileColor 0 0 0 #Blue: 0.1 0.1 0.9; Purple: 0.3 0.1 0.6; Red: 0.9 0.1 0.1
-	 field SFBool isHalf FALSE
-	 field SFInt32 curveDir 0
-	 field SFInt32 room 0
+	  field SFColor tileColor 0 0 0 #Blue: 0.1 0.1 0.9; Purple: 0.3 0.1 0.6; Red: 0.9 0.1 0.1
+	  field SFBool isHalf FALSE
+	  field SFInt32 curveDir 0
+	  field SFInt32 room 0
 ]
 {
       DEF TILE Solid {
@@ -415,6 +418,38 @@ PROTO worldTile [
 					curvedWall {
 						rot %{= fields.curveDir.value}%
 						isHalf %{= fields.isHalf.value and "TRUE" or "FALSE"}%
+					}
+				%{end}%
+				%{if fields.obstacle.value == true then}%
+					%{
+						function clamp(x, h, l) 
+							if (x > h) then
+								return h
+							elseif (x < l) then
+								return l
+							end
+							return x
+						end
+
+						obs_xoff = clamp(fields.obstacleOffset.value.x, .15, -.15)
+						obs_yoff = clamp(fields.obstacleOffset.value.y, .15, -.15)
+						
+					}%
+					DEF OBSTACLE Transform {
+						translation %{=obs_xoff}% 0 %{=obs_yoff}% 
+						rotation IS obstacleRotation
+						children [
+							Shape {
+								appearance Appearance {
+									material Material {
+									diffuseColor 0.45 0.45 0.45
+									}
+								}
+								geometry DEF OBSTACLEBOX Box {
+									size 0.1 0.18 0.084
+								}
+							}
+						]
 					}
 				%{end}%
 			  ]
