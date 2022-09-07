@@ -20,14 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - ⚡️: Improved the look of Erebus console outputs to help distinguish them from Webots warnings/errors.
 - 🐛: Obstacles not implemented properly.
 
-### Removed
-## [Release v21.2.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.2) - 2021-10-10
-
-### Changed
-- 🐛: The map answer generator did not work correctly under some conditions
-
-- 🗑️: Unused obstacle code
-
 ### Extra notes
 
 #### Swamp warning
@@ -56,6 +48,13 @@ Since this is a large update to the erebus code base, there may be some bugs. Pl
 
 - [Erebus issues](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
 - [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
+
+## [Release v21.2.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.2) - 2021-10-10
+
+### Changed
+- 🐛: The map answer generator did not work correctly under some conditions
+
+- 🗑️: Unused obstacle code
 
 ## [Release v21.2.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.1) - 2021-06-11
 
