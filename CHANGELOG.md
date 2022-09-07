@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - 🐛: Obstacles not implemented properly.
 
 ### Removed
+## [Release v21.2.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v21.2.2) - 2021-10-10
+
+### Changed
+- 🐛: The map answer generator did not work correctly under some conditions
 
 - 🗑️: Unused obstacle code
 
