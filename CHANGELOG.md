@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - ❗: Erebus must be run with Webots version 2022a. Download [here](https://github.com/cyberbotics/webots/releases/tag/R2022a).
 - ❗: Old custom robot JSON files will no longer work and have to be recreated using the new robot customization v22.0.0.
+- ❗: Various sensor axis (rotations) have been changed to be more consistent with eachother and the world axis system. Generally the sensor axis should now be, relative to the robot pointing forwards, **X: Right, Y: Up, Z: Back.**
 - ⚡️: Reworked internal code.
 - ⚡️: Updated code to align with [new Webots coordinate changes](https://github.com/cyberbotics/webots/wiki/How-to-adapt-your-world-or-PROTO-to-Webots-R2022a).
 - ⚡️: Reworked how swamps slow the robot.
@@ -40,7 +41,7 @@ The changes to the coordinate system within Webots 2022a can be viewed [here](ht
 
 > The object's axis system of Webots is now FLU (x-Forward, y-Left, z-Up).
 
-We are continuing to use the NUE global coordinate system as we did before. However, internal Erebus code had to be changed to accommodate the new FLU object axis system change, therefore your team's code may experience axis sign (+/-) inversions in your sensor readings.
+We are continuing to use the NUE global coordinate system as we did before. Internal Erebus code had to be changed to accommodate the new FLU object axis system change, along with robot customiser updates and bug fixes. As a result, sensor axis have changed to be more consistent with eachother and the world axis (see changes section). **Changes to your team's code will have to be made to accommodate these new changes. Please make sure to test the new sensor axis changes since they will now be different.**
 
 That being said, your team's **custom robot JSON files will have to be re-created** due to the changes to the custom robot generator to accommodate the new coordinate system using the new robot customization v22.0.0.
 
