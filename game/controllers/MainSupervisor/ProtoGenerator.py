@@ -352,7 +352,7 @@ def generate_robot_proto(robot_json):
                 0.8 0.8 0
             ]
             type "infra-red"
-            rotation 0.577 -0.577 -0.577 2.09
+            rotation 1 0 0 1.56826
             }}
             ]
             }}
@@ -378,7 +378,7 @@ def generate_robot_proto(robot_json):
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
-                rotation 0.577 -0.577 -0.577 2.09
+                rotation 0 0 1 0
                 fieldOfView 6.2832
                 }}
             ]
