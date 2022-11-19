@@ -58,7 +58,6 @@ class MapAnswer:
                     self.setAnswer(z+3, x, 1)
                     self.setAnswer(z+4, x, 1)
                 
-                room = tile.getField("room").getSFInt32()
                 ## Half wall
                 try:
                     if tile.getField("tile1Walls").getMFInt32(0) > 0:

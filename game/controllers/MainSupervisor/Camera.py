@@ -1,4 +1,4 @@
-
+from ConsoleLog import Console
 class Camera():
     def __init__(self, node, side="bottom"):
         self.wb_viewpoint_node = node
@@ -11,30 +11,28 @@ class Camera():
                 robotObj.position[1] + 0.8,
                 robotObj.position[2] - 0.8
             ]
-            vo = [0.0, 0.9235793898666079, 0.3834072386035822, 3.141592653589793]
+            vo = [-0.34, -0.34, -0.88, 1.7]
         elif self.side == "right":
             vp = [
-                robotObj.position[0] + 0.8,
+                robotObj.position[0] + 0.7,
                 robotObj.position[1] + 0.8,
                 robotObj.position[2]
             ]
-            vo = [-0.357996176885067, 0.8623673664230065,
-                0.357996176885067, 1.7183320854248436]
+            vo = [-0.29, 0.68, 0.68, 3.71]
         elif self.side == "bottom":
             vp = [
                 robotObj.position[0],
                 robotObj.position[1] + 0.8,
-                robotObj.position[2] + 0.8
+                robotObj.position[2] + 0.7
             ]
-            vo = [1.0, 0.0, 0.0, 5.4962200048483485]
+            vo = [-0.683263, 0.683263, 0.257493, 2.63756]
         elif self.side == "left":
             vp = [
                 robotObj.position[0] - 0.8,
                 robotObj.position[1] + 0.8,
                 robotObj.position[2]
             ]
-            vo = [0.357996176885067, 0.8623673664230065,
-                0.357996176885067, 4.564853221754743]
+            vo = [-0.85, 0.37, -0.37, 1.73]
         self.wb_viewpoint_node.getField('position').setSFVec3f(vp)
         self.wb_viewpoint_node.getField('orientation').setSFRotation(vo)    
     

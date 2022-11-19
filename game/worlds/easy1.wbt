@@ -1148,7 +1148,7 @@ EXTERNPROTO "../protos/HazardMap.proto"
             ]
             supervisor TRUE
             controller "MainSupervisor"
-            customData "10"
+            customData "360"
             window "MainSupervisorWindow"
             showWindow TRUE
           }

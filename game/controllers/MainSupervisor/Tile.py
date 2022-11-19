@@ -133,7 +133,7 @@ class TileManager():
             else:
                 # If not in swamp, reset max velocity to default
                 # robotObj.setMaxVelocity(max_velocity)
-                robotObj.setMaxVelocity(1)
+                robotObj.setMaxVelocity(max_velocity)
                 # Reset physics
                 robotObj.wb_node.resetPhysics()
                 # Update history

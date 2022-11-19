@@ -224,7 +224,7 @@ Robot {
       ]
     }
     Gyro {
-      rotation 0 0 1 1.57079
+      rotation 0 1 0 0
     }
     SpotLight {
       attenuation 0 0 12.56
@@ -242,6 +242,7 @@ Robot {
       height 1
     }
     GPS {
+      rotation 0 1 0 0
     }
     DistanceSensor {
       translation 0.00941437 0.04 -0.0401418
@@ -641,7 +642,7 @@ Robot {
       ]
     }
     DEF EPUCK_ACCELEROMETER Accelerometer {
-      rotation 1 0 0 -1.57
+      rotation 0 1 0 0
       lookupTable [
         -100 -100 0.003
         100 100 0.003
