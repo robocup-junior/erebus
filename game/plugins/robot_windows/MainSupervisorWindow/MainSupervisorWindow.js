@@ -26,6 +26,7 @@ function receive (message){
 	//Receive message from the python supervisor
 	//Split on comma
 	var parts = message.split(",");
+	console.log(parts);
 
 	//If there is a message
 	if (parts.length > 0){			
@@ -144,11 +145,13 @@ function receive (message){
 }
 
 function updateWorld(worlds_str){
+	//reset worlds
+	document.getElementById("worlds_div").innerHTML = "";
+
 	var worlds_array_str = String(worlds_str)
 	let worlds = worlds_array_str.split(",");
 	for (let i = 0; i < worlds.length; i ++){
 		let button = document.createElement("button");
-		// let world_thumb = "../../../worlds/thumbnails/"+worlds[i].substring(0,worlds[i].length-4)+".png";
 		button.innerHTML = worlds[i];
 		button.onclick = function(){
 			window.robotWindow.send(`loadWorld,${worlds[i]}`);
@@ -158,6 +161,7 @@ function updateWorld(worlds_str){
 		document.getElementById("worlds_div").appendChild(button);
 		
 	}
+	// TODO worldloader only present on first run
 	document.getElementById("worldloader").remove();
 }
 
@@ -207,6 +211,11 @@ function updateHistory(history0){
 	document.getElementById("history").innerHTML = historyHtml;
 }
 
+function resetHistory() {
+	historyHtml = "";
+	document.getElementById("history").innerHTML = "";
+}
+
 function loadedController(id){
 	//A controller has been loaded into a robot id is 0 or 1 and name is the name of the robot
 	//Set name and toggle to unload button for robot 0
@@ -224,6 +233,9 @@ function unloadedController(id){
 }
 
 function startup (){
+	resetHistory();
+	unloadedController(0);
+	unloadedController(1);
 	//Turn on the run button and reset button when the program has loaded
 	setEnableButton("runButton", true);
 	setEnableButton("pauseButton", false);
@@ -231,6 +243,9 @@ function startup (){
 
 	setEnableButton("load0", true);
 	setEnableButton("unload0", true);
+	setEnableButton("load1", true);
+	setEnableButton("unload1", true);
+	setEnableButton("giveupB", false);
 }
 
 function update (data){
@@ -325,9 +340,9 @@ window.pausePressed = function(){
 window.resetPressed = function(){
 	//When the reset button is pressed
 	//Disable all buttons
-	setEnableButton("runButton", false)
+	setEnableButton("runButton", false);
 	setEnableButton("pauseButton", false);
-	setEnableButton('lopButton', false)
+	setEnableButton('lopButton', false);
 	//Send signal to reset everything
 	window.robotWindow.send("reset");
 }
@@ -488,25 +503,6 @@ window.openJsonFile = function(){
 		}
 		
 	}
-}
-
-function calculateWinner(name0,name1){
-	//if scores are the same
-	if (scores[0] == scores[1]){
-		//Show draw text
-		document.getElementById("winning-team").innerHTML = "Draw!"
-	}else {
-		//Find index of highest scoring team
-
-		if (scores[0] > scores[1]){
-			//Show robot 0 win text
-			document.getElementById("winning-team").innerHTML = name0 + " wins!"
-		} else {
-			//Show robot 1 win text
-			document.getElementById("winning-team").innerHTML = name1 + " wins!"
-		}
-	}
-
 }
 
 window.relocate = function(id){

@@ -1,14 +1,15 @@
 class RWSender:
-    def __init__(self):
+    def __init__(self, supervisor):
         self.history = {}
+        self.supervisor = supervisor
     
     def updateHistory(self, command: str, args: str = ''):
         self.history[command] = args
     
-    def send(self, supervisor, command: str, args: str = ''):
-        supervisor.wwiSendText(command + ', ' + args)
+    def send(self,command: str, args: str = ''):
+        self.supervisor.wwiSendText(command + ', ' + args)
         self.updateHistory(command, args)
     
-    def sendAll(self, supervisor):
+    def sendAll(self):
         for command in self.history:
-            supervisor.wwiSendText(command + ', ' + self.history[command])
+            self.supervisor.wwiSendText(command + ', ' + self.history[command])

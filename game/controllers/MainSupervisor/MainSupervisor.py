@@ -81,10 +81,10 @@ class Game(Supervisor):
         self.mainSupervisor = self.getFromDef("MAINSUPERVISOR")
         
         # Robot window send text wrapper
-        self.rws = RWSender()
+        self.rws = RWSender(self)
         
         # Send message to robot window to perform setup
-        self.rws.send(self, "startup")
+        self.rws.send("startup")
         
         self.gameState = MATCH_NOT_STARTED
         self.lastFrame = False
@@ -106,7 +106,7 @@ class Game(Supervisor):
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
             self.maxTime = int(customData[0])
-            self.rws.send(self, "update", str(0) + "," + str(0) + "," + str(self.maxTime))
+            self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime))
         
         self.getSimulationVersion()
         
@@ -145,11 +145,10 @@ class Game(Supervisor):
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
 
-        self.rws.send(self, 'worlds', f'{str(self.get_worlds())}')
+        self.rws.send('worlds', f'{str(self.get_worlds())}')
         
         self.testRunner = TestRunner(self)
         self.runTests = False
-
         # self.update_world_thumbnail()
     
     def game_init(self):
@@ -215,7 +214,7 @@ class Game(Supervisor):
             self.robot0Obj.wb_node.remove()
             self.robot0Obj.inSimulation = False
             # Send message to robot window to update quit button
-            self.rws.send(self, "robotNotInSimulation"+str(num))
+            self.rws.send("robotNotInSimulation"+str(num))
             # Update history event whether its manual or via exit message
             if not timeup:
                 self.robot0Obj.history.enqueue("Successful Exit", self)
@@ -238,7 +237,7 @@ class Game(Supervisor):
             root_children_field.importMFNodeFromString(
                 12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "robot0controller" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
-        self.rws.send(self, "robotInSimulation0")
+        self.rws.send("robotInSimulation0")
 
         return self.getFromDef("ROBOT0")
 
@@ -320,7 +319,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         '''Process json file to generate robot file'''
         robot_json = json.loads(json_data)
         if generate_robot_proto(robot_json):
-            self.rws.send(self, "loaded1")
+            self.rws.send("loaded1")
 
     def wait(self, sec):
         first = self.getTime()
@@ -355,7 +354,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
     def getSimulationVersion(self):
         try:
-            self.rws.send(self, "version", f"{self.version}")
+            self.rws.send("version", f"{self.version}")
             # Check updates
             url = "https://gitlab.com/api/v4/projects/22054848/releases"
             response = req.get(url)
@@ -364,16 +363,15 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 filter(lambda release: release['tag_name'].startswith(f"v{self.stream}"), releases))
             if len(releases) > 0:
                 if releases[0]['tag_name'].replace('_', ' ') == f'v{self.version}':
-                    self.rws.send(self, "latest", f"{self.version}")
+                    self.rws.send("latest", f"{self.version}")
                 elif any([r['tag_name'].replace('_', ' ') == f'v{self.version}' for r in releases]):
-                   self.rws.send(self,
-                        "outdated", f"{self.version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
+                   self.rws.send("outdated", f"{self.version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
                 else:
-                    self.rws.send(self, "unreleased", f"{self.version}")
+                    self.rws.send("unreleased", f"{self.version}")
             else:
-                self.rws.send(self, "version", f"{self.version}")
+                self.rws.send("version", f"{self.version}")
         except:
-            self.rws.send(self, "version", f"{self.version}")
+            self.rws.send("version", f"{self.version}")
 
     def processMessage(self, robotMessage):
 
@@ -382,7 +380,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             # Check robot position is on starting tile
             if self.robot0Obj.startingTile.checkPosition(self.robot0Obj.position):
                 self.gameState = MATCH_FINISHED
-                self.rws.send(self, "ended")
+                self.rws.send("ended")
                 if self.robot0Obj.victimIdentified:
                     self.robot0Obj.increaseScore(
                         "Exit Bonus", self.robot0Obj.getScore() * 0.1, self)
@@ -473,6 +471,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
     def receive(self, message):
         
         parts = message.split(",")
+        print(parts)
+        print(self.robot0Obj.inSimulation)
 
         # If there are parts
         if len(parts) > 0:
@@ -533,7 +533,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                             self.robot_quit(0, True)
                             self.gameState = MATCH_FINISHED
                             self.lastFrame = True
-                            self.rws.send(self, "ended")
+                            self.rws.send("ended")
 
             if parts[0] == 'robotJson':
                 data = message.split(",", 1)
@@ -558,7 +558,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.runTests = True
                 self.config.disableLOP = True
             if parts[0] == 'rw_reload':
-                self.rws.sendAll(self)
+                self.rws.sendAll()
                 # TODO might be better way -- may cause bugs
                 configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
                 self.config = self.getConfig(configFilePath)
@@ -573,7 +573,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         with open(configFilePath, 'r') as f:
             configData = f.read().split(',')
             
-        self.rws.send(self, "config",  ','.join(configData))
+        self.rws.send("config",  ','.join(configData))
         configData = list(map((lambda x: int(x)), configData))
         
         return Config(configData, configFilePath)
@@ -657,8 +657,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Send the update information to the robot window
                 nowScore = self.robot0Obj.getScore()
                 if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed):
-                    self.rws.send(self, 
-                        "update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime))
+                    self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime))
                     self.lastSentScore = nowScore
                     self.lastSentTime = int(self.timeElapsed)
                     if self.config.recording:
@@ -672,7 +671,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     self.gameState = MATCH_FINISHED
                     self.lastFrame = True
                     
-                    self.rws.send(self, "ended")
+                    self.rws.send("ended")
 
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()
@@ -692,6 +691,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.timeElapsed += frameTime
             # Get the current time
             self.lastTime = self.getTime()
+            # TODO CRASHES HERE (sometimes?): vvvvv
             # Step the simulation on
             step = self.step(TIME_STEP)
             # If the simulation is terminated or the time is up

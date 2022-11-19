@@ -41,7 +41,7 @@ class RobotHistory(Queue):
     def enqueue(self, data, supervisor):
         #update master history when an event happens
         record = self.update_master_history(data)
-        supervisor.rws.send(supervisor, "historyUpdate", ",".join(record))
+        supervisor.rws.send("historyUpdate", ",".join(record))
         hisT = ""
         histories = list(reversed(self.master_history))
         for h in range(min(len(histories),5)):
@@ -287,13 +287,13 @@ class Robot:
             if os.path.isfile(robot_proto):
                 if self.controller.keepController and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
-                        supervisor.rws.send(supervisor, "loaded1")
+                        supervisor.rws.send("loaded1")
                     return
                 shutil.copyfile(default_robot_proto, robot_proto)
             else:
                 shutil.copyfile(default_robot_proto, robot_proto)
                 supervisor.worldReload()
-            supervisor.rws.send(supervisor, "unloaded1")
+            supervisor.rws.send("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(e)
