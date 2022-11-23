@@ -8,7 +8,7 @@ class MapAnswer:
     def __init__(self, supervisor):
         self.supervisor = supervisor
         #Count the number of tiles
-        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
+        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount() - 1
         #Retrieve the node containing the tiles
         self.tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
         
@@ -340,10 +340,12 @@ class MapAnswer:
                         col_temp = 2*xCount + 1 + xShift
 
                 # Concatenate if victims on either side of the wall
-                if type(self.answerMatrix[row_temp][col_temp]) == str:
-                    self.answerMatrix[row_temp][col_temp] += victimType
-                else:
-                   self. answerMatrix[row_temp][col_temp] = victimType
+                if row_temp < len(self.answerMatrix) and col_temp < len(self.answerMatrix[0]):    #if victim not in area 4
+                    if type(self.answerMatrix[row_temp][col_temp]) == str:
+                        self.answerMatrix[row_temp][col_temp] += victimType
+                    else:
+                       self. answerMatrix[row_temp][col_temp] = victimType
+                    
             
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
