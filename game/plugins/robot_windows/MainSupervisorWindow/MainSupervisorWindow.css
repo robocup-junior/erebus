@@ -1,15 +1,7 @@
 
-
-@font-face { 
-  font-family: OpenSansBold; 
-  src: url('fonts/OpenSans-ExtraBold.ttf');
- } 
-@font-face { 
-  font-family: OpenSans; 
-  src: url('fonts/OpenSans-Bold.ttf');
- } 
 *{
-	font-family: OpenSans, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-weight: 500;
 }
 body{
   background: white;
@@ -96,7 +88,7 @@ span{
 
 .buttonLoad{
   cursor: pointer;
-  font-family: OpenSansBold;
+  font-weight: 700;
   text-transform: uppercase;
   line-height: 1.5;
   padding: 1em 2em;
@@ -111,7 +103,7 @@ span{
 
 .buttonUnload{
   cursor: pointer;
-  font-family: OpenSansBold;
+  font-weight: 700;
   text-transform: uppercase;
   font-weight: bold;
   line-height: 1.5;
@@ -209,7 +201,7 @@ span{
 
 .buttonQuit{
   cursor: pointer;
-  font-family: OpenSansBold;
+  font-weight: 700;
   text-transform: uppercase;
   font-weight: bold;
   line-height: 1.5;
