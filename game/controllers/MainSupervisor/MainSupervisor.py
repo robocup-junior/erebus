@@ -471,8 +471,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
     def receive(self, message):
         
         parts = message.split(",")
-        print(parts)
-        print(self.robot0Obj.inSimulation)
 
         # If there are parts
         if len(parts) > 0:
