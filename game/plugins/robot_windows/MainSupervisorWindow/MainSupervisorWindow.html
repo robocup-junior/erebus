@@ -16,12 +16,18 @@
 						<span id="newVersion"></span>
 					</div>
 					<div class="col-6">
-						<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/" style="margin:0;">
-							<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
-						</form>
-						<img src="program.png" style="max-width:100%;height:40px;"/><br>
-						<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load</button>
-						<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove</button>
+						<div class="row-6">
+							<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/" style="margin:0;">
+								<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
+							</form>
+							<img src="program.png" style="max-width:100%;height:40px;"/><br>
+							<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load</button>
+							<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove</button>
+						</div>
+						<div class="row-6">
+							<button class="button buttonLoad" onclick="enableRemotePressed()" style="display:inline-block;" id="enableRemote">Toggle Remote</button>
+							<button class="button buttonUnload" onclick="disableRemotePressed()" style="display:none;" id="disableRemote">Toggle Remote</button>
+						</div>
 					</div>
 					<div class="col-6">
 						<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />

@@ -150,6 +150,9 @@ class Game(Supervisor):
         self.testRunner = TestRunner(self)
         self.runTests = False
         # self.update_world_thumbnail()
+        
+        # Toggle for enabling remote webots controllers
+        self.remoteEnabled = False
     
     def game_init(self):
         # If recording
@@ -225,6 +228,10 @@ class Game(Supervisor):
         '''Add robot via .wbo file'''
         # Get relative path
         filePath = os.path.dirname(os.path.abspath(__file__))
+        
+        controller = "robot0controller"
+        if self.remoteEnabled:
+            controller = "<extern>"
 
         # Get webots root
         root = self.getRoot()
@@ -232,10 +239,10 @@ class Game(Supervisor):
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "robot0controller" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         else:
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "robot0controller" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
         self.rws.send("robotInSimulation0")
 
@@ -565,6 +572,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.rws.updateHistory("loadControllerPressed,", parts[1])
             if parts[0] == 'unloadControllerPressed':
                 self.rws.updateHistory("unloadControllerPressed,", parts[1])
+                
+            if parts[0] == 'remoteEnable':
+                self.remoteEnabled = True
+            if parts[0] == 'remoteDisable':
+                self.remoteEnabled = False
 
     def getConfig(self, configFilePath):
             

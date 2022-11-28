@@ -232,6 +232,15 @@ function unloadedController(id){
 	document.getElementById("load"+ id).style.display = "inline-block";
 }
 
+function setEnableRemoteBtn() {
+	document.getElementById("disableRemote").style.display = "none";
+	document.getElementById("enableRemote").style.display = "inline-block";
+}
+function setDisableRemoteBtn() {
+	document.getElementById("enableRemote").style.display = "none";
+	document.getElementById("disableRemote").style.display = "inline-block";
+}
+
 function startup (){
 	resetHistory();
 	unloadedController(0);
@@ -246,6 +255,10 @@ function startup (){
 	setEnableButton("load1", true);
 	setEnableButton("unload1", true);
 	setEnableButton("giveupB", false);
+	
+	setEnableButton("enableRemote", true);
+	setEnableButton("disableRemote", true);
+	setEnableRemoteBtn();
 }
 
 function update (data){
@@ -321,6 +334,9 @@ function preRun() {
 	setEnableButton('lopButton', true)
 
 	setEnableButton("giveupB", true);
+
+	setEnableButton("enableRemote", false);
+	setEnableButton("disableRemote", false);
 }
 
 window.runPressed = function(){
@@ -512,4 +528,17 @@ window.relocate = function(id){
 window.quit = function(id){
 	unloadPressed(id);
 	window.robotWindow.send("quit,"+id.toString());
+}
+
+window.enableRemotePressed = function() {
+	setEnableButton("load0", false);
+	setEnableButton("unload0", false);
+	setDisableRemoteBtn();
+	window.robotWindow.send("remoteEnable");
+}
+window.disableRemotePressed = function() {
+	setEnableButton("load0", true);
+	setEnableButton("unload0", true);
+	setEnableRemoteBtn();
+	window.robotWindow.send("remoteDisable");
 }
