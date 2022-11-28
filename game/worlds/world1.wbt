@@ -1,11 +1,12 @@
 #VRML_SIM R2022b utf8
-
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/1c31ee2ea5a740ba959e2dcc7c43fb5a853085bf/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/1c31ee2ea5a740ba959e2dcc7c43fb5a853085bf/projects/objects/backgrounds/protos/TexturedBackground.proto"
-EXTERNPROTO "../protos/worldTile.proto"
-EXTERNPROTO "../protos/Victim.proto"
-EXTERNPROTO "../protos/HazardMap.proto"
+EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/TexturedBackground.proto"
+EXTERNPROTO "../protos/curvedWall.proto"
 EXTERNPROTO "../protos/halfTile.proto"
+EXTERNPROTO "../protos/HazardMap.proto"
+EXTERNPROTO "../protos/obstacle.proto"
+EXTERNPROTO "../protos/Victim.proto"
+EXTERNPROTO "../protos/worldTile.proto"
 IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
 
 WorldInfo {
