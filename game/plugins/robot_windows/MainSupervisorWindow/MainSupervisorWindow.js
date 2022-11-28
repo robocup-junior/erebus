@@ -7,8 +7,6 @@ Changelog:
 
 import RobotWindow from 'https://cyberbotics.com/wwi/R2022b/RobotWindow.js';
 
-//The total time at the start
-var maxTime = 8 * 60;
 
 var visable = false;
 
@@ -255,7 +253,7 @@ function startup (){
 	setEnableButton("load1", true);
 	setEnableButton("unload1", true);
 	setEnableButton("giveupB", false);
-	
+
 	setEnableButton("enableRemote", true);
 	setEnableButton("disableRemote", true);
 	setEnableRemoteBtn();
@@ -268,8 +266,14 @@ function update (data){
 
 	scores = [data[0],0]
 
-	maxTime = data[2]
-	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1]);
+	//The total time at the start
+	let maxTime = 8 * 60; 
+	if (data[2]) { // is this necessary?
+		maxTime = data[2]
+	}
+	maxTime = parseInt(maxTime);
+	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1], maxTime);
+	document.getElementById("realWorldTimer").innerHTML = calculateTimeRemaining(data[3], maxTime + 60);
 }
 
 function updateConfig (data){
@@ -289,7 +293,7 @@ window.configChanged = function(){
 	window.robotWindow.send(`config,${data.join(',')}`);
 }
 
-function calculateTimeRemaining(done){
+function calculateTimeRemaining(done, maxTime){
 	//Create the string for the time remaining (mm:ss) given the amount of time elapsed
 	//Convert to an integer
 	done = Math.floor(done);

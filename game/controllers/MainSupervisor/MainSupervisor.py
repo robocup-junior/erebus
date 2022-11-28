@@ -92,9 +92,13 @@ class Game(Supervisor):
         # How long the game has been running for
         self.timeElapsed = 0
         self.lastTime = -1
+        self.realTimeElapsed = 0
+        self.lastRealTime = -1
+        self.firstRealTime = True
         
         self.lastSentScore = 0
         self.lastSentTime = 0
+        self.lastSentRealTime = 0
 
         self.robotInitialized = False
                 
@@ -102,11 +106,11 @@ class Game(Supervisor):
         self.maxTime = 8 * 60
         
         self.sWarnCooldown = False
-
+        customData = []
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
             self.maxTime = int(customData[0])
-            self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime))
+        self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime) + "," + str(0))
         
         self.getSimulationVersion()
         
@@ -186,6 +190,8 @@ class Game(Supervisor):
         self.lastTime = self.getTime()
         self.firstFrame = False
         self.robotInitialized = True
+        
+        self.lastRealTime = time.time()
     
     def relocate_robot(self):
         '''Relocate robot to last visited checkpoint'''
@@ -666,15 +672,17 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.robotInitialized:
                 # Send the update information to the robot window
                 nowScore = self.robot0Obj.getScore()
-                if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed):
-                    self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime))
+                if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
+                    self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
                     self.lastSentScore = nowScore
                     self.lastSentTime = int(self.timeElapsed)
+                    self.lastSentRealTime = int(self.realTimeElapsed)
                     if self.config.recording:
                         Recorder.update(self)
 
                 # If the time is up
-                if self.timeElapsed >= self.maxTime and self.lastFrame != -1:
+                # TODO 9 min rule? max time + 1 min?
+                if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= (self.maxTime + 60)) and self.lastFrame != -1:
                     self.add_map_multiplier()
                     self.robot_quit(0, True)
                     
@@ -692,16 +700,24 @@ ROBOT_0: {str(self.robot0Obj.name)}
         if self.gameState == MATCH_PAUSED:
             self.step(0)
             time.sleep(0.01)
+            self.lastRealTime = time.time()
 
         # If the match is running
         if self.robotInitialized and self.gameState == MATCH_RUNNING:
+            # TODO fix this since its not too responsive? - maybe not tho
+            # If waiting for a remote controller, don't count time waiting
+            if self.remoteEnabled and self.firstRealTime and self.lastTime != self.getTime():
+                self.lastRealTime = time.time()
+                self.firstRealTime = False
+            # Get real world time (for 9 min real world time elapsed rule)
+            self.realTimeElapsed += (time.time() - self.lastRealTime)
+            self.lastRealTime = time.time()
             # Get the time since the last frame
             frameTime = self.getTime() - self.lastTime
             # Add to the elapsed time
             self.timeElapsed += frameTime
             # Get the current time
             self.lastTime = self.getTime()
-            # TODO CRASHES HERE (sometimes?): vvvvv
             # Step the simulation on
             step = self.step(TIME_STEP)
             # If the simulation is terminated or the time is up
