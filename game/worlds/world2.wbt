@@ -25,7 +25,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
           ]
         }
         DEF Viewpoint Viewpoint {
-          orientation -1 0 0 0.85
+          orientation -0.683263 0.683263 0.257493 2.63756
           position -0.08 1.2000000000000002 1.02
         }
         TexturedBackground {
@@ -1815,6 +1815,5 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             controller "MainSupervisor"
             customData "480,bottom"
             window "MainSupervisorWindow"
-            showWindow TRUE
           }
         
