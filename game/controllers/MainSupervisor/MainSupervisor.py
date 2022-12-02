@@ -1,6 +1,7 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
+from tkinter import N
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -148,6 +149,8 @@ class Game(Supervisor):
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
+        for row in self.mapSolution:
+            print(row)
 
         self.rws.send('worlds', f'{str(self.get_worlds())}')
         
@@ -693,7 +696,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()
-        while message != '':
+        while message not in ['', None]:
             self.receive(message)
             message = self.wwiReceiveText()
 
