@@ -71,8 +71,8 @@ class Game(Supervisor):
         super().__init__()
         
         # Version info
-        self.stream = 22
-        self.version = "22.0.0"
+        self.stream = 23
+        self.version = "23.0.0"
         
         uploader = threading.Thread(target=ControllerUploader.start)
         uploader.setDaemon(True)
