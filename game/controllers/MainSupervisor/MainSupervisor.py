@@ -149,8 +149,6 @@ class Game(Supervisor):
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
-        for row in self.mapSolution:
-            print(row)
 
         self.rws.send('worlds', f'{str(self.get_worlds())}')
         
