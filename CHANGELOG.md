@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v22.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v22.0.1) - 2022-12-13
+
+> For the major changes, see the changelog for v22.0.0
+
+### Changed
+
+- 🐛: Fixed bug with distance and lidar sensors not placing in the correct positions on the robot
+
 ## [Release v22.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v22.0.0) - 2022-09-07
 
 ### Added
