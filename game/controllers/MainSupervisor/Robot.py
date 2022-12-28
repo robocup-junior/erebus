@@ -296,4 +296,4 @@ class Robot:
             supervisor.wwiSendText("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
-            Console.log_err(e)
+            Console.log_err(str(e))

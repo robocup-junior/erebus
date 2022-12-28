@@ -299,10 +299,15 @@ def generate_robot_proto(robot_json):
 
         if robot_json[component]["name"] in ["Gyro", "GPS", "InertialUnit"]:
             proto_code += f"""
-            {robot_json[component]["name"]} {{
+            Transform {{
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            children [
+            {robot_json[component]["name"]} {{
+            rotation 0.577 -0.577 -0.577 2.09
             name "{robot_json[component]["customName"]}"
+            }}
+            ]
             }}
             """
 
@@ -336,24 +341,34 @@ def generate_robot_proto(robot_json):
 
         if robot_json[component]["name"] == "Distance Sensor":
             proto_code += f"""
-            DistanceSensor {{
+            Transform {{
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            children [
+            DistanceSensor {{
             name "{robot_json[component]["customName"]}"
             lookupTable [
                 0 0 0
                 0.8 0.8 0
             ]
             type "infra-red"
+            rotation 1 0 0 1.56826
+            }}
+            ]
             }}
             """
 
         if(robot_json[component]["name"] == "Accelerometer"):
             proto_code += f"""
-            Accelerometer {{
-            lookupTable [ -100 -100 0.003 100 100 0.003 ]
+            Transform {{
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            children [
+            Accelerometer {{
+                lookupTable [ -100 -100 0.003 100 100 0.003 ]
+                rotation 0.577 -0.577 -0.577 2.09
+            }}
+            ]
             }}"""
 
         if(robot_json[component]["name"] == "Lidar"):
@@ -363,7 +378,7 @@ def generate_robot_proto(robot_json):
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
-                rotation 1 0 0 0
+                rotation 0 0 1 0
                 fieldOfView 6.2832
                 }}
             ]

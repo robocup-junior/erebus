@@ -69,8 +69,8 @@ class Game(Supervisor):
         super().__init__()
         
         # Version info
-        self.stream = 21
-        self.version = "21.2.1"
+        self.stream = 22
+        self.version = "22.0.0"
         
         uploader = threading.Thread(target=ControllerUploader.start)
         uploader.setDaemon(True)
@@ -412,7 +412,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     Console.log_err("Please send your map data before hand.")
             except Exception as e:
                 Console.log_err("Map scoring error. Please check your code. (except)")
-                Console.log_err(e)
+                Console.log_err(str(e))
 
         elif robotMessage[0] == 'L':
             self.relocate_robot()
@@ -606,7 +606,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_VELOCITY, game)
+            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, game)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
@@ -635,7 +635,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
-                        Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every frame.\nSee Erebus 22.0.0 changelog for more details.")
+                        Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
 
                 if self.robot0Obj.position[1] < -0.035 and self.gameState == MATCH_RUNNING:
                     if not self.config.disableLOP:
