@@ -8,6 +8,7 @@ PROTO HazardMap [
     field SFString   name              "Hazard Map"
     field SFString   type              "F"
     field SFInt32    scoreWorth        10
+	field SFBool     room4	           FALSE
 ]
 {
     %{

@@ -311,35 +311,36 @@ class MapAnswer:
 
                 
                 victimType = victim.getField("type").getSFString()
-                if victimType == "harmed":
-                    victimType = "H"
-                elif victimType == "unharmed":
-                    victimType = "U"
-                elif victimType == "stable":
-                    victimType = "S"
+                victimRoom4 = victim.getField("room4").getSFBool()
+                if victimRoom4 == False:
+                    if victimType == "harmed":
+                        victimType = "H"
+                    elif victimType == "unharmed":
+                        victimType = "U"
+                    elif victimType == "stable":
+                        victimType = "S"
 
-                rotation = victim.getField("rotation").getSFRotation()
-                if abs(round(rotation[3],2)) == 1.57:
-                    # Vertical
-                    zCount = int(zCount/2)
-                    if xCount % 2 == 0:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount
+                    rotation = victim.getField("rotation").getSFRotation()
+                    if abs(round(rotation[3],2)) == 1.57:
+                        # Vertical
+                        zCount = int(zCount/2)
+                        if xCount % 2 == 0:
+                            row_temp = 2*zCount + 1 + zShift
+                            col_temp = xCount
+                        else:
+                            row_temp = 2*zCount + 1 + zShift
+                            col_temp = xCount+1
                     else:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount+1
-                else:
-                    # Horizontal
-                    xCount = int(xCount/2)
-                    if zCount % 2 == 0:
-                        row_temp = zCount
-                        col_temp = 2*xCount + 1 + xShift
-                    else:
-                        row_temp = zCount+1
-                        col_temp = 2*xCount + 1 + xShift
+                        # Horizontal
+                        xCount = int(xCount/2)
+                        if zCount % 2 == 0:
+                            row_temp = zCount
+                            col_temp = 2*xCount + 1 + xShift
+                        else:
+                            row_temp = zCount+1
+                            col_temp = 2*xCount + 1 + xShift
 
-                # Concatenate if victims on either side of the wall
-                if row_temp < len(self.answerMatrix) and col_temp < len(self.answerMatrix[0]):    #if victim not in area 4
+                    # Concatenate if victims on either side of the wall
                     if type(self.answerMatrix[row_temp][col_temp]) == str:
                         self.answerMatrix[row_temp][col_temp] += victimType
                     else:

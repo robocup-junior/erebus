@@ -46,7 +46,7 @@ class StartTile(Tile):
         
 class TileManager():
     # Room multipliers
-    ROOM_MULT = [1, 1.25, 1.5]
+    ROOM_MULT = [1, 1.25, 1.5, 2]
     SWAMP_SLOW_MULT = 0.32
     
     def __init__(self):
