@@ -49,6 +49,8 @@ MATCH_RUNNING = 'MATCH_RUNNING'
 MATCH_FINISHED = 'MATCH_FINISHED'
 MATCH_PAUSED = 'MATCH_PAUSED'
 
+ROBOT_NAME = "Erebus_Bot"
+
 
 class Config():
     def __init__(self, configData, path):
@@ -183,7 +185,7 @@ class Game(Supervisor):
 
         # If automatic camera
         if self.config.automatic_camera and self.camera.wb_viewpoint_node:
-            self.camera.follow(self.robot0Obj)
+            self.camera.follow(self.robot0Obj, ROBOT_NAME)
 
         if self.config.recording:
             Recorder.resetCountDown(self)
@@ -246,10 +248,10 @@ class Game(Supervisor):
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         else:
             root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "Erebus_Bot" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
         self.rws.send("robotInSimulation0")
 
@@ -639,7 +641,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
                 # Get receiver data
-                receivedData = self.receiver.getData()
+                receivedData = self.receiver.getBytes()
                 testMsg = False
                 if self.runTests:
                     testMsg = self.testRunner.getStage(receivedData)
