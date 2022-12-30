@@ -276,12 +276,18 @@ function update (data){
 	document.getElementById("realWorldTimer").innerHTML = calculateTimeRemaining(data[3], maxTime + 60);
 }
 
+function updateTestBtnState(state) {
+	setEnableButton("test",!state);
+}
+
 function updateConfig (data){
 	//Update the config ui
 	document.getElementById("autoRemoveFiles").checked = Boolean(Number(data[0]));
 	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
 	document.getElementById("recording").checked = Boolean(Number(data[2]));
 	document.getElementById("autoCam").checked = Boolean(Number(data[3]));
+
+	updateTestBtnState(Boolean(Number(data[0])))
 }
 
 window.configChanged = function(){
@@ -290,6 +296,7 @@ window.configChanged = function(){
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
 	data[2] = String(Number(document.getElementById("recording").checked));
 	data[3] = String(Number(document.getElementById("autoCam").checked));
+	updateTestBtnState(document.getElementById("autoRemoveFiles").checked)
 	window.robotWindow.send(`config,${data.join(',')}`);
 }
 

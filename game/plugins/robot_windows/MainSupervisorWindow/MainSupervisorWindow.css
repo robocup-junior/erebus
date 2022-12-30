@@ -316,6 +316,17 @@ span{
   color: #4b4b4b;
 }
 
+.btn-test:disabled {
+  background: #fff;
+  background-size: 20px 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #8b8b8b;
+}
+
 .hidden_box input {
   display: none;
 }
@@ -427,4 +438,8 @@ span{
 
 .world_thumb {
   width: 70px;
+}
+
+.dev-line {
+  margin: 20px 40px 0px 40px;
 }
