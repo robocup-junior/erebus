@@ -675,6 +675,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.robotInitialized:
                 # Send the update information to the robot window
                 nowScore = self.robot0Obj.getScore()
+                self.timeElapsed = min(self.timeElapsed, self.maxTime)
+                self.realTimeElapsed = min(self.realTimeElapsed, self.maxTime + 60)
                 if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
                     self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
                     self.lastSentScore = nowScore
@@ -707,7 +709,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         # If the match is running
         if self.robotInitialized and self.gameState == MATCH_RUNNING:
-            # TODO fix this since its not too responsive? - maybe not tho
             # If waiting for a remote controller, don't count time waiting
             if self.remoteEnabled and self.firstRealTime and self.lastTime != self.getTime():
                 self.lastRealTime = time.time()
