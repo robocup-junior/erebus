@@ -24,9 +24,20 @@
 							<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load</button>
 							<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove</button>
 						</div>
-						<div class="row-6">
-							<button class="button buttonLoad" onclick="enableRemotePressed()" style="display:inline-block;" id="enableRemote">Toggle Remote</button>
-							<button class="button buttonUnload" onclick="disableRemotePressed()" style="display:none;" id="disableRemote">Toggle Remote</button>
+						<div class="col-12 remoteWrapper">
+							<div>
+								<button class="button buttonLoad" onclick="enableRemotePressed()" style="display:inline-block;" id="enableRemote">Toggle Remote</button>
+								<button class="button buttonUnload" onclick="disableRemotePressed()" style="display:none;" id="disableRemote">Toggle Remote</button>
+							</div>
+							<div>
+								<div class="tooltip">
+									<div class="tooltipmark">?</div>
+									<span class="tooltiptext">Enable webots remote extern controllers. 
+										Find out more <a href="https://cyberbotics.com/doc/guide/running-extern-robot-controllers" target="_blank">here</a>
+										<br>NOTE: Webots will wait for a controller to connect, and will halt the program until one is found.
+										 Failing to do so will cause you to have to manually reset Webots (CTRL+SHIFT+R) to use Erebus again.</span>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="col-6">
