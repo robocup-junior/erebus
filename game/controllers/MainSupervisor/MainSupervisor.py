@@ -107,6 +107,7 @@ class Game(Supervisor):
                 
         # Maximum time for a match
         self.maxTime = 8 * 60
+        self.maxRealWorldTime = self.maxTime + 60
         
         self.sWarnCooldown = False
         customData = []
@@ -676,7 +677,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Send the update information to the robot window
                 nowScore = self.robot0Obj.getScore()
                 self.timeElapsed = min(self.timeElapsed, self.maxTime)
-                self.realTimeElapsed = min(self.realTimeElapsed, self.maxTime + 60)
+                self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
                 if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
                     self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
                     self.lastSentScore = nowScore
@@ -687,7 +688,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
                 # If the time is up
                 # TODO 9 min rule? max time + 1 min?
-                if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= (self.maxTime + 60)) and self.lastFrame != -1:
+                if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
                     self.add_map_multiplier()
                     self.robot_quit(0, True)
                     
