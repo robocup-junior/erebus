@@ -585,8 +585,10 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 
             if parts[0] == 'remoteEnable':
                 self.remoteEnabled = True
+                self.rws.updateHistory("remoteEnabled")
             if parts[0] == 'remoteDisable':
                 self.remoteEnabled = False
+                self.rws.updateHistory("remoteDisabled")
 
     def getConfig(self, configFilePath):
             

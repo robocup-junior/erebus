@@ -138,6 +138,12 @@ function receive (message){
 			case "pausedPressed":
 				window.pausePressed();
 				break;
+			case "remoteEnabled":
+				window.enableRemotePressed();
+				break;
+			case "remoteDisabled":
+				window.disableRemotePressed();
+				break;
 		}
 	}
 }
