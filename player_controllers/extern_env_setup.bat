@@ -19,8 +19,7 @@ path|find /i "%WEBOTS_HOME%\msys64\mingw64\bin"     >nul || set path=%path%;%WEB
 path|find /i "%WEBOTS_HOME%\msys64\mingw64\bin\cpp" >nul || set path=%path%;%WEBOTS_HOME%\msys64\mingw64\bin\cpp
 
 IF "%PYTHONPATH%"=="" (
-    set /p "python_ver=Enter Python (37, 38 or 39): "
-    set path=%path%;%WEBOTS_HOME%\lib\controller\python%python_ver%
+    set PYTHONPATH=%WEBOTS_HOME%\lib\controller\python
 ) ELSE (
     echo PYTHONPATH already set: %PYTHONPATH%
 )
