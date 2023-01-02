@@ -143,8 +143,11 @@ PROTO worldTile [
 										Shape {
 											appearance Appearance {
 												material Material {
-													diffuseColor IS tileColor
+													diffuseColor 0 0 0
+													emissiveColor 0.0313 0.835 0.0313
+													shininess 0.8
 												}
+
 											}
 											geometry Box {
 												size %{=x_size}% %{=tileThickness}% %{=z_size}%
