@@ -456,7 +456,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                         self.robot0Obj.increaseScore(
                             f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-
+                            
                     self.robot0Obj.increaseScore(
                         f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                     self.robot0Obj.victimIdentified = True
