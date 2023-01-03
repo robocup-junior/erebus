@@ -157,7 +157,6 @@ class Game(Supervisor):
         
         self.testRunner = TestRunner(self)
         self.runTests = False
-        # self.update_world_thumbnail()
         
         # Toggle for enabling remote webots controllers
         self.remoteEnabled = False
@@ -345,11 +344,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.getTime() - first > sec:
                 break
         return
-
-    def update_world_thumbnail(self):
-        path = getFilePath("worlds/thumbnails", "../../worlds/thumbnails")
-        path = os.path.join(path, os.path.split(self.getWorldPath())[1][:-4]+'.png')
-        self.exportImage(path, 20)
 
     def get_worlds(self):           
         path = getFilePath("worlds", "../../worlds")    
