@@ -152,8 +152,6 @@ class Game(Supervisor):
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
-
-        self.rws.send('worlds', f'{str(self.get_worlds())}')
         
         self.testRunner = TestRunner(self)
         self.runTests = False
@@ -583,6 +581,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == 'remoteDisable':
                 self.remoteEnabled = False
                 self.rws.updateHistory("remoteDisabled")
+            if parts[0] == 'getWorlds':
+                self.rws.send('worlds', f'{str(self.get_worlds())}')
 
     def getConfig(self, configFilePath):
             

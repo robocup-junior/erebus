@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Added
 
 - ✨: Added support for Webots extern remote controllers to allow for remote controllers via tcp or locally. Read more about it [here](https://cyberbotics.com/doc/guide/running-extern-robot-controllers).
+- ✨: Added a world selector fresh button.
 - ✨: Added a new real-world timer to ensure controller don't take too long to run during competitions.
 - ✨: Added links to the world generator and robot customiser under settings.
 - ✨: Added some development unit tests that can be run under settings.

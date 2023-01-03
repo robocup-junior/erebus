@@ -495,3 +495,25 @@ hr {
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+
+.btn-refresh {
+  background: #fff url('reset.png') no-repeat top left;
+  background-size: 20px 20px;
+  width: 20px;
+  height: 20px;
+  border: solid 2px #b4b4b4;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #4b4b4b;
+}
+
+.worlds_container {
+  display: flex;
+}
+
+.refreshContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

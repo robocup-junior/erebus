@@ -165,8 +165,6 @@ function updateWorld(worlds_str){
 		document.getElementById("worlds_div").appendChild(button);
 		
 	}
-	// TODO worldloader only present on first run
-	document.getElementById("worldloader").remove();
 }
 
 function robotQuitColour(id){
@@ -263,6 +261,12 @@ function startup (){
 	setEnableButton("enableRemote", true);
 	setEnableButton("disableRemote", true);
 	setEnableRemoteBtn();
+	getWorlds();
+}
+
+window.getWorlds = function() {
+	console.log("Getting worlds...")
+	window.robotWindow.send('getWorlds');
 }
 
 function update (data){

@@ -124,13 +124,15 @@
 				<div class="hidden_box_worlds row center">
 					<input type="checkbox" id="worlds"/>
 					<div class="hidden_show_worlds">
-						<div id="worlds_div" class="col-12">
-							<div>
-								Worlds
+						<div class="worlds_container">
+							<div id="worlds_div" class="col-10">
+								<div id="worldloader">
+									LOADING WORLDS
+								</div>
 							</div>
-							<br>
-							<div id="worldloader">
-								LOADING WORLDS
+							<div class="col-2 refreshContainer">
+								<label class="btn-refresh" for="worldRefresh"></label>
+								<input type="button" onclick="getWorlds()" style="display:none;" id="worldRefresh"/>
 							</div>
 						</div>
 					</div>
