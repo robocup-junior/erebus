@@ -1,3 +1,7 @@
+#VRML_SIM R2022b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/objects/apartment_structure/protos/Wall.proto"
+
 PROTO Area4_1 [
 	field SFInt32			 X							  0
 	field SFInt32			 Y							  0
@@ -97,28 +101,48 @@ Solid {
 				  name "wall6"
 				  boundingObject USE CURVED
 				}
-				wall {
+				Wall {
 				  translation -0.1 0.03 0.18
 				  size 0.31 0.06 0.01
 				  name "wall7"
+				  appearance Appearance {
+					material Material {
+						diffuseColor 0.2 0.47 0.52
+					}
 				}
-				wall {
+				}
+				Wall {
 				  translation -0.2 0.03 0.03
 				  rotation 0 1 0 -1.5707953071795862
 				  size 0.31 0.06 0.01
 				  name "wall8"
+				  appearance Appearance {
+					material Material {
+						diffuseColor 0.2 0.47 0.52
+					}
 				}
-				wall {
+				}
+				Wall {
 				  translation -0.35 0.03 0.06
 				  rotation 0 1 0 -1.5707953071795862
 				  size 0.24 0.06 0.01
 				  name "wall9"
+				  appearance Appearance {
+					material Material {
+						diffuseColor 0.2 0.47 0.52
+					}
 				}
-				wall {
+				}
+				Wall {
 				  translation -0.23 0.03 0.0900001
 				  rotation 0 1 0 3.14159
 				  size 0.34 0.06 0.01
 				  name "wall10"
+				  appearance Appearance {
+					material Material {
+						diffuseColor 0.2 0.47 0.52
+					}
+				}
 				}
 				Solid {
 				  translation 0.11 -0.000111485 0.14
