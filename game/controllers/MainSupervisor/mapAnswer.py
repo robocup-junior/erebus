@@ -59,7 +59,7 @@ class MapAnswer:
                     self.setAnswer(z+4, x, 1)
                 
                 ## Half wall
-                if tile.getTypeName() == "halfTile":
+                try:
                     if tile.getField("tile1Walls").getMFInt32(0) > 0:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z, x+1, 1)
@@ -233,7 +233,9 @@ class MapAnswer:
                         self.setAnswer(z+2, x+2, 0)
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
-
+                except:
+                    pass
+                
                 if tile.getField("trap").getSFBool():
                     self.answerMatrix[z+1][x+1] = 2
                     self.answerMatrix[z+1][x+3] = 2

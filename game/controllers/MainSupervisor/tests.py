@@ -50,7 +50,7 @@ class TestRobot(Robot):
         # Wait for confirmation
         if self.receiver.getQueueLength() > 0:
             try:
-                receivedData = self.receiver.getBytes()
+                receivedData = self.receiver.getData()
                 rDataLen = len(receivedData)
                 if rDataLen > 8:
                     tup = struct.unpack('c i i i i i c', receivedData)

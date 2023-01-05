@@ -1,9 +1,3 @@
-#VRML_SIM R2022b utf8
-
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/objects/apartment_structure/protos/Wall.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/appearances/protos/CorrodedMetal.proto"
-EXTERNPROTO "curvedWall.proto"
-
 PROTO worldTile [
       field SFInt32 xPos 0
       field SFInt32 zPos 0

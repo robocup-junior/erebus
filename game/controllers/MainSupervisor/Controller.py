@@ -21,18 +21,13 @@ class Controller():
         if self.keepController and not manual:
             files = glob.glob(os.path.join(path, "*"))
             if len(files) > 0:
-                supervisor.rws.send("loaded0")
+                supervisor.wwiSendText("loaded0")
             return
 
         shutil.rmtree(path)
         os.mkdir(path)
-        # 2022b bug: if a player controller crashes, the mainsupervisor will not
-        # step the simulation if the robot is running a generic controller
-        # Therefore, run empty controller file to fix this 
-        with open(os.path.join(path, "robot0Controller.py"), "w") as f:
-            pass
     
     def reset(self, supervisor) -> None:
         '''Send message to robot window to say that controller has been unloaded'''
         self.resetFile(supervisor, True)
-        supervisor.rws.send("unloaded0")
+        supervisor.wwiSendText("unloaded0")

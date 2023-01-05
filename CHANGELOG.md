@@ -3,29 +3,6 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Release v23.0.0]() - 2023-XX-XX
-
-### Added
-
-- ✨: Added support for Webots extern remote controllers to allow for remote controllers via tcp or locally. Read more about it [here](https://cyberbotics.com/doc/guide/running-extern-robot-controllers).
-- ✨: Added a world selector fresh button.
-- ✨: Added a new real-world timer to ensure controller don't take too long to run during competitions.
-- ✨: Added links to the world generator and robot customiser under settings.
-- ✨: Added some development unit tests that can be run under settings.
-
-### Changed
-
-- ❗: Ported to Webots version 2023a. Erebus must be run with Webots version 2023a. Download [here](https://github.com/cyberbotics/webots/releases/tag/R2023a).
-- ❗: Due to 2023a port, the Erebus UI robot window now runs in the browser.
-    - If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
-- ⚡️: Updated UI styling to worlds and settings.
-- ⚡️: Victims, hazards and skymap now use local textures instead of being generated or online.
-
-### Removed
-
-- 🗑️: Removed `robot0.wbt` file
-- 🗑️: Removed unused proto template files
-
 ## [Release v22.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v22.0.1) - 2022-12-13
 
 > For the major changes, see the changelog for v22.0.0

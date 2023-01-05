@@ -1,14 +1,4 @@
-#VRML_SIM R2022b utf8
-        EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
-        EXTERNPROTO "../protos/TexturedBackground.proto"
-        EXTERNPROTO "../protos/curvedWall.proto"
-        EXTERNPROTO "../protos/halfTile.proto"
-        EXTERNPROTO "../protos/HazardMap.proto"
-        EXTERNPROTO "../protos/obstacle.proto"
-        EXTERNPROTO "../protos/Victim.proto"
-        EXTERNPROTO "../protos/worldTile.proto"
-        IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
-
+#VRML_SIM R2021b utf8
         WorldInfo {
           basicTimeStep 16
           coordinateSystem "NUE"
@@ -25,7 +15,7 @@
           ]
         }
         Viewpoint {
-          orientation -0.683263 0.683263 0.257493 2.63756
+          orientation -1 0 0 0.85
           position -0.08 1 0.8500000000000001
         }
         TexturedBackground {
@@ -1153,5 +1143,6 @@
             controller "MainSupervisor"
             customData "360"
             window "MainSupervisorWindow"
+            showWindow TRUE
           }
         

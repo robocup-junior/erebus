@@ -41,7 +41,7 @@ class RobotHistory(Queue):
     def enqueue(self, data, supervisor):
         #update master history when an event happens
         record = self.update_master_history(data)
-        supervisor.rws.send("historyUpdate", ",".join(record))
+        supervisor.wwiSendText("historyUpdate" + "," + ",".join(record))
         hisT = ""
         histories = list(reversed(self.master_history))
         for h in range(min(len(histories),5)):
@@ -276,24 +276,24 @@ class Robot:
 
         if path[-4:] == "game":
             default_robot_proto = os.path.join(
-                path, 'proto_defaults/E-puck-custom-default-FLU.proto')
+                path, 'protos/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, 'protos/custom_robot.proto')
         else:
             default_robot_proto = os.path.join(
-                path, '../../proto_defaults/E-puck-custom-default-FLU.proto')
+                path, '../../protos/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, '../../protos/custom_robot.proto')
 
         try:
             if os.path.isfile(robot_proto):
                 if self.controller.keepController and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
-                        supervisor.rws.send("loaded1")
+                        supervisor.wwiSendText("loaded1")
                     return
                 shutil.copyfile(default_robot_proto, robot_proto)
             else:
                 shutil.copyfile(default_robot_proto, robot_proto)
                 supervisor.worldReload()
-            supervisor.rws.send("unloaded1")
+            supervisor.wwiSendText("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(str(e))
