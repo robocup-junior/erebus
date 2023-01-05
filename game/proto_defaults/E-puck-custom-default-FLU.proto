@@ -1,8 +1,18 @@
 #VRML_SIM R2022a utf8
+# license: Copyright Cyberbotics Ltd. Licensed for use only with Webots.
+# license url: https://cyberbotics.com/webots_assets_license
+# tags: static
+# documentation url: https://www.cyberbotics.com/doc/guide/epuck
+# EPFL educational and research mini mobile robot.
+# The e-puck is powered by a dsPIC processor and features a very large number of sensors in its basic configuration.
+# More info here: http://www.e-puck.org.
+
+# EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/objects/solids/protos/SolidPipe.proto"
+
 PROTO custom_robot [
     field SFVec3f            translation                  0 0 0                    # Is `Transform.translation`.
     field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
-    field SFString           name                         "e-puck"                 # Is `Solid.name`.
+    field SFString           name                         "Erebus_Bot"                 # Is `Solid.name`.
     field SFFloat            camera_fieldOfView           0.84
     field SFInt32            camera_width                 64
     field SFInt32            camera_height                40
