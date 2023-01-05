@@ -1,3 +1,4 @@
+#VRML_SIM R2022b utf8
 PROTO obstacle[
     field SFString id ""
     field SFBool rectangular FALSE

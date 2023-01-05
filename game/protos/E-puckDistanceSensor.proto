@@ -1,8 +1,7 @@
-#VRML_SIM R2020b utf8
+#VRML_SIM R2022b utf8
 # license: Copyright Cyberbotics Ltd. Licensed for use only with Webots.
 # license url: https://cyberbotics.com/webots_assets_license
 # Distance sensor of the e-puck mobile robot.
-
 PROTO E-puckDistanceSensor [
   field SFVec3f    translation  0 0.005 0
   field SFRotation rotation     0 1 0 0

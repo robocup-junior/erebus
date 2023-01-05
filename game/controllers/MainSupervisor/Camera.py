@@ -36,8 +36,8 @@ class Camera():
         self.wb_viewpoint_node.getField('position').setSFVec3f(vp)
         self.wb_viewpoint_node.getField('orientation').setSFRotation(vo)    
     
-    def follow(self, followPoint):
-        self.wb_viewpoint_node.getField('follow').setSFString("e-puck 0")
+    def follow(self, followPoint, name):
+        self.wb_viewpoint_node.getField('follow').setSFString(name)
         self.setViewPoint(followPoint)
     
     def updateView(self, side, followPoint):
