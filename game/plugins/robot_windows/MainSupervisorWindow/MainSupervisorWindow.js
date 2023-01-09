@@ -282,8 +282,9 @@ function update (data){
 		maxTime = data[2]
 	}
 	maxTime = parseInt(maxTime);
+	let maxRealTime = Math.max(maxTime + 60, maxTime * 1.25);
 	document.getElementById("timer").innerHTML = calculateTimeRemaining(data[1], maxTime);
-	document.getElementById("realWorldTimer").innerHTML = calculateTimeRemaining(data[3], maxTime + 60);
+	document.getElementById("realWorldTimer").innerHTML = calculateTimeRemaining(data[3], maxRealTime);
 }
 
 function updateTestBtnState(state) {

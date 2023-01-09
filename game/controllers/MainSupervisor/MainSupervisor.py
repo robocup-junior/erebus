@@ -107,13 +107,13 @@ class Game(Supervisor):
                 
         # Maximum time for a match
         self.maxTime = 8 * 60
-        self.maxRealWorldTime = self.maxTime + 60
         
         self.sWarnCooldown = False
         customData = []
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
             self.maxTime = int(customData[0])
+        self.maxRealWorldTime = max(self.maxTime + 60, self.maxTime * 1.25)
         self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime) + "," + str(0))
         
         self.getSimulationVersion()
