@@ -15,14 +15,14 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 
 ## Documentation
-Documentation for the platform can be accessed through [this link](https://erebus.rcj.cloud/docs/).  
+Documentation for the platform can be accessed through [this link](https://v22.erebus.rcj.cloud/docs/).  
 However, some pages are currently under construction.
 
 ## Robot Customization
-The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). 
+The robot customizer can be accessed through [this link](https://v23.robot.erebus.rcj.cloud/).
 
 ## Map Generator
-The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/).
+The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2023).
 
 
 ## Communication
