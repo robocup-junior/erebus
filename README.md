@@ -5,7 +5,7 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 ### [Erebus Official Website](https://erebus.rcj.cloud/)
 
-<div align="center"><img src="/docs/images/environment_v21_0_0_b2.png" width=80%></div>
+<div align="center"><img src="/docs/images/environment_v23_0_0.png" width=80%></div>
 
 ## Quick Start
 1. Download and install [Python 3.x](https://www.python.org/). Don't forget to add a path to the "Python".
