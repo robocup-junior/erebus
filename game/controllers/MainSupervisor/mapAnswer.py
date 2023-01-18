@@ -31,6 +31,15 @@ class MapAnswer:
                 tile = self.tileNodes.getMFNode(i)
                 x = 4*tile.getField("xPos").getSFInt32()
                 z = 4*tile.getField("zPos").getSFInt32()
+                room = tile.getField("room").getSFInt32()
+
+                # Room 4
+                # self.answerMatrix[z+a][x+b] = '*'
+                if room == 4:
+                    for a in range(5):
+                        for b in range(5):
+                            self.answerMatrix[z+a][x+b] = 20
+                    continue
 
                 # Wall
                 if tile.getField("topWall").getSFInt32() > 0:
@@ -339,10 +348,11 @@ class MapAnswer:
                             col_temp = 2*xCount + 1 + xShift
 
                     # Concatenate if victims on either side of the wall
-                    if type(self.answerMatrix[row_temp][col_temp]) == str:
-                        self.answerMatrix[row_temp][col_temp] += victimType
-                    else:
-                       self. answerMatrix[row_temp][col_temp] = victimType
+                    if self.answerMatrix[row_temp][col_temp] != 20:
+                        if type(self.answerMatrix[row_temp][col_temp]) == str:
+                            self.answerMatrix[row_temp][col_temp] += victimType
+                        else:
+                            self.answerMatrix[row_temp][col_temp] = victimType
                     
             
             for i in range(len(self.answerMatrix)):
@@ -373,7 +383,6 @@ class MapAnswer:
                             print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
                     print('')
 
-            
             return self.answerMatrix
             
         except:

@@ -67,7 +67,7 @@ def _calculate_completeness(answerMatrix: np.array, subMatrix: np.array) -> floa
     for i in range(len(answerMatrix)):
         for j in range(len(answerMatrix[0])):
             # If the cells are equal
-            if not(subMatrix[i][j] == '0' and answerMatrix[i][j] == '0'):
+            if not((subMatrix[i][j] == '0' and answerMatrix[i][j] == '0') or answerMatrix[i][j] == '20'):
                 if subMatrix[i][j] == answerMatrix[i][j]:
                     correct += 1
                 # if a victim is on either side of the wall
