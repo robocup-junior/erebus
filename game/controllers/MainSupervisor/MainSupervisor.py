@@ -627,7 +627,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Test if the robots are in checkpoints
             checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
-            # If any chechpoints
+            # If any checkpoints
             if len(checkpoint) > 0:
                 self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], game)
 
