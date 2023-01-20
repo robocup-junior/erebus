@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added
 
-- ✨: Added support for Webots extern remote controllers to allow for remote controllers via tcp or locally. Read more about it [here](https://cyberbotics.com/doc/guide/running-extern-robot-controllers).
+- ✨: Added support for Webots extern remote controllers to allow for remote controllers via tcp or locally. Read more about it on the Webots website [here](https://cyberbotics.com/doc/guide/running-extern-robot-controllers), and read our documentation to get started [here](https://docs.google.com/document/d/19yIzfaxb6fx1lw7hKTE6EkX7_Pi2NzfE_oGaks76Kgo/edit?usp=sharing).
 - ✨: Added a world selector fresh button.
 - ✨: Added a new real-world timer (below the main timer) to ensure controllers don't take too long to run during competitions.
     - The max real world time is `max(maxTime + 60, maxTime * 1.25)` where `maxTime` is the maximum time for a given world
@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
 - ⚡️: Updated UI styling to worlds and settings.
 - ⚡️: Victims, hazards and skymap now use local textures instead of being generated or online.
+- 🐛: Fixed a bug where the map bonus score wasn't being correctly added to the final score.
 
 ### Removed
 
