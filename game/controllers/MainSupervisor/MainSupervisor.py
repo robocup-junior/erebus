@@ -669,29 +669,28 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
 
-            if self.robotInitialized:
-                # Send the update information to the robot window
-                nowScore = self.robot0Obj.getScore()
-                self.timeElapsed = min(self.timeElapsed, self.maxTime)
-                self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
-                if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
-                    self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
-                    self.lastSentScore = nowScore
-                    self.lastSentTime = int(self.timeElapsed)
-                    self.lastSentRealTime = int(self.realTimeElapsed)
-                    if self.config.recording:
-                        Recorder.update(self)
+        if self.robotInitialized:
+            # Send the update information to the robot window
+            nowScore = self.robot0Obj.getScore()
+            self.timeElapsed = min(self.timeElapsed, self.maxTime)
+            self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
+            if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
+                self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
+                self.lastSentScore = nowScore
+                self.lastSentTime = int(self.timeElapsed)
+                self.lastSentRealTime = int(self.realTimeElapsed)
+                if self.config.recording:
+                    Recorder.update(self)
 
-                # If the time is up
-                # TODO 9 min rule? max time + 1 min?
-                if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
-                    self.add_map_multiplier()
-                    self.robot_quit(0, True)
-                    
-                    self.gameState = MATCH_FINISHED
-                    self.lastFrame = True
-                    
-                    self.rws.send("ended")
+            # If the time is up
+            if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
+                self.add_map_multiplier()
+                self.robot_quit(0, True)
+                
+                self.gameState = MATCH_FINISHED
+                self.lastFrame = True
+                
+                self.rws.send("ended")
 
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()
