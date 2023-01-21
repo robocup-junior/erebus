@@ -40,6 +40,7 @@ Annoucements will be made in a number of different locations.
 
 ### Known issues
 - The robot customization wheel rotations are off by 0.5*pi in the y axis compared to the sensor values. However, what you see in the 3d output in the webpage is still what Erebus generates.
+- Moving sensor sliders very fast within robot customizer v23 can result in visual bugs where some sensors are not removed correctly. This is purely visual, and does not affect the resulting JSON.
 
 ### Reporting bugs and fixes
 Please report bugs and potential fixes either through: 

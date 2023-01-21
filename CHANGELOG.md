@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
 - ⚡️: Updated UI styling to worlds and settings.
 - ⚡️: Victims, hazards and skymap now use local textures instead of being generated or online.
+- ⚡️: Victims box geometry is now thinner.
 - 🐛: Fixed a bug where the map bonus score wasn't being correctly added to the final score.
 
 ### Removed
