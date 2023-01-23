@@ -6,6 +6,15 @@ from abc import abstractmethod
 AutoInstall._import("np", "numpy")
 
 class Test:
+    def __init__(self):
+        self._report = ""
+        
+    def getTestReport(self) -> str:
+        return self._report
+    
+    def setTestReport(self, s: str):
+        self._report = s
+    
     @abstractmethod
     def preTest(self, supervisor) -> tuple : raise NotImplementedError
 
@@ -18,6 +27,7 @@ class Test:
 class TestVictim(Test):
     
     def __init__(self, index, offset, victimList):
+        super()
         self.victim = None
         self.startScore = 0
         self.index = index
@@ -27,13 +37,13 @@ class TestVictim(Test):
     def preTest(self, supervisor):
         Console.log_info(f"Testing Offset {self.offset}")
         self.startScore = supervisor.robot0Obj.getScore()  
+        supervisor.robot0Obj.stoppedTime = supervisor.getTime()
         
         self.victim = self.victimList[self.index]
-        
         TestRunner.robotToVictim(supervisor.robot0Obj, self.victim, self.offset)
         victimType = bytes(self.victim.get_simple_type(), "utf-8") # The victim type being sent is the letter 'H' for harmed victim
         # identify human, wait , wheel 1, wheel 2, human type
-        return (1, 4, 0, 0, victimType)
+        return (1, 3, 0, 0, victimType)
         # supervisor.robot0Obj.rotation = [self.victim.rotation[0], self.victim.rotation[1], self.victim.rotation[2], -self.victim.rotation[3]]
 
     def test(self, supervisor):
@@ -41,11 +51,13 @@ class TestVictim(Test):
         roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
         multiplier = supervisor.tileManager.ROOM_MULT[roomNum]
         if self.offset > 0.09:
+            self.setTestReport(f"Expected score: {self.startScore - 5}, but was: {supervisor.robot0Obj.getScore()}")
             return supervisor.robot0Obj.getScore() == self.startScore - 5
         return supervisor.robot0Obj.getScore() - self.startScore == (10 * multiplier) + ( self.victim.scoreWorth * multiplier)
 
 class TestCheckpoint(Test):
     def __init__(self,index):
+        super()
         self.startScore = 0
         self.checkpoint = None
         self.index = index
@@ -66,6 +78,7 @@ class TestCheckpoint(Test):
 
 class TestLOP(Test):
     def __init__(self,index):
+        super()
         self.startScore = 0
         self.checkpoint = None
         self.index = index
@@ -161,12 +174,15 @@ class TestRunner:
         # self.stage == 0 and 
         if self.startTest and self.finishedTest:
             if self.tests[self.stage].test(supervisor):
-                Console.log_pass(f"Test {str(self.stage)} Passed")
+                Console.log_pass(f"Test {str(self.stage)}/{len(self.tests)} Passed")
                 self.passes += 1
             else:
-                Console.log_fail(f"Test {str(self.stage)} Failed")
+                Console.log_fail(f"Test {str(self.stage)}/{len(self.tests)} Failed")
+                if self.tests[self.stage].getTestReport() != "":
+                    Console.log_fail(f"Report: {self.tests[self.stage].getTestReport()}")
                 self.fails += 1
                 
+            self.tests[self.stage].setTestReport("")
             self.startTest = False
             self.finishedTest = False
             self.preTest = False
