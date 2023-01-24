@@ -639,11 +639,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
             checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
             # If any checkpoints
             if len(checkpoint) > 0:
-                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], game)
+                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], self)
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, game)
+            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, self)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
@@ -666,11 +666,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
-                if self.robot0Obj.timeStopped(game) >= 20:
+                if self.robot0Obj.timeStopped(self) >= 20:
                     if not self.config.disableLOP:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
-                elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
+                elif self.robot0Obj.timeStopped(self) >= 3 and self.robot0Obj.inSwamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
                         Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
