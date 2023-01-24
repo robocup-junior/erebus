@@ -64,8 +64,8 @@ class VictimObject():
         distance = math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
         return distance <= radius
     
-    def getDistance(self, pos: list) -> bool:
-        return (((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
+    def getDistance(self, pos: list):
+        return math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
         
     def onSameSide(self, pos: list) -> bool:
         #Get side the victim pointing at
