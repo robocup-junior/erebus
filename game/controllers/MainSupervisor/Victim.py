@@ -191,3 +191,5 @@ class VictimManager():
         # Iterate for each victim
         for i in range(self.numberOfHumans):
             self.humans[i].identified = False
+        for i in range(self.numberOfHazards):
+            self.hazards[i].identified = False

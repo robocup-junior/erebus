@@ -27,7 +27,7 @@ class Test:
 class TestVictim(Test):
     
     def __init__(self, index, offset, victimList):
-        super()
+        super().__init__()
         self.victim = None
         self.startScore = 0
         self.index = index
@@ -44,7 +44,6 @@ class TestVictim(Test):
         victimType = bytes(self.victim.get_simple_type(), "utf-8") # The victim type being sent is the letter 'H' for harmed victim
         # identify human, wait , wheel 1, wheel 2, human type
         return (1, 3, 0, 0, victimType)
-        # supervisor.robot0Obj.rotation = [self.victim.rotation[0], self.victim.rotation[1], self.victim.rotation[2], -self.victim.rotation[3]]
 
     def test(self, supervisor):
         grid = supervisor.tileManager.coord2grid(self.victim.wb_translationField.getSFVec3f(), supervisor)
@@ -57,7 +56,7 @@ class TestVictim(Test):
 
 class TestCheckpoint(Test):
     def __init__(self,index):
-        super()
+        super().__init__()
         self.startScore = 0
         self.checkpoint = None
         self.index = index
@@ -78,7 +77,7 @@ class TestCheckpoint(Test):
 
 class TestLOP(Test):
     def __init__(self,index):
-        super()
+        super().__init__()
         self.startScore = 0
         self.checkpoint = None
         self.index = index
@@ -117,8 +116,8 @@ class TestRunner:
         
         init = self.tests
         init += [TestCheckpoint(i) for i in range(len(supervisor.tileManager.checkpoints))]
-        init += [TestVictim(i, ofst, supervisor.victimManager.humans) for ofst in np.linspace(0.06,0.13,3) for i in range(len(supervisor.victimManager.humans))]
-        init += [TestVictim(i, ofst, supervisor.victimManager.hazards) for ofst in np.linspace(0.06,0.13,3) for i in range(len(supervisor.victimManager.hazards))]
+        init += [TestVictim(i, ofst, supervisor.victimManager.hazards) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.hazards))]
+        init += [TestVictim(i, ofst, supervisor.victimManager.humans) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.humans))]
         init += [TestLOP(i) for i in range(len(supervisor.victimManager.humans))]
         self.tests = init
     
