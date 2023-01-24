@@ -53,7 +53,7 @@ class VictimObject():
     @identified.setter
     def identified(self, idfy: int):
         self.wb_foundField.setSFBool(idfy)
-        
+
     def get_simple_type(self):
         # Will be overrided
         pass
@@ -64,8 +64,8 @@ class VictimObject():
         distance = math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
         return distance <= radius
     
-    def getDistance(self, pos: list) -> bool:
-        return (((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
+    def getDistance(self, pos: list):
+        return math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
         
     def onSameSide(self, pos: list) -> bool:
         #Get side the victim pointing at
@@ -74,7 +74,7 @@ class VictimObject():
         #0 1 0 pi/2 -> -X axis
         #0 1 0 pi -> Z axis
         #0 1 0 0 -> -Z axis
-
+        
         rot = self.rotation[3]
         rot = round(rot, 2)
 
@@ -98,6 +98,8 @@ class VictimObject():
             robot_z = pos[2]
             if robot_z < self.position[2]:
                 return True
+        else:
+            return True
 
         return False
 
@@ -189,3 +191,5 @@ class VictimManager():
         # Iterate for each victim
         for i in range(self.numberOfHumans):
             self.humans[i].identified = False
+        for i in range(self.numberOfHazards):
+            self.hazards[i].identified = False

@@ -1,6 +1,5 @@
-#VRML_SIM R2022a utf8
+#VRML_SIM R2022b utf8
 # tags: static
-
 PROTO HazardMap [
     field SFVec3f    translation       0 0 0
     field SFRotation rotation          0 0 0 0
@@ -8,6 +7,7 @@ PROTO HazardMap [
     field SFString   name              "Hazard Map"
     field SFString   type              "F"
     field SFInt32    scoreWorth        10
+	field SFBool     room4	           FALSE
 ]
 {
     %{

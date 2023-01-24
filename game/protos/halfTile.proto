@@ -1,3 +1,7 @@
+#VRML_SIM R2022b utf8
+
+EXTERNPROTO "worldTile.proto"
+
 PROTO halfTile [
       field SFInt32 xPos 0
       field SFInt32 zPos 0

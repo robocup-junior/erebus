@@ -1,6 +1,7 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
+from tkinter import N
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -33,6 +34,7 @@ from Victim import *
 from Robot import *
 from Recorder import Recorder
 from Test import TestRunner
+from RobotWindowSender import RWSender
 
 
 
@@ -46,6 +48,8 @@ MATCH_NOT_STARTED = 'MATCH_NOT_STARTED'
 MATCH_RUNNING = 'MATCH_RUNNING'
 MATCH_FINISHED = 'MATCH_FINISHED'
 MATCH_PAUSED = 'MATCH_PAUSED'
+
+ROBOT_NAME = "Erebus_Bot"
 
 
 class Config():
@@ -69,8 +73,8 @@ class Game(Supervisor):
         super().__init__()
         
         # Version info
-        self.stream = 22
-        self.version = "22.0.0"
+        self.stream = 23
+        self.version = "23.0.0"
         
         uploader = threading.Thread(target=ControllerUploader.start)
         uploader.setDaemon(True)
@@ -79,8 +83,11 @@ class Game(Supervisor):
         # Get this supervisor node - so that it can be rest when game restarts
         self.mainSupervisor = self.getFromDef("MAINSUPERVISOR")
         
+        # Robot window send text wrapper
+        self.rws = RWSender(self)
+        
         # Send message to robot window to perform setup
-        self.wwiSendText("startup")
+        self.rws.send("startup")
         
         self.gameState = MATCH_NOT_STARTED
         self.lastFrame = False
@@ -88,9 +95,13 @@ class Game(Supervisor):
         # How long the game has been running for
         self.timeElapsed = 0
         self.lastTime = -1
+        self.realTimeElapsed = 0
+        self.lastRealTime = -1
+        self.firstRealTime = True
         
         self.lastSentScore = 0
         self.lastSentTime = 0
+        self.lastSentRealTime = 0
 
         self.robotInitialized = False
                 
@@ -98,11 +109,12 @@ class Game(Supervisor):
         self.maxTime = 8 * 60
         
         self.sWarnCooldown = False
-
+        customData = []
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
             self.maxTime = int(customData[0])
-            self.wwiSendText("update," + str(0) + "," + str(0) + "," + str(self.maxTime))
+        self.maxRealWorldTime = max(self.maxTime + 60, self.maxTime * 1.25)
+        self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime) + "," + str(0))
         
         self.getSimulationVersion()
         
@@ -140,13 +152,12 @@ class Game(Supervisor):
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
-
-        self.wwiSendText(f'worlds,{str(self.get_worlds())}')
         
         self.testRunner = TestRunner(self)
         self.runTests = False
-
-        # self.update_world_thumbnail()
+        
+        # Toggle for enabling remote webots controllers
+        self.remoteEnabled = False
     
     def game_init(self):
         # If recording
@@ -172,7 +183,7 @@ class Game(Supervisor):
 
         # If automatic camera
         if self.config.automatic_camera and self.camera.wb_viewpoint_node:
-            self.camera.follow(self.robot0Obj)
+            self.camera.follow(self.robot0Obj, ROBOT_NAME)
 
         if self.config.recording:
             Recorder.resetCountDown(self)
@@ -180,6 +191,8 @@ class Game(Supervisor):
         self.lastTime = self.getTime()
         self.firstFrame = False
         self.robotInitialized = True
+        
+        self.lastRealTime = time.time()
     
     def relocate_robot(self):
         '''Relocate robot to last visited checkpoint'''
@@ -211,7 +224,7 @@ class Game(Supervisor):
             self.robot0Obj.wb_node.remove()
             self.robot0Obj.inSimulation = False
             # Send message to robot window to update quit button
-            self.wwiSendText("robotNotInSimulation"+str(num))
+            self.rws.send("robotNotInSimulation"+str(num))
             # Update history event whether its manual or via exit message
             if not timeup:
                 self.robot0Obj.history.enqueue("Successful Exit", self)
@@ -222,19 +235,23 @@ class Game(Supervisor):
         '''Add robot via .wbo file'''
         # Get relative path
         filePath = os.path.dirname(os.path.abspath(__file__))
+        
+        controller = "robot0controller"
+        if self.remoteEnabled:
+            controller = "<extern>"
 
         # Get webots root
         root = self.getRoot()
         root_children_field = root.getField('children')
         # Get .wbo file to insert into world
         if filePath[-4:] == "game":
-            root_children_field.importMFNode(
-                12, os.path.join(filePath, 'nodes/robot0.wbo'))
+            root_children_field.importMFNodeFromString(
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         else:
-            root_children_field.importMFNode(
-                12, os.path.join(filePath, '../../nodes/robot0.wbo'))
+            root_children_field.importMFNodeFromString(
+                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
-        self.wwiSendText("robotInSimulation0")
+        self.rws.send("robotInSimulation0")
 
         return self.getFromDef("ROBOT0")
 
@@ -316,7 +333,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         '''Process json file to generate robot file'''
         robot_json = json.loads(json_data)
         if generate_robot_proto(robot_json):
-            self.wwiSendText("loaded1")
+            self.rws.send("loaded1")
 
     def wait(self, sec):
         first = self.getTime()
@@ -325,11 +342,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.getTime() - first > sec:
                 break
         return
-
-    def update_world_thumbnail(self):
-        path = getFilePath("worlds/thumbnails", "../../worlds/thumbnails")
-        path = os.path.join(path, os.path.split(self.getWorldPath())[1][:-4]+'.png')
-        self.exportImage(path, 20)
 
     def get_worlds(self):           
         path = getFilePath("worlds", "../../worlds")    
@@ -351,7 +363,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
     def getSimulationVersion(self):
         try:
-            self.wwiSendText(f"version,{self.version}")
+            self.rws.send("version", f"{self.version}")
             # Check updates
             url = "https://gitlab.com/api/v4/projects/22054848/releases"
             response = req.get(url)
@@ -360,25 +372,24 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 filter(lambda release: release['tag_name'].startswith(f"v{self.stream}"), releases))
             if len(releases) > 0:
                 if releases[0]['tag_name'].replace('_', ' ') == f'v{self.version}':
-                    self.wwiSendText(f"latest,{self.version}")
+                    self.rws.send("latest", f"{self.version}")
                 elif any([r['tag_name'].replace('_', ' ') == f'v{self.version}' for r in releases]):
-                    self.wwiSendText(
-                        f"outdated,{self.version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
+                   self.rws.send("outdated", f"{self.version},{releases[0]['tag_name'].replace('v','').replace('_', ' ')}")
                 else:
-                    self.wwiSendText(f"unreleased,{self.version}")
+                    self.rws.send("unreleased", f"{self.version}")
             else:
-                self.wwiSendText(f"version,{self.version}")
+                self.rws.send("version", f"{self.version}")
         except:
-            self.wwiSendText(f"version,{self.version}")
+            self.rws.send("version", f"{self.version}")
 
     def processMessage(self, robotMessage):
-
+        Console.log_debug(f"Robot Stopped for {self.robot0Obj.timeStopped(self)}s")
         # If exit message is correct
         if robotMessage[0] == 'E':
             # Check robot position is on starting tile
             if self.robot0Obj.startingTile.checkPosition(self.robot0Obj.position):
                 self.gameState = MATCH_FINISHED
-                self.wwiSendText("ended")
+                self.rws.send("ended")
                 if self.robot0Obj.victimIdentified:
                     self.robot0Obj.increaseScore(
                         "Exit Bonus", self.robot0Obj.getScore() * 0.1, self)
@@ -438,30 +449,40 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             misidentification = True
             
-            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position)]
+            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position) and not h.identified]
+            
+            Console.log_debug(f"--- Victim Data ---")
+            for h in iterator:
+                Console.log_debug(f"Distance {h.getDistance(self.robot0Obj.position)}/0.09 in range ({h.checkPosition(self.robot0Obj.position)})")
+                Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
+                Console.log_debug(f"On same side: {h.onSameSide(self.robot0Obj.position)}")
+                Console.log_debug(f"Identified: {h.identified}")
+            Console.log_debug(f"--- ----------- ---")
+            Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
             
             if len(nearby_map_issues) > 0:
                 # TODO Should it iterate through all nearby map issues or just take the first one???
                 nearby_issue = nearby_map_issues[0]
+                
                 misidentification = False
-                # If not already identified
-                if not nearby_issue.identified:
-                    # Get points scored depending on the type of victim
-                    #pointsScored = nearby_issue.scoreWorth
+                # Get points scored depending on the type of victim
+                #pointsScored = nearby_issue.scoreWorth
 
-                    grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
-                    roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
+                roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
 
-                    # Update score and history
-                    if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
-                        self.robot0Obj.increaseScore(
-                            f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs {nearby_issue.simple_victim_type.lower()}")
 
+                # Update score and history
+                if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                     self.robot0Obj.increaseScore(
-                        f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                    self.robot0Obj.victimIdentified = True
+                        f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                        
+                self.robot0Obj.increaseScore(
+                    f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                self.robot0Obj.victimIdentified = True
 
-                    nearby_issue.identified = True
+                nearby_issue.identified = True
 
             if misidentification:
                 self.robot0Obj.increaseScore(f"Misidentification of {name}", -5, self)
@@ -475,9 +496,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == "run":
                 # Start running the match
                 self.gameState = MATCH_RUNNING
+                self.rws.updateHistory("runPressed")
             if parts[0] == "pause":
                 # Pause the match
                 self.gameState = MATCH_PAUSED
+                self.rws.updateHistory("pausedPressed")
             if parts[0] == "reset":
                 self.robot_quit(0, False)
                 # Reset both controller files
@@ -527,7 +550,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                             self.robot_quit(0, True)
                             self.gameState = MATCH_FINISHED
                             self.lastFrame = True
-                            self.wwiSendText("ended")
+                            self.rws.send("ended")
 
             if parts[0] == 'robotJson':
                 data = message.split(",", 1)
@@ -545,19 +568,38 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == 'loadWorld':
                 self.load_world(parts[1])
                 
-            if parts[0] == 'runTest':
+            if parts[0] == 'loadTest':
                 self.load_test_script()
             if parts[0] == 'runTest':
                 self.gameState = MATCH_RUNNING
                 self.runTests = True
                 self.config.disableLOP = True
+            if parts[0] == 'rw_reload':
+                self.rws.sendAll()
+                # TODO might be better way -- may cause bugs
+                configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
+                self.config = self.getConfig(configFilePath)
+                
+            if parts[0] == 'loadControllerPressed':
+                self.rws.updateHistory("loadControllerPressed,", parts[1])
+            if parts[0] == 'unloadControllerPressed':
+                self.rws.updateHistory("unloadControllerPressed,", parts[1])
+                
+            if parts[0] == 'remoteEnable':
+                self.remoteEnabled = True
+                self.rws.updateHistory("remoteEnabled")
+            if parts[0] == 'remoteDisable':
+                self.remoteEnabled = False
+                self.rws.updateHistory("remoteDisabled")
+            if parts[0] == 'getWorlds':
+                self.rws.send('worlds', f'{str(self.get_worlds())}')
 
     def getConfig(self, configFilePath):
             
         with open(configFilePath, 'r') as f:
             configData = f.read().split(',')
             
-        self.wwiSendText("config," + ','.join(configData))
+        self.rws.send("config",  ','.join(configData))
         configData = list(map((lambda x: int(x)), configData))
         
         return Config(configData, configFilePath)
@@ -580,12 +622,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         # Main game loop
         if self.robot0Obj.inSimulation:
-            
-            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_LEFT_WHEEL").addTorque([-0.2,0,0,0,0,0], True))
-            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_RIGHT_WHEEL").addTorque([-0.2,0,0,0,0,0], True))
-            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_LEFT_WHEEL").setVelocity([0,-0.2,0,0,0,0]))
-            # print(self.robot0Obj.wb_node.getFromProtoDef("EPUCK_RIGHT_WHEEL").setVelocity([0,-0.2,0,0,0,0]))
-            
             self.robot0Obj.updateTimeElapsed(self.timeElapsed)
 
             # Automatic camera movement
@@ -600,18 +636,18 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Test if the robots are in checkpoints
             checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
-            # If any chechpoints
+            # If any checkpoints
             if len(checkpoint) > 0:
-                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], game)
+                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], self)
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, game)
+            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, self)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
                 # Get receiver data
-                receivedData = self.receiver.getData()
+                receivedData = self.receiver.getBytes()
                 testMsg = False
                 if self.runTests:
                     testMsg = self.testRunner.getStage(receivedData)
@@ -623,16 +659,17 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # If data sent to receiver
                 if self.robot0Obj.message != []:
                     r0_message = self.robot0Obj.message
+                    Console.log_debug(f"Robot Message: {r0_message}")
                     self.robot0Obj.message = []
                     self.processMessage(r0_message)
 
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
-                if self.robot0Obj.timeStopped(game) >= 20:
+                if self.robot0Obj.timeStopped(self) >= 20:
                     if not self.config.disableLOP:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
-                elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
+                elif self.robot0Obj.timeStopped(self) >= 3 and self.robot0Obj.inSwamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
                         Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
@@ -642,38 +679,49 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
 
-            if self.robotInitialized:
-                # Send the update information to the robot window
-                nowScore = self.robot0Obj.getScore()
-                if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed):
-                    self.wwiSendText(
-                        "update," + str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime))
-                    self.lastSentScore = nowScore
-                    self.lastSentTime = int(self.timeElapsed)
-                    if self.config.recording:
-                        Recorder.update(self)
+        if self.robotInitialized:
+            # Send the update information to the robot window
+            nowScore = self.robot0Obj.getScore()
+            self.timeElapsed = min(self.timeElapsed, self.maxTime)
+            self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
+            if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
+                self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
+                self.lastSentScore = nowScore
+                self.lastSentTime = int(self.timeElapsed)
+                self.lastSentRealTime = int(self.realTimeElapsed)
+                if self.config.recording:
+                    Recorder.update(self)
 
-                # If the time is up
-                if self.timeElapsed >= self.maxTime and self.lastFrame != -1:
-                    self.add_map_multiplier()
-                    self.robot_quit(0, True)
-                    
-                    self.gameState = MATCH_FINISHED
-                    self.lastFrame = True
-                    
-                    self.wwiSendText("ended")
+            # If the time is up
+            if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
+                self.add_map_multiplier()
+                self.robot_quit(0, True)
+                
+                self.gameState = MATCH_FINISHED
+                self.lastFrame = True
+                
+                self.rws.send("ended")
 
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()
-
-        self.receive(message)
+        while message not in ['', None]:
+            self.receive(message)
+            message = self.wwiReceiveText()
 
         if self.gameState == MATCH_PAUSED:
             self.step(0)
             time.sleep(0.01)
+            self.lastRealTime = time.time()
 
         # If the match is running
         if self.robotInitialized and self.gameState == MATCH_RUNNING:
+            # If waiting for a remote controller, don't count time waiting
+            if self.remoteEnabled and self.firstRealTime and self.lastTime != self.getTime():
+                self.lastRealTime = time.time()
+                self.firstRealTime = False
+            # Get real world time (for 9 min real world time elapsed rule)
+            self.realTimeElapsed += (time.time() - self.lastRealTime)
+            self.lastRealTime = time.time()
             # Get the time since the last frame
             frameTime = self.getTime() - self.lastTime
             # Add to the elapsed time

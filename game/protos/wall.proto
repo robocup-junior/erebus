@@ -1,0 +1,19 @@
+PROTO wall [
+	field SFVec3f            translation                  0 0.03 0                    # Is `Transform.translation`.
+    field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
+	field SFVec3f			 size						  0.12 0.06 0.01
+    field SFString           name                         "wall"                 # Is `Solid.name`.
+]
+{
+	Wall {
+	  translation IS translation
+	  rotation IS rotation
+	  size IS size
+	  appearance Appearance {
+		material Material {
+		  diffuseColor 0.2 0.47 0.52
+		}
+	  }
+	  name IS name
+	}
+}

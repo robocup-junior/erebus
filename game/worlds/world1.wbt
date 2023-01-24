@@ -1,12 +1,22 @@
-#VRML_SIM R2021b utf8
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/TexturedBackground.proto"
+EXTERNPROTO "../protos/halfTile.proto"
+EXTERNPROTO "../protos/HazardMap.proto"
+EXTERNPROTO "../protos/worldTile.proto"
+IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
+
 WorldInfo {
   basicTimeStep 16
   coordinateSystem "NUE"
   contactProperties [
     ContactProperties {
-      material1  "TILE"
-      material2  "NO_FRIC"
-      coulombFriction 0
+      material1 "TILE"
+      material2 "NO_FRIC"
+      coulombFriction [
+        0
+      ]
       bounce 0
       bumpSound ""
       rollSound ""
@@ -15,8 +25,8 @@ WorldInfo {
   ]
 }
 DEF Viewpoint Viewpoint {
-  orientation -1 4.5317877835753625e-14 9.448830298683955e-15 0.670000000000022
-  position -0.05097664811755035 1.4872131100190586 1.6276952609407322
+  orientation -0.6832632393515958 0.6832632393515958 0.25749309020151906 2.63756
+  position -0.07564287574572318 1.3895287899061324 1.1967485427161828
 }
 TexturedBackground {
 }
@@ -1168,27 +1178,6 @@ DEF SWAMPBOUNDS Group {
 DEF OBSTACLES Group {
 }
 DEF HUMANGROUP Group {
-  children [
-    Victim {
-      translation -0.20099999999999998 0 0.1750000000000001
-      name "Victim1"
-      scoreWorth 15
-    }
-    Victim {
-      translation 0.0650000000000001 0 0.13100000000000012
-      rotation 0 1 0 -1.57
-      name "Victim2"
-      type "unharmed"
-      scoreWorth 15
-    }
-    Victim {
-      translation 0.4150000000000001 0 -0.37
-      rotation 0 1 0 1.57
-      name "Victim3"
-      type "stable"
-      scoreWorth 5
-    }
-  ]
 }
 DEF HAZARDGROUP Group {
   children [
@@ -1217,6 +1206,5 @@ DEF MAINSUPERVISOR Robot {
   controller "MainSupervisor"
   customData "480,bottom"
   supervisor TRUE
-  showWindow TRUE
   window "MainSupervisorWindow"
 }

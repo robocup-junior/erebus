@@ -8,7 +8,7 @@ class MapAnswer:
     def __init__(self, supervisor):
         self.supervisor = supervisor
         #Count the number of tiles
-        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
+        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount() - 1
         #Retrieve the node containing the tiles
         self.tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
         
@@ -31,6 +31,15 @@ class MapAnswer:
                 tile = self.tileNodes.getMFNode(i)
                 x = 4*tile.getField("xPos").getSFInt32()
                 z = 4*tile.getField("zPos").getSFInt32()
+                room = tile.getField("room").getSFInt32()
+
+                # Room 4
+                # self.answerMatrix[z+a][x+b] = '*'
+                if room == 4:
+                    for a in range(5):
+                        for b in range(5):
+                            self.answerMatrix[z+a][x+b] = 20
+                    continue
 
                 # Wall
                 if tile.getField("topWall").getSFInt32() > 0:
@@ -59,7 +68,7 @@ class MapAnswer:
                     self.setAnswer(z+4, x, 1)
                 
                 ## Half wall
-                try:
+                if tile.getTypeName() == "halfTile":
                     if tile.getField("tile1Walls").getMFInt32(0) > 0:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z, x+1, 1)
@@ -233,9 +242,7 @@ class MapAnswer:
                         self.setAnswer(z+2, x+2, 0)
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
-                except:
-                    pass
-                
+
                 if tile.getField("trap").getSFBool():
                     self.answerMatrix[z+1][x+1] = 2
                     self.answerMatrix[z+1][x+3] = 2
@@ -311,38 +318,42 @@ class MapAnswer:
 
                 
                 victimType = victim.getField("type").getSFString()
-                if victimType == "harmed":
-                    victimType = "H"
-                elif victimType == "unharmed":
-                    victimType = "U"
-                elif victimType == "stable":
-                    victimType = "S"
+                victimRoom4 = victim.getField("room4").getSFBool()
+                if victimRoom4 == False:
+                    if victimType == "harmed":
+                        victimType = "H"
+                    elif victimType == "unharmed":
+                        victimType = "U"
+                    elif victimType == "stable":
+                        victimType = "S"
 
-                rotation = victim.getField("rotation").getSFRotation()
-                if abs(round(rotation[3],2)) == 1.57:
-                    # Vertical
-                    zCount = int(zCount/2)
-                    if xCount % 2 == 0:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount
+                    rotation = victim.getField("rotation").getSFRotation()
+                    if abs(round(rotation[3],2)) == 1.57:
+                        # Vertical
+                        zCount = int(zCount/2)
+                        if xCount % 2 == 0:
+                            row_temp = 2*zCount + 1 + zShift
+                            col_temp = xCount
+                        else:
+                            row_temp = 2*zCount + 1 + zShift
+                            col_temp = xCount+1
                     else:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount+1
-                else:
-                    # Horizontal
-                    xCount = int(xCount/2)
-                    if zCount % 2 == 0:
-                        row_temp = zCount
-                        col_temp = 2*xCount + 1 + xShift
-                    else:
-                        row_temp = zCount+1
-                        col_temp = 2*xCount + 1 + xShift
+                        # Horizontal
+                        xCount = int(xCount/2)
+                        if zCount % 2 == 0:
+                            row_temp = zCount
+                            col_temp = 2*xCount + 1 + xShift
+                        else:
+                            row_temp = zCount+1
+                            col_temp = 2*xCount + 1 + xShift
 
-                # Concatenate if victims on either side of the wall
-                if type(self.answerMatrix[row_temp][col_temp]) == str:
-                    self.answerMatrix[row_temp][col_temp] += victimType
-                else:
-                   self. answerMatrix[row_temp][col_temp] = victimType
+                    # Concatenate if victims on either side of the wall
+                    if self.answerMatrix[row_temp][col_temp] != 20:
+                        if type(self.answerMatrix[row_temp][col_temp]) == str:
+                            self.answerMatrix[row_temp][col_temp] += victimType
+                        else:
+                            self.answerMatrix[row_temp][col_temp] = victimType
+                    
             
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
@@ -372,7 +383,6 @@ class MapAnswer:
                             print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
                     print('')
 
-            
             return self.answerMatrix
             
         except:

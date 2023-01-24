@@ -41,7 +41,7 @@ class RobotHistory(Queue):
     def enqueue(self, data, supervisor):
         #update master history when an event happens
         record = self.update_master_history(data)
-        supervisor.wwiSendText("historyUpdate" + "," + ",".join(record))
+        supervisor.rws.send("historyUpdate", ",".join(record))
         hisT = ""
         histories = list(reversed(self.master_history))
         for h in range(min(len(histories),5)):
@@ -136,7 +136,7 @@ class Robot:
 
     def _isStopped(self) -> bool:
         vel = self.wb_node.getVelocity()
-        return all(abs(ve) < 0.1 for ve in vel)
+        return all(abs(ve) < 0.001 for ve in vel)
 
     def timeStopped(self, supervisor) -> float:
         self.stopped = self._isStopped()
@@ -157,7 +157,6 @@ class Robot:
                 # if it's no longer stopped, reset variables
                 self.stoppedTime = None
                 self.robot_timeStopped = 0
-
         return self.robot_timeStopped
     
     def resetTimeStopped(self):
@@ -214,6 +213,7 @@ class Robot:
     def setMessage(self, receivedData):
         # Get length of bytes
         rDataLen = len(receivedData)
+        Console.log_debug(f"Data: {receivedData} with length {rDataLen}")
         try:
             if rDataLen == 1:
                 tup = struct.unpack('c', receivedData)
@@ -276,24 +276,24 @@ class Robot:
 
         if path[-4:] == "game":
             default_robot_proto = os.path.join(
-                path, 'protos/E-puck-custom-default-FLU.proto')
+                path, 'proto_defaults/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, 'protos/custom_robot.proto')
         else:
             default_robot_proto = os.path.join(
-                path, '../../protos/E-puck-custom-default-FLU.proto')
+                path, '../../proto_defaults/E-puck-custom-default-FLU.proto')
             robot_proto = os.path.join(path, '../../protos/custom_robot.proto')
 
         try:
             if os.path.isfile(robot_proto):
                 if self.controller.keepController and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
-                        supervisor.wwiSendText("loaded1")
+                        supervisor.rws.send("loaded1")
                     return
                 shutil.copyfile(default_robot_proto, robot_proto)
             else:
                 shutil.copyfile(default_robot_proto, robot_proto)
                 supervisor.worldReload()
-            supervisor.wwiSendText("unloaded1")
+            supervisor.rws.send("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(str(e))
