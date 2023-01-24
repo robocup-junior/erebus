@@ -2,6 +2,7 @@ from ConsoleLog import Console
 import struct
 import AutoInstall
 from abc import abstractmethod
+import math
 
 AutoInstall._import("np", "numpy")
 
@@ -37,7 +38,7 @@ class TestVictim(Test):
     def preTest(self, supervisor):
         Console.log_info(f"Testing Offset {self.offset}")
         self.startScore = supervisor.robot0Obj.getScore()  
-        supervisor.robot0Obj.stoppedTime = supervisor.getTime()
+        supervisor.robot0Obj.resetTimeStopped()
         
         self.victim = self.victimList[self.index]
         TestRunner.robotToVictim(supervisor.robot0Obj, self.victim, self.offset)
@@ -53,6 +54,9 @@ class TestVictim(Test):
             self.setTestReport(f"Expected score: {self.startScore - 5}, but was: {supervisor.robot0Obj.getScore()}")
             return supervisor.robot0Obj.getScore() == self.startScore - 5
         return supervisor.robot0Obj.getScore() - self.startScore == (10 * multiplier) + ( self.victim.scoreWorth * multiplier)
+    
+    def postTest(self, supervisor):
+        supervisor.victimManager.resetVictimsTextures()
 
 class TestCheckpoint(Test):
     def __init__(self,index):
@@ -74,12 +78,14 @@ class TestCheckpoint(Test):
         roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
         multiplier = supervisor.tileManager.ROOM_MULT[roomNum]
         return supervisor.robot0Obj.getScore() == self.startScore + (10 * multiplier)
+    
+    def postTest(self, supervisor):
+        pass
 
-class TestLOP(Test):
+class TestRelocate(Test):
     def __init__(self,index):
         super().__init__()
         self.startScore = 0
-        self.checkpoint = None
         self.index = index
         
     def preTest(self, supervisor):
@@ -96,13 +102,83 @@ class TestLOP(Test):
         # inRelocatePos = supervisor.robot0Obj.position[0] == supervisor.robot0Obj.lastVisitedCheckPointPosition[0] and supervisor.robot0Obj.position[1] == supervisor.robot0Obj.lastVisitedCheckPointPosition[1]
         # print(supervisor.robot0Obj.position, supervisor.robot0Obj.lastVisitedCheckPointPosition, supervisor.robot0Obj.getScore() , self.startScore)
         return supervisor.robot0Obj.getScore() == self.startScore - 5
+    
+    def postTest(self, supervisor):
+        pass
 
+class TestBlackHole(Test):
+    def __init__(self):
+        super().__init__()
+        self.startScore = 0
+        
+    def preTest(self, supervisor):
+        supervisor.robot0Obj.increaseScore("TestBlackHole staring test score", 100, supervisor)
+        self.startScore = supervisor.robot0Obj.getScore()  
+        supervisor.config.disableLOP = False
+        supervisor.robot0Obj.resetTimeStopped()
+        supervisor.robot0Obj.position = [0,-1,0]
+        # identify human, wait , wheel 1, wheel 2, human type
+        return (0, 1, 0, 0, b'U')
+    
+    def test(self, supervisor):
+        return supervisor.robot0Obj.getScore() == self.startScore - 5
+    
+    def postTest(self, supervisor):
+        supervisor.config.disableLOP = True
+        
+class TestSwamp(Test):
+    def __init__(self, index):
+        super().__init__()
+        self.startScore = 0
+        self.index = index
+        
+    def preTest(self, supervisor):
+        self.startScore = supervisor.robot0Obj.getScore()  
+        swamps = supervisor.tileManager.swamps
+        swamp = swamps[self.index]
+        supervisor.robot0Obj.position = swamp.center
+        # identify human, wait , wheel 1, wheel 2, human type
+        return (0, 1, 1, 1, b'U')
+    
+    def test(self, supervisor):
+        vel = supervisor.robot0Obj.wb_node.getVelocity()
+        print(vel)
+        # 0.02 for wheel velocity of 1
+        # 0.02 * 0.32 multiplier = 0.006
+        ans = any(math.isclose(abs(v),0.006, abs_tol=0.0005) for v in vel)
+        return ans
+    
+    def postTest(self, supervisor):
+        supervisor.config.disableLOP = True
+
+class TestLOP(Test):
+    """Test auto LOP after 20 seconds
+    Make sure this isn't run first, since auto LOPs dont happen from the starting tile 
+    """
+    def __init__(self):
+        super().__init__()
+        self.startScore = 0
+        
+    def preTest(self, supervisor):
+        supervisor.robot0Obj.increaseScore("TestLOP staring test score", 100, supervisor)
+        supervisor.config.disableLOP = False
+        supervisor.robot0Obj.resetTimeStopped()
+        self.startScore = supervisor.robot0Obj.getScore() 
+        # identify human, wait , wheel 1, wheel 2, human type
+        return (0, 25, 0, 0, b'U')
+    
+    def test(self, supervisor):
+        print(self.startScore, supervisor.robot0Obj.getScore(), self.startScore - 5 == supervisor.robot0Obj.getScore())
+        return supervisor.robot0Obj.getScore() == self.startScore - 5
+    
+    def postTest(self, supervisor):
+        supervisor.robot0Obj.resetTimeStopped()
+        supervisor.config.disableLOP = True
 
 class TestRunner:
     
     
     def __init__(self, supervisor):
-        # self.tests = [Test1(), Test2()]
         self.tests = []
         
         self.stage = 0
@@ -115,10 +191,13 @@ class TestRunner:
         self.finished = False
         
         init = self.tests
+        init += [TestBlackHole()]
+        init += [TestSwamp(i) for i in range(len(supervisor.tileManager.swamps))]
+        init += [TestLOP()]
         init += [TestCheckpoint(i) for i in range(len(supervisor.tileManager.checkpoints))]
         init += [TestVictim(i, ofst, supervisor.victimManager.hazards) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.hazards))]
         init += [TestVictim(i, ofst, supervisor.victimManager.humans) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.humans))]
-        init += [TestLOP(i) for i in range(len(supervisor.victimManager.humans))]
+        init += [TestRelocate(i) for i in range(len(supervisor.victimManager.humans))]
         self.tests = init
     
     def getStage(self, receivedData) -> bool:
@@ -170,16 +249,18 @@ class TestRunner:
             supervisor.emitter.send(message)
 
             self.preTest = True
-        # self.stage == 0 and 
+
         if self.startTest and self.finishedTest:
             if self.tests[self.stage].test(supervisor):
                 Console.log_pass(f"Test {str(self.stage)}/{len(self.tests)} Passed")
                 self.passes += 1
             else:
-                Console.log_fail(f"Test {str(self.stage)}/{len(self.tests)} Failed")
+                Console.log_fail(f"Test {str(self.stage)}/{len(self.tests)-1} Failed")
                 if self.tests[self.stage].getTestReport() != "":
                     Console.log_fail(f"Report: {self.tests[self.stage].getTestReport()}")
                 self.fails += 1
+                
+            self.tests[self.stage].postTest(supervisor)
                 
             self.tests[self.stage].setTestReport("")
             self.startTest = False
@@ -187,7 +268,6 @@ class TestRunner:
             self.preTest = False
             self.stage += 1
             
-            supervisor.victimManager.resetVictimsTextures()
     
     def run(self, supervisor) -> None:
         if self.stage >= len(self.tests) and not self.finished:
