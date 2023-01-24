@@ -26,7 +26,7 @@ import mapAnswer
 
 # Version info
 stream = 21
-version = "21.2.5"
+version = "21.2.4"
 
 
 # Create the instance of the supervisor class
@@ -875,30 +875,29 @@ def generate_robot_proto(robot_json):
     component_counts = {}
     
     proto_code = """
-    #VRML_SIM R2020a utf8
     PROTO custom_robot [
-      field SFVec3f            translation                  0 0 0                    # Is `Transform.translation`.
-      field SFRotation         rotation                     0 1 0 0                  # Is `Transform.rotation`.
-      field SFString           name                         "e-puck"                 # Is `Solid.name`.
-      field SFString           controller                   "" # Is `Robot.controller`.
-      field MFString           controllerArgs               ""                       # Is `Robot.controllerArgs`.
-      field SFString           customData                   ""                       # Is `Robot.customData`.
-      field SFBool             supervisor                   FALSE                    # Is `Robot.supervisor`.
-      field SFBool             synchronization              TRUE                     # Is `Robot.synchronization`.
-      field SFString{"1"}      version                      "1"                      # Defines the e-puck version; either "1" or "2".
-      field SFFloat            camera_fieldOfView           0.84                     # Is `Camera.fieldOfView`.
-      field SFInt32            camera_width                 64                       # Is `Camera.width`.
-      field SFInt32            camera_height                40                       # Is `Camera.height`.
-      field SFBool             camera_antiAliasing          FALSE                    # Is `Camera.antiAliasing`.
-      field SFRotation         camera_rotation              1 0 0 0                  # Is `Camera.rotation`. Interesting setup: set `1 0 0 -0.47` in order to simulate the linear camera mode.
-      field SFFloat            camera_noise                 0.0                      # Is `Camera.noise`.
-      field SFFloat            camera_motionBlur            0.0                      # Is `Camera.motionBlur`.
-      field SFInt32            emitter_channel              1                        # Is `Emitter.channel`.
-      field SFInt32            receiver_channel             1                        # Is `Receiver.channel`.
-      field MFFloat            battery                      []                       # Is `Robot.battery`.
-      field MFNode             turretSlot                   []                       # Extends the robot with new nodes in the turret slot.
-      field MFNode             groundSensorsSlot            []                       # Extends the robot with new nodes in the ground slot. Typically: `E-puckGroundSensors.proto`.
-      field SFBool             kinematic                    FALSE                    # Defines whether the robot motion and its sensors are computed according to a 2D kinematics algorithm.
+      field SFVec3f            translation                  0 0 0                    
+      field SFRotation         rotation                     0 1 0 0                  
+      field SFString           name                         "e-puck"                 
+      field SFString           controller                   "" 
+      field MFString           controllerArgs               ""                       
+      field SFString           customData                   ""                       
+      field SFBool             supervisor                   FALSE                    
+      field SFBool             synchronization              TRUE                     
+      field SFString{"1"}      version                      "1"                      
+      field SFFloat            cam_fieldOfView           0.84                     
+      field SFInt32            cam_width                 64                       
+      field SFInt32            cam_height                40                       
+      field SFBool             cam_antiAliasing          FALSE                    
+      field SFRotation         cam_rotation              1 0 0 0                  
+      field SFFloat            cam_noise                 0.0                      
+      field SFFloat            cam_motionBlur            0.0                      
+      field SFInt32            emitter_channel              1                        
+      field SFInt32            receiver_channel             1                        
+      field MFFloat            battery                      []                       
+      field MFNode             turretSlot                   []                       
+      field MFNode             groundSensorsSlot            []                       
+      field SFBool             kinematic                    FALSE                    
       hiddenField  SFFloat            max_velocity                 6.28
     ]
     {
