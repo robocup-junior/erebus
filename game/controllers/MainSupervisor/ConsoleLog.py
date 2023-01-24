@@ -4,6 +4,8 @@ import sys
 import os
 
 class Console:
+    DEBUG_MODE = True
+    
     PREFIX_DEBUG: str = "EREBUS DEBUG"
     PREFIX_PASS: str = "EREBUS PASS"
     PREFIX_FAIL: str = "EREBUS FAIL"
@@ -64,7 +66,8 @@ class Console:
         
     @staticmethod
     def log_debug(msg: str) -> None:
-        Console._log(Console.PREFIX_DEBUG, msg, Console.COLOR_DEBUG)
+        if Console.DEBUG_MODE:
+            Console._log(Console.PREFIX_DEBUG, msg, Console.COLOR_DEBUG)
     
     @staticmethod
     def _log(prefix: str, msg: str, color: str):
