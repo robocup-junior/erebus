@@ -99,8 +99,6 @@ class TestRelocate(Test):
         return (0, 1, 0, 0, b'U')
     
     def test(self, supervisor):
-        # inRelocatePos = supervisor.robot0Obj.position[0] == supervisor.robot0Obj.lastVisitedCheckPointPosition[0] and supervisor.robot0Obj.position[1] == supervisor.robot0Obj.lastVisitedCheckPointPosition[1]
-        # print(supervisor.robot0Obj.position, supervisor.robot0Obj.lastVisitedCheckPointPosition, supervisor.robot0Obj.getScore() , self.startScore)
         return supervisor.robot0Obj.getScore() == self.startScore - 5
     
     def postTest(self, supervisor):
@@ -142,7 +140,6 @@ class TestSwamp(Test):
     
     def test(self, supervisor):
         vel = supervisor.robot0Obj.wb_node.getVelocity()
-        print(vel)
         # 0.02 for wheel velocity of 1
         # 0.02 * 0.32 multiplier = 0.006
         ans = any(math.isclose(abs(v),0.006, abs_tol=0.0005) for v in vel)
@@ -168,7 +165,6 @@ class TestLOP(Test):
         return (0, 25, 0, 0, b'U')
     
     def test(self, supervisor):
-        print(self.startScore, supervisor.robot0Obj.getScore(), self.startScore - 5 == supervisor.robot0Obj.getScore())
         return supervisor.robot0Obj.getScore() == self.startScore - 5
     
     def postTest(self, supervisor):
