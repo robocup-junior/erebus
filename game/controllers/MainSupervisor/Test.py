@@ -116,7 +116,7 @@ class TestBlackHole(Test):
         self.startScore = supervisor.robot0Obj.getScore()  
         supervisor.config.disableLOP = False
         supervisor.robot0Obj.resetTimeStopped()
-        supervisor.robot0Obj.position = [0,-1,0]
+        supervisor.robot0Obj.position = [-10,-1,-10]
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
     
