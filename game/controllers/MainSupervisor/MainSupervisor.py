@@ -449,41 +449,40 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             misidentification = True
             
-            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position)]
+            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position) and not h.identified]
             
             Console.log_debug(f"--- Victim Data ---")
             for h in iterator:
                 Console.log_debug(f"Distance {h.getDistance(self.robot0Obj.position)}/0.09 in range ({h.checkPosition(self.robot0Obj.position)})")
                 Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
                 Console.log_debug(f"On same side: {h.onSameSide(self.robot0Obj.position)}")
+                Console.log_debug(f"Identified: {h.identified}")
             Console.log_debug(f"--- ----------- ---")
             Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
             
             if len(nearby_map_issues) > 0:
                 # TODO Should it iterate through all nearby map issues or just take the first one???
                 nearby_issue = nearby_map_issues[0]
-                Console.log_debug(f"Nearby issue Identified: {nearby_issue.identified}")
-                # If not already identified
-                if not nearby_issue.identified:
-                    misidentification = False
-                    # Get points scored depending on the type of victim
-                    #pointsScored = nearby_issue.scoreWorth
+                
+                misidentification = False
+                # Get points scored depending on the type of victim
+                #pointsScored = nearby_issue.scoreWorth
 
-                    grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
-                    roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
+                roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
 
-                    Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs {nearby_issue.simple_victim_type.lower()}")
+                Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs {nearby_issue.simple_victim_type.lower()}")
 
-                    # Update score and history
-                    if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
-                        self.robot0Obj.increaseScore(
-                            f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                            
+                # Update score and history
+                if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                     self.robot0Obj.increaseScore(
-                        f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                    self.robot0Obj.victimIdentified = True
+                        f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                        
+                self.robot0Obj.increaseScore(
+                    f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                self.robot0Obj.victimIdentified = True
 
-                    nearby_issue.identified = True
+                nearby_issue.identified = True
 
             if misidentification:
                 self.robot0Obj.increaseScore(f"Misidentification of {name}", -5, self)
