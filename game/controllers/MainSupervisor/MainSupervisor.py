@@ -26,7 +26,7 @@ import mapAnswer
 
 # Version info
 stream = 21
-version = "21.2.4"
+version = "21.2.6"
 
 
 # Create the instance of the supervisor class
@@ -875,6 +875,7 @@ def generate_robot_proto(robot_json):
     component_counts = {}
     
     proto_code = """
+    #VRML_SIM R2020a utf8
     PROTO custom_robot [
       field SFVec3f            translation                  0 0 0                    
       field SFRotation         rotation                     0 1 0 0                  
@@ -885,13 +886,13 @@ def generate_robot_proto(robot_json):
       field SFBool             supervisor                   FALSE                    
       field SFBool             synchronization              TRUE                     
       field SFString{"1"}      version                      "1"                      
-      field SFFloat            cam_fieldOfView           0.84                     
-      field SFInt32            cam_width                 64                       
-      field SFInt32            cam_height                40                       
-      field SFBool             cam_antiAliasing          FALSE                    
-      field SFRotation         cam_rotation              1 0 0 0                  
-      field SFFloat            cam_noise                 0.0                      
-      field SFFloat            cam_motionBlur            0.0                      
+      field SFFloat            camera_fieldOfView           0.84                     
+      field SFInt32            camera_width                 64                       
+      field SFInt32            camera_height                40                       
+      field SFBool             camera_antiAliasing          FALSE                    
+      field SFRotation         camera_rotation              1 0 0 0                  
+      field SFFloat            camera_noise                 0.0                      
+      field SFFloat            camera_motionBlur            0.0                      
       field SFInt32            emitter_channel              1                        
       field SFInt32            receiver_channel             1                        
       field MFFloat            battery                      []                       
@@ -1325,7 +1326,7 @@ def generate_robot_proto(robot_json):
                     rotation 0 0.707107 0.707107 3.14159
                     children [
                         Transform {{
-                        rotation IS cam_rotation
+                        rotation IS camera_rotation
                         children [
                             Shape {{
                               appearance PBRAppearance {{
@@ -1351,13 +1352,13 @@ def generate_robot_proto(robot_json):
                     ]
                     }}
                 ]
-                fieldOfView IS cam_fieldOfView
-                width IS cam_width
-                height IS cam_height
+                fieldOfView IS camera_fieldOfView
+                width IS camera_width
+                height IS camera_height
                 near 0.0055
-                antiAliasing IS cam_antiAliasing
-                motionBlur IS cam_motionBlur
-                noise IS cam_noise
+                antiAliasing IS camera_antiAliasing
+                motionBlur IS camera_motionBlur
+                noise IS camera_noise
                 zoom Zoom {{
                 }}
                 }}
