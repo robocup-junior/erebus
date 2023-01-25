@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 
+- ❗: The recommended Python version is now 3.9+.
 - ❗: Ported to Webots version 2023a. Erebus must be run with Webots version 2023a. Download it [here](https://github.com/cyberbotics/webots/releases/tag/R2023a).
 - ❗: Due to 2023a port, the Erebus UI robot window now runs in the browser.
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
