@@ -9,8 +9,8 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 ## Quick Start
 
-1. Download and install [Python 3.x](https://www.python.org/). Don't forget to add a path to the "Python".
-2. Download and install [Webots 2021a](https://cyberbotics.com/).
+1. Download and install [Python 3.9+](https://www.python.org/). Don't forget to add a path to the "Python".
+2. Download and install [Webots 2023a](https://cyberbotics.com/).
 3. Download our [latest release](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases) and extract the zip file.
 4. Open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
 
