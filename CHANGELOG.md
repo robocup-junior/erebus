@@ -8,12 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Added
 
 - ✨: Added support for Webots extern remote controllers to allow for remote controllers via tcp or locally. Read more about it on the Webots website [here](https://cyberbotics.com/doc/guide/running-extern-robot-controllers), and read our documentation to get started [here](https://docs.google.com/document/d/19yIzfaxb6fx1lw7hKTE6EkX7_Pi2NzfE_oGaks76Kgo/edit?usp=sharing).
-- ✨: Added a world selector fresh button.
 - ✨: Added a new real-world timer (below the main timer) to ensure controllers don't take too long to run during competitions.
     - The max real world time is `max(maxTime + 60, maxTime * 1.25)` where `maxTime` is the maximum time for a given world
+- ✨: Added a world selector refresh button.
 - ✨: Added links to the world generator and robot customiser under settings.
-- ✨: Added some development unit tests that can be run under settings.
-- ✨: Added support for room 4.
+- ✨: Added support for room 4. Please refer to the 2023 rules for more details.
+- 🔨: Added some development unit tests that can be run under settings.
 
 ### Changed
 
@@ -22,8 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
 - ❗: Reduced the velocity threshold for checking whether a robot is stopped. **Please make sure this change doesn't affect your victim detection code**. In some instances, you may need to delay movement after sending a victim identification, in case you begin to move too quickly after the message is received.
 - ⚡️: Updated UI styling to worlds and settings.
-- ⚡️: Victims, hazards and skymap now use local textures instead of being generated or online.
+- ⚡️: Victims, hazards and sky map now use local textures instead of being generated or online.
 - ⚡️: Victims box geometry is now thinner.
+
+### Fixed
+
 - 🐛: Fixed a bug where the map bonus score wasn't being correctly added to the final score.
 - 🐛: Fixed a bug where victim misidentifications weren't being applied when trying to identify an already identified robot.
 
@@ -31,6 +34,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - 🗑️: Removed `robot0.wbt` file
 - 🗑️: Removed unused proto template files
+
+### Communication
+
+Since this is a large update to the erebus code base, there may be some bugs. Please feel free to create bug issues on the respective Gitlab repos to help us fix any issues:
+
+- [Erebus issue page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
+- [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
 
 ## [Release v22.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v22.0.1) - 2022-12-13
 
