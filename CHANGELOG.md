@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - ❗: The recommended Python version is now 3.9+.
 - ❗: Ported to Webots version 2023a. Erebus must be run with Webots version 2023a. Download it [here](https://github.com/cyberbotics/webots/releases/tag/R2023a).
+- ❗: Due to 2023a port, previous worlds (for v21 and before) may no longer work.
 - ❗: Due to 2023a port, the Erebus UI robot window now runs in the browser.
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
 - ❗: Reduced the velocity threshold for checking whether a robot is stopped. **Please make sure this change doesn't affect your victim detection code**. In some instances, you may need to delay movement after sending a victim identification, in case you begin to move too quickly after the message is received.
