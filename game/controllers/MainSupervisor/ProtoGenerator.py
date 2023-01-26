@@ -248,7 +248,7 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
                 Camera {{
                 name "{robot_json[component]["customName"]}"
@@ -306,7 +306,7 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
             {robot_json[component]["name"]} {{
             rotation 0.577 -0.577 -0.577 2.09
@@ -325,26 +325,30 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
                 Transform {{
-                    rotation 0 0 1 1.57
-                    children [
-                        SpotLight {{
-                        attenuation 0 0 12.56
-                        intensity   0.01
-                        direction   1 0 0
-                        cutOffAngle 0.3
-                        }}
-                    ]
+                rotation 1 0 0 3.14
+                children [
+                    Transform {{
+                        rotation 0 0 1 0
+                        children [
+                            SpotLight {{
+                            attenuation 0 0 12.56
+                            intensity   0.01
+                            direction   1 0 0
+                            cutOffAngle 0.3
+                            }}
+                        ]
+                    }}
+                    Camera {{
+                    name "{robot_json[component]["customName"]}"
+                    rotation 0 0 1 0
+                    width 1
+                    height 1
+                    }}
+                ]
                 }}
-                Camera {{
-                name "{robot_json[component]["customName"]}"
-                rotation 0 0 1 1.5707944504244395
-                width 1
-                height 1
-                }}
-                
             ]
             }}
             """
@@ -353,7 +357,7 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
             DistanceSensor {{
             name "{robot_json[component]["customName"]}"
@@ -377,7 +381,7 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
             Accelerometer {{
                 lookupTable [ -100 -100 0.003 100 100 0.003 ]
@@ -395,7 +399,7 @@ def generate_robot_proto(robot_json):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
-            rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
                 rotation 0 0 1 3.14159
