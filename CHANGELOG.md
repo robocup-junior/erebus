@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 
 - 🐛: Fixed a bug where the map bonus score wasn't being correctly added to the final score.
+- 🐛: Fixed a bug where custom sensor z and y axis were not being handled correctly.
 - 🐛: Fixed a bug where victim misidentifications weren't being applied when trying to identify an already identified robot.
 
 ### Removed
