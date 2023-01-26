@@ -287,11 +287,16 @@ def generate_robot_proto(robot_json):
                 fieldOfView IS camera_fieldOfView
                 width IS camera_width
                 height IS camera_height
-                near 0.0055
+                near 0.0045
                 antiAliasing IS camera_antiAliasing
                 motionBlur IS camera_motionBlur
                 noise IS camera_noise
                 zoom Zoom {{
+                }}
+                physics Physics {{
+                }}
+                boundingObject Sphere {{
+                    radius 0.007
                 }}
                 }}
             ]
@@ -306,6 +311,11 @@ def generate_robot_proto(robot_json):
             {robot_json[component]["name"]} {{
             rotation 0.577 -0.577 -0.577 2.09
             name "{robot_json[component]["customName"]}"
+            physics Physics {{
+            }}
+            boundingObject Sphere {{
+                radius 0.003
+            }}
             }}
             ]
             }}
@@ -353,6 +363,11 @@ def generate_robot_proto(robot_json):
             ]
             type "infra-red"
             rotation 1 0 0 1.56826
+            physics Physics {{
+            }}
+            boundingObject Sphere {{
+                radius 0.003
+            }}
             }}
             ]
             }}
@@ -367,6 +382,11 @@ def generate_robot_proto(robot_json):
             Accelerometer {{
                 lookupTable [ -100 -100 0.003 100 100 0.003 ]
                 rotation 0.577 -0.577 -0.577 2.09
+                physics Physics {{
+                }}
+                boundingObject Sphere {{
+                    radius 0.003
+                }}
             }}
             ]
             }}"""
@@ -380,6 +400,11 @@ def generate_robot_proto(robot_json):
                 Lidar {{
                 rotation 0 0 1 3.14159
                 fieldOfView 6.2832
+                physics Physics {{
+                }}
+                boundingObject Sphere {{
+                    radius 0.003
+                }}
                 }}
             ]
             }}"""
