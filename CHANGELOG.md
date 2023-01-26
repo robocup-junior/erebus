@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - ❗: Due to 2023a port, the Erebus UI robot window now runs in the browser.
     - **Note**: If the window doesn't appear, go to `Scene Tree > DEF MAINSUPERVISOR Robot > (Right click) > Show Robot Window`
 - ❗: Reduced the velocity threshold for checking whether a robot is stopped. **Please make sure this change doesn't affect your victim detection code**. In some instances, you may need to delay movement after sending a victim identification, in case you begin to move too quickly after the message is received.
-- ❗: Added small spherical collision bounding objects to all sensors within the custom and the default robot. These have a radius of 0.3cm for all sensors except cameras, which have a larger radius of 0.7cm.
+- ❗: Added small spherical collision bounding objects to all sensors (excluding the colour sensor) within the custom and the default robot. These have a radius of 0.3cm for all sensors except cameras, which have a larger radius of 0.7cm.
 - ⚡️: Updated UI styling to worlds and settings.
 - ⚡️: Victims, hazards and sky map now use local textures instead of being generated or online.
 - ⚡️: Victims box geometry is now thinner.
