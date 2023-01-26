@@ -43,6 +43,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Communication
 
+We would love for teams to share the new worlds they create for practicing. Feel free to share them in the "#share-worlds" channel in the discord.
+
 Since this is a large update to the erebus code base, there may be some bugs. Please feel free to create bug issues on the respective Gitlab repos to help us fix any issues:
 
 - [Erebus issue page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
