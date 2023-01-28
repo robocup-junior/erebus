@@ -5,7 +5,7 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 ### [Erebus Official Website](https://erebus.rcj.cloud/)
 
-<div align="center"><img src="/docs/images/environment_v21_0_0_b2.png" width=80%></div>
+<div align="center"><img src="/docs/images/environment_v23_0_0.png" width=80%></div>
 
 ## Quick Start
 1. Download and install [Python 3.x](https://www.python.org/). Don't forget to add a path to the "Python".
@@ -15,14 +15,14 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 
 ## Documentation
-Documentation for the platform can be accessed through [this link](https://erebus.rcj.cloud/docs/).  
+Documentation for the platform can be accessed through [this link](https://v22.erebus.rcj.cloud/docs/).  
 However, some pages are currently under construction.
 
 ## Robot Customization
-The robot customizer can be accessed through [this link](https://robot.erebus.rcj.cloud/). 
+The robot customizer can be accessed through [this link](https://v23.robot.erebus.rcj.cloud/).
 
 ## Map Generator
-The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/).
+The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2023).
 
 
 ## Communication
@@ -40,6 +40,7 @@ Annoucements will be made in a number of different locations.
 
 ### Known issues
 - The robot customization wheel rotations are off by 0.5*pi in the y axis compared to the sensor values. However, what you see in the 3d output in the webpage is still what Erebus generates.
+- Moving sensor sliders very fast within robot customizer v23 can result in visual bugs where some sensors are not removed correctly. This is purely visual, and does not affect the resulting JSON.
 
 ### Reporting bugs and fixes
 Please report bugs and potential fixes either through: 

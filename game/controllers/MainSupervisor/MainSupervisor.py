@@ -383,7 +383,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.rws.send("version", f"{self.version}")
 
     def processMessage(self, robotMessage):
-
+        Console.log_debug(f"Robot Stopped for {self.robot0Obj.timeStopped(self)}s")
         # If exit message is correct
         if robotMessage[0] == 'E':
             # Check robot position is on starting tile
@@ -449,30 +449,40 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             misidentification = True
             
-            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position)]
+            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position) and not h.identified]
+            
+            Console.log_debug(f"--- Victim Data ---")
+            for h in iterator:
+                Console.log_debug(f"Distance {h.getDistance(self.robot0Obj.position)}/0.09 in range ({h.checkPosition(self.robot0Obj.position)})")
+                Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
+                Console.log_debug(f"On same side: {h.onSameSide(self.robot0Obj.position)}")
+                Console.log_debug(f"Identified: {h.identified}")
+            Console.log_debug(f"--- ----------- ---")
+            Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
             
             if len(nearby_map_issues) > 0:
                 # TODO Should it iterate through all nearby map issues or just take the first one???
                 nearby_issue = nearby_map_issues[0]
+                
                 misidentification = False
-                # If not already identified
-                if not nearby_issue.identified:
-                    # Get points scored depending on the type of victim
-                    #pointsScored = nearby_issue.scoreWorth
+                # Get points scored depending on the type of victim
+                #pointsScored = nearby_issue.scoreWorth
 
-                    grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
-                    roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
+                grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
+                roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
 
-                    # Update score and history
-                    if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
-                        self.robot0Obj.increaseScore(
-                            f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                            
+                Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs {nearby_issue.simple_victim_type.lower()}")
+
+                # Update score and history
+                if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                     self.robot0Obj.increaseScore(
-                        f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                    self.robot0Obj.victimIdentified = True
+                        f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                        
+                self.robot0Obj.increaseScore(
+                    f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                self.robot0Obj.victimIdentified = True
 
-                    nearby_issue.identified = True
+                nearby_issue.identified = True
 
             if misidentification:
                 self.robot0Obj.increaseScore(f"Misidentification of {name}", -5, self)
@@ -612,7 +622,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         # Main game loop
         if self.robot0Obj.inSimulation:
-            
             self.robot0Obj.updateTimeElapsed(self.timeElapsed)
 
             # Automatic camera movement
@@ -629,11 +638,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
             checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
             # If any checkpoints
             if len(checkpoint) > 0:
-                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], game)
+                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], self)
 
             # Check if the robots are in swamps
             inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, game)
+            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, self)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:
@@ -650,16 +659,17 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # If data sent to receiver
                 if self.robot0Obj.message != []:
                     r0_message = self.robot0Obj.message
+                    Console.log_debug(f"Robot Message: {r0_message}")
                     self.robot0Obj.message = []
                     self.processMessage(r0_message)
 
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
-                if self.robot0Obj.timeStopped(game) >= 20:
+                if self.robot0Obj.timeStopped(self) >= 20:
                     if not self.config.disableLOP:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
-                elif self.robot0Obj.timeStopped(game) >= 3 and self.robot0Obj.inSwamp:
+                elif self.robot0Obj.timeStopped(self) >= 3 and self.robot0Obj.inSwamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
                         Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
@@ -669,29 +679,28 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
 
-            if self.robotInitialized:
-                # Send the update information to the robot window
-                nowScore = self.robot0Obj.getScore()
-                self.timeElapsed = min(self.timeElapsed, self.maxTime)
-                self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
-                if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
-                    self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
-                    self.lastSentScore = nowScore
-                    self.lastSentTime = int(self.timeElapsed)
-                    self.lastSentRealTime = int(self.realTimeElapsed)
-                    if self.config.recording:
-                        Recorder.update(self)
+        if self.robotInitialized:
+            # Send the update information to the robot window
+            nowScore = self.robot0Obj.getScore()
+            self.timeElapsed = min(self.timeElapsed, self.maxTime)
+            self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
+            if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):
+                self.rws.send("update", str(round(nowScore, 2)) + "," + str(int(self.timeElapsed)) + "," + str(self.maxTime) + "," + str(int(self.realTimeElapsed)))
+                self.lastSentScore = nowScore
+                self.lastSentTime = int(self.timeElapsed)
+                self.lastSentRealTime = int(self.realTimeElapsed)
+                if self.config.recording:
+                    Recorder.update(self)
 
-                # If the time is up
-                # TODO 9 min rule? max time + 1 min?
-                if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
-                    self.add_map_multiplier()
-                    self.robot_quit(0, True)
-                    
-                    self.gameState = MATCH_FINISHED
-                    self.lastFrame = True
-                    
-                    self.rws.send("ended")
+            # If the time is up
+            if (self.timeElapsed >= self.maxTime or self.realTimeElapsed >= self.maxRealWorldTime) and self.lastFrame != -1:
+                self.add_map_multiplier()
+                self.robot_quit(0, True)
+                
+                self.gameState = MATCH_FINISHED
+                self.lastFrame = True
+                
+                self.rws.send("ended")
 
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()

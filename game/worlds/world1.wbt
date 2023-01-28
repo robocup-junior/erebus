@@ -1,11 +1,9 @@
-#VRML_SIM R2022b utf8
+#VRML_SIM R2023a utf8
+
 EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/TexturedBackground.proto"
-EXTERNPROTO "../protos/curvedWall.proto"
 EXTERNPROTO "../protos/halfTile.proto"
 EXTERNPROTO "../protos/HazardMap.proto"
-EXTERNPROTO "../protos/obstacle.proto"
-EXTERNPROTO "../protos/Victim.proto"
 EXTERNPROTO "../protos/worldTile.proto"
 IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
 
@@ -27,8 +25,8 @@ WorldInfo {
   ]
 }
 DEF Viewpoint Viewpoint {
-  orientation -0.683263 0.683263 0.257493 2.63756
-  position -1.1723664565712655 1.588355251164068 -0.06695790812987049
+  orientation -0.6832632393515958 0.6832632393515958 0.25749309020151906 2.63756
+  position -0.07564287574572318 1.3895287899061324 1.1967485427161828
 }
 TexturedBackground {
 }

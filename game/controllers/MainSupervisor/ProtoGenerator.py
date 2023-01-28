@@ -378,7 +378,7 @@ def generate_robot_proto(robot_json):
             rotation {robot_json[component]["rx"]} {robot_json[component]["ry"]} {robot_json[component]["rz"]} {robot_json[component]["a"]}
             children [
                 Lidar {{
-                rotation 0 0 1 0
+                rotation 0 0 1 3.14159
                 fieldOfView 6.2832
                 }}
             ]

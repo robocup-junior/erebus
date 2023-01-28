@@ -136,7 +136,7 @@ class Robot:
 
     def _isStopped(self) -> bool:
         vel = self.wb_node.getVelocity()
-        return all(abs(ve) < 0.1 for ve in vel)
+        return all(abs(ve) < 0.001 for ve in vel)
 
     def timeStopped(self, supervisor) -> float:
         self.stopped = self._isStopped()
@@ -157,7 +157,6 @@ class Robot:
                 # if it's no longer stopped, reset variables
                 self.stoppedTime = None
                 self.robot_timeStopped = 0
-
         return self.robot_timeStopped
     
     def resetTimeStopped(self):
@@ -214,6 +213,7 @@ class Robot:
     def setMessage(self, receivedData):
         # Get length of bytes
         rDataLen = len(receivedData)
+        Console.log_debug(f"Data: {receivedData} with length {rDataLen}")
         try:
             if rDataLen == 1:
                 tup = struct.unpack('c', receivedData)
