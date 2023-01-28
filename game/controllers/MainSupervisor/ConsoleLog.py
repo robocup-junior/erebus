@@ -1,10 +1,5 @@
-import AutoInstall
-AutoInstall._import("cl", "termcolor")
-import sys
-import os
-
 class Console:
-    DEBUG_MODE = True
+    DEBUG_MODE = False
     
     PREFIX_DEBUG: str = "EREBUS DEBUG"
     PREFIX_PASS: str = "EREBUS PASS"

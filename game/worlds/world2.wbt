@@ -1,13 +1,15 @@
 #VRML_SIM R2022b utf8
-EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "../protos/TexturedBackground.proto"
-EXTERNPROTO "../protos/curvedWall.proto"
-EXTERNPROTO "../protos/halfTile.proto"
-EXTERNPROTO "../protos/HazardMap.proto"
-EXTERNPROTO "../protos/obstacle.proto"
-EXTERNPROTO "../protos/Victim.proto"
-EXTERNPROTO "../protos/worldTile.proto"
-IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
+        EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
+        EXTERNPROTO "../protos/TexturedBackground.proto"
+        EXTERNPROTO "../protos/curvedWall.proto"
+        EXTERNPROTO "../protos/halfTile.proto"
+        EXTERNPROTO "../protos/HazardMap.proto"
+        EXTERNPROTO "../protos/obstacle.proto"
+        EXTERNPROTO "../protos/Victim.proto"
+        EXTERNPROTO "../protos/worldTile.proto"
+        EXTERNPROTO "../protos/Area4_1.proto"
+        EXTERNPROTO "../protos/Area4_2.proto"
+        IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
 
         WorldInfo {
           basicTimeStep 16
@@ -36,7 +38,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
         DEF WALLTILES Group {
             children [
               
-        DEF TILE worldTile {
+        DEF TILE halfTile {
             xPos 0
             zPos 0
             floor TRUE
@@ -44,10 +46,15 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             rightWall 0
             bottomWall 5
             leftWall 3
-            topExternal TRUE
-            rightExternal FALSE
-            bottomExternal FALSE
-            leftExternal TRUE
+            tile1Walls [ 0, 0, 0, 0 ]
+            tile2Walls [ 0, 0, 0, 0 ]
+            tile3Walls [ 0, 0, 0, 0 ]
+            tile4Walls [ 0, 0, 0, 0 ]
+            tile1External [ TRUE, FALSE, FALSE, TRUE ]
+            tile2External [ TRUE, FALSE, FALSE, FALSE ]
+            tile3External [ FALSE, FALSE, FALSE, TRUE ]
+            tile4External [ FALSE, FALSE, FALSE, FALSE ]
+            curve [0,0,0,0]
             start FALSE
             trap FALSE
             checkpoint TRUE
@@ -59,7 +66,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 2
           }
         
         DEF TILE halfTile {
@@ -69,10 +76,10 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             topWall 0
             rightWall 0
             bottomWall 0
-            leftWall 0
-            tile1Walls [ 0, 9, 225, 0 ]
+            leftWall 2
+            tile1Walls [ 0, 27, 27, 0 ]
             tile2Walls [ 0, 0, 0, 0 ]
-            tile3Walls [ 0, 0, 0, 2 ]
+            tile3Walls [ 0, 0, 0, 0 ]
             tile4Walls [ 0, 0, 0, 0 ]
             tile1External [ FALSE, FALSE, FALSE, TRUE ]
             tile2External [ FALSE, FALSE, FALSE, FALSE ]
@@ -192,17 +199,17 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             floor TRUE
             topWall 0
             rightWall 0
-            bottomWall 0
-            leftWall 0
-            tile1Walls [ 0, 0, 0, 1 ]
+            bottomWall 5
+            leftWall 3
+            tile1Walls [ 0, 0, 0, 0 ]
             tile2Walls [ 0, 0, 0, 0 ]
             tile3Walls [ 0, 0, 0, 0 ]
-            tile4Walls [ 0, 0, 1, 0 ]
+            tile4Walls [ 0, 0, 0, 0 ]
             tile1External [ FALSE, FALSE, FALSE, TRUE ]
             tile2External [ FALSE, FALSE, FALSE, FALSE ]
             tile3External [ FALSE, FALSE, TRUE, TRUE ]
             tile4External [ FALSE, FALSE, TRUE, FALSE ]
-            curve [0,0,3,0]
+            curve [0,0,0,0]
             start FALSE
             trap FALSE
             checkpoint FALSE
@@ -492,7 +499,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             xScale 0.4
             yScale 0.4
             zScale 0.4
-            tileColor 0.9019607843137255 0.10196078431372549 0.10196078431372549 
+            tileColor 0.30196078431372547 0.10196078431372549 0.6 
             room 1
           }
         
@@ -563,12 +570,12 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             zPos 5
             floor FALSE
             topWall 0
-            rightWall 0
-            bottomWall 0
+            rightWall 3
+            bottomWall 3
             leftWall 0
             tile1Walls [ 0, 0, 0, 0 ]
-            tile2Walls [ 0, 1, 0, 0 ]
-            tile3Walls [ 0, 0, 1, 0 ]
+            tile2Walls [ 0, 0, 0, 0 ]
+            tile3Walls [ 0, 0, 0, 0 ]
             tile4Walls [ 0, 0, 0, 0 ]
             tile1External [ FALSE, FALSE, FALSE, FALSE ]
             tile2External [ FALSE, FALSE, FALSE, FALSE ]
@@ -750,12 +757,12 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             floor TRUE
             topWall 0
             rightWall 0
-            bottomWall 0
+            bottomWall 2
             leftWall 0
             tile1Walls [ 0, 0, 0, 0 ]
             tile2Walls [ 0, 0, 0, 0 ]
             tile3Walls [ 0, 0, 0, 0 ]
-            tile4Walls [ 0, 0, 1, 0 ]
+            tile4Walls [ 0, 0, 0, 0 ]
             tile1External [ FALSE, FALSE, FALSE, FALSE ]
             tile2External [ FALSE, FALSE, FALSE, FALSE ]
             tile3External [ FALSE, FALSE, TRUE, FALSE ]
@@ -775,7 +782,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             room 3
           }
         
-        DEF TILE halfTile {
+        DEF TILE worldTile {
             xPos 4
             zPos 0
             floor FALSE
@@ -783,15 +790,10 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             rightWall 6
             bottomWall 15
             leftWall 0
-            tile1Walls [ 0, 0, 0, 0 ]
-            tile2Walls [ 0, 0, 0, 0 ]
-            tile3Walls [ 0, 0, 0, 0 ]
-            tile4Walls [ 0, 0, 0, 0 ]
-            tile1External [ TRUE, FALSE, FALSE, FALSE ]
-            tile2External [ TRUE, FALSE, FALSE, FALSE ]
-            tile3External [ FALSE, FALSE, FALSE, FALSE ]
-            tile4External [ FALSE, FALSE, FALSE, FALSE ]
-            curve [0,0,0,0]
+            topExternal TRUE
+            rightExternal FALSE
+            bottomExternal FALSE
+            leftExternal FALSE
             start FALSE
             trap TRUE
             checkpoint FALSE
@@ -803,7 +805,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 2
+            room 1
           }
         
         DEF TILE worldTile {
@@ -877,7 +879,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             leftExternal FALSE
             start FALSE
             trap FALSE
-            checkpoint TRUE
+            checkpoint FALSE
             swamp FALSE
             width 9
             height 6
@@ -886,7 +888,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE halfTile {
@@ -920,7 +922,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             room 3
           }
         
-        DEF TILE worldTile {
+        DEF TILE halfTile {
             xPos 4
             zPos 5
             floor TRUE
@@ -928,10 +930,15 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             rightWall 0
             bottomWall 1
             leftWall 0
-            topExternal FALSE
-            rightExternal FALSE
-            bottomExternal TRUE
-            leftExternal FALSE
+            tile1Walls [ 0, 0, 0, 0 ]
+            tile2Walls [ 0, 0, 0, 0 ]
+            tile3Walls [ 0, 0, 0, 0 ]
+            tile4Walls [ 0, 0, 0, 0 ]
+            tile1External [ FALSE, FALSE, FALSE, FALSE ]
+            tile2External [ FALSE, FALSE, FALSE, FALSE ]
+            tile3External [ FALSE, FALSE, TRUE, FALSE ]
+            tile4External [ FALSE, FALSE, TRUE, FALSE ]
+            curve [0,0,0,0]
             start FALSE
             trap FALSE
             checkpoint FALSE
@@ -942,8 +949,8 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             xScale 0.4
             yScale 0.4
             zScale 0.4
-            tileColor 0.30196078431372547 0.10196078431372549 0.6 
-            room 1
+            tileColor 0.9058823529411765 0.10196078431372549 0.10196078431372549 
+            room 3
           }
         
         DEF TILE worldTile {
@@ -998,7 +1005,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             room 1
           }
         
-        DEF TILE halfTile {
+        DEF TILE worldTile {
             xPos 5
             zPos 2
             floor TRUE
@@ -1006,15 +1013,10 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             rightWall 6
             bottomWall 3
             leftWall 0
-            tile1Walls [ 0, 0, 0, 0 ]
-            tile2Walls [ 0, 0, 0, 0 ]
-            tile3Walls [ 0, 0, 0, 0 ]
-            tile4Walls [ 0, 0, 0, 0 ]
-            tile1External [ FALSE, FALSE, FALSE, FALSE ]
-            tile2External [ FALSE, FALSE, FALSE, FALSE ]
-            tile3External [ FALSE, FALSE, FALSE, FALSE ]
-            tile4External [ FALSE, FALSE, FALSE, FALSE ]
-            curve [0,0,0,0]
+            topExternal FALSE
+            rightExternal FALSE
+            bottomExternal FALSE
+            leftExternal FALSE
             start FALSE
             trap FALSE
             checkpoint TRUE
@@ -1026,7 +1028,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 2
+            room 1
           }
         
         DEF TILE worldTile {
@@ -1052,7 +1054,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1078,7 +1080,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1104,7 +1106,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1208,7 +1210,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1234,7 +1236,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1260,7 +1262,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1363,7 +1365,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             xScale 0.4
             yScale 0.4
             zScale 0.4
-            tileColor 0.635 0.635 0.635
+            tileColor 0.03137254901960784 0.8352941176470589 0.03137254901960784 
             room 1
           }
         
@@ -1390,7 +1392,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1416,7 +1418,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1546,7 +1548,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
         DEF TILE worldTile {
@@ -1572,7 +1574,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             yScale 0.4
             zScale 0.4
             tileColor 0.635 0.635 0.635
-            room 1
+            room 4
           }
         
             ]
@@ -1606,20 +1608,9 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
         DEF boundary Group {
             children [
               DEF checkpoint2min Transform {
-                    translation -0.12000000000000005 -0.03 -0.06
-              }
-              DEF checkpoint2max Transform {
-                    translation -5.551115123125783e-17 -0.03 0.06
-              }
-            ]
-          }
-        
-        DEF boundary Group {
-            children [
-              DEF checkpoint3min Transform {
                     translation 5.551115123125783e-17 -0.03 -0.18
               }
-              DEF checkpoint3max Transform {
+              DEF checkpoint2max Transform {
                     translation 0.12000000000000005 -0.03 -0.06
               }
             ]
@@ -1738,7 +1729,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
         }
         
         Victim {
-            translation -0.08500000000000005 0 0.06499999999999999
+            translation -0.04900000000000006 0 0.06499999999999999
             rotation 0 1 0 3.14
             name "Victim2"
             type "unharmed"
@@ -1746,7 +1737,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
         }
         
         Victim {
-            translation 0.12499999999999993 0 -0.096
+            translation 0.12499999999999993 0 -0.132
             rotation 0 1 0 -1.57
             name "Victim3"
             type "harmed"
@@ -1754,7 +1745,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
         }
         
         Victim {
-            translation 0.279 0 0.2950000000000001
+            translation 0.337 0 0.2950000000000001
             rotation 0 1 0 0
             name "Victim4"
             type "stable"
@@ -1768,33 +1759,25 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             children [
               
         HazardMap {
-            translation -0.45000000000000007 0 0.2944000000000001
-            rotation 0 1 0 0
-            name "Hazard0"
-            type "F"
-            scoreWorth 10
-        }
-        
-        HazardMap {
             translation -0.35440000000000005 0 -0.32999999999999996
             rotation 0 1 0 -1.57
-            name "Hazard1"
+            name "Hazard0"
             type "C"
             scoreWorth 10
         }
         
         HazardMap {
-            translation 0.08000000000000006 0 -0.4144
+            translation 0.055000000000000056 0 -0.4144
             rotation 0 1 0 3.14
-            name "Hazard2"
-            type "C"
+            name "Hazard1"
+            type "P"
             scoreWorth 10
         }
         
         HazardMap {
-            translation 0.23439999999999994 0 -0.274
+            translation 0.23439999999999994 0 -0.247
             rotation 0 1 0 1.57
-            name "Hazard3"
+            name "Hazard2"
             type "O"
             scoreWorth 30
         }
@@ -1813,7 +1796,7 @@ IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
             ]
             supervisor TRUE
             controller "MainSupervisor"
-            customData "480,bottom"
+            customData "480"
             window "MainSupervisorWindow"
           }
         
