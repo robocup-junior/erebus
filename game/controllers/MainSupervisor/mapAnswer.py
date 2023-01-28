@@ -266,20 +266,26 @@ class MapAnswer:
                 
                 colour = tile.getField("tileColor").getSFColor()
                 colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
-                if colour == [0.3, 0.1, 0.6]:
-                    # 1 to 3
-                    self.answerMatrix[z+1][x+1] = 7
-                    self.answerMatrix[z+1][x+3] = 7
-                    self.answerMatrix[z+3][x+1] = 7
-                    self.answerMatrix[z+3][x+3] = 7
+                if colour == [0.0, 0.8, 0.0]:
+                    # 1 to 4
+                    self.answerMatrix[z+1][x+1] = 9
+                    self.answerMatrix[z+1][x+3] = 9
+                    self.answerMatrix[z+3][x+1] = 9
+                    self.answerMatrix[z+3][x+3] = 9
                 elif colour == [0.1, 0.1, 0.9]:
                     # 1 to 2
                     self.answerMatrix[z+1][x+1] = 6
                     self.answerMatrix[z+1][x+3] = 6
                     self.answerMatrix[z+3][x+1] = 6
                     self.answerMatrix[z+3][x+3] = 6
-                elif colour == [0.9, 0.1, 0.1]:
+                elif colour == [0.3, 0.1, 0.6]:
                     # 2 to 3
+                    self.answerMatrix[z+1][x+1] = 7
+                    self.answerMatrix[z+1][x+3] = 7
+                    self.answerMatrix[z+3][x+1] = 7
+                    self.answerMatrix[z+3][x+3] = 7
+                elif colour == [0.9, 0.1, 0.1]:
+                    # 3 to 4
                     self.answerMatrix[z+1][x+1] = 8
                     self.answerMatrix[z+1][x+3] = 8
                     self.answerMatrix[z+3][x+1] = 8
