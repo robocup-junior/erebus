@@ -387,7 +387,6 @@ class MapAnswer:
                             print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
                     print('')
 
-            print(self.answerMatrix)
             return self.answerMatrix
             
         except:
