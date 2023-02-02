@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v23.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.1) - 2023-02-02
+
+> Please see the changelog for v23.0.0 as well, since this update builds upon it.
+
+### Fixed
+
+- 🐛: Fixed a bug where the map answer wasn't being calculated correctly for room 4 entrances.
+
 ## [Release v23.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.0) - 2023-01-27
 
 > Please see the changelog for v22.0.0 as well, since this update builds upon it.
