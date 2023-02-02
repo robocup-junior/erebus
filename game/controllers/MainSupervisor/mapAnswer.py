@@ -266,20 +266,26 @@ class MapAnswer:
                 
                 colour = tile.getField("tileColor").getSFColor()
                 colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
-                if colour == [0.3, 0.1, 0.6]:
-                    # 1 to 3
-                    self.answerMatrix[z+1][x+1] = 7
-                    self.answerMatrix[z+1][x+3] = 7
-                    self.answerMatrix[z+3][x+1] = 7
-                    self.answerMatrix[z+3][x+3] = 7
+                if colour == [0.0, 0.8, 0.0]:
+                    # 1 to 4
+                    self.answerMatrix[z+1][x+1] = 9
+                    self.answerMatrix[z+1][x+3] = 9
+                    self.answerMatrix[z+3][x+1] = 9
+                    self.answerMatrix[z+3][x+3] = 9
                 elif colour == [0.1, 0.1, 0.9]:
                     # 1 to 2
                     self.answerMatrix[z+1][x+1] = 6
                     self.answerMatrix[z+1][x+3] = 6
                     self.answerMatrix[z+3][x+1] = 6
                     self.answerMatrix[z+3][x+3] = 6
-                elif colour == [0.9, 0.1, 0.1]:
+                elif colour == [0.3, 0.1, 0.6]:
                     # 2 to 3
+                    self.answerMatrix[z+1][x+1] = 7
+                    self.answerMatrix[z+1][x+3] = 7
+                    self.answerMatrix[z+3][x+1] = 7
+                    self.answerMatrix[z+3][x+3] = 7
+                elif colour == [0.9, 0.1, 0.1]:
+                    # 3 to 4
                     self.answerMatrix[z+1][x+1] = 8
                     self.answerMatrix[z+1][x+3] = 8
                     self.answerMatrix[z+3][x+1] = 8
@@ -318,41 +324,39 @@ class MapAnswer:
 
                 
                 victimType = victim.getField("type").getSFString()
-                victimRoom4 = victim.getField("room4").getSFBool()
-                if victimRoom4 == False:
-                    if victimType == "harmed":
-                        victimType = "H"
-                    elif victimType == "unharmed":
-                        victimType = "U"
-                    elif victimType == "stable":
-                        victimType = "S"
+                if victimType == "harmed":
+                    victimType = "H"
+                elif victimType == "unharmed":
+                    victimType = "U"
+                elif victimType == "stable":
+                    victimType = "S"
 
-                    rotation = victim.getField("rotation").getSFRotation()
-                    if abs(round(rotation[3],2)) == 1.57:
-                        # Vertical
-                        zCount = int(zCount/2)
-                        if xCount % 2 == 0:
-                            row_temp = 2*zCount + 1 + zShift
-                            col_temp = xCount
-                        else:
-                            row_temp = 2*zCount + 1 + zShift
-                            col_temp = xCount+1
+                rotation = victim.getField("rotation").getSFRotation()
+                if abs(round(rotation[3],2)) == 1.57:
+                    # Vertical
+                    zCount = int(zCount/2)
+                    if xCount % 2 == 0:
+                        row_temp = 2*zCount + 1 + zShift
+                        col_temp = xCount
                     else:
-                        # Horizontal
-                        xCount = int(xCount/2)
-                        if zCount % 2 == 0:
-                            row_temp = zCount
-                            col_temp = 2*xCount + 1 + xShift
-                        else:
-                            row_temp = zCount+1
-                            col_temp = 2*xCount + 1 + xShift
+                        row_temp = 2*zCount + 1 + zShift
+                        col_temp = xCount+1
+                else:
+                    # Horizontal
+                    xCount = int(xCount/2)
+                    if zCount % 2 == 0:
+                        row_temp = zCount
+                        col_temp = 2*xCount + 1 + xShift
+                    else:
+                        row_temp = zCount+1
+                        col_temp = 2*xCount + 1 + xShift
 
-                    # Concatenate if victims on either side of the wall
-                    if self.answerMatrix[row_temp][col_temp] != 20:
-                        if type(self.answerMatrix[row_temp][col_temp]) == str:
-                            self.answerMatrix[row_temp][col_temp] += victimType
-                        else:
-                            self.answerMatrix[row_temp][col_temp] = victimType
+                # Concatenate if victims on either side of the wall
+                if self.answerMatrix[row_temp][col_temp] != 20:
+                    if type(self.answerMatrix[row_temp][col_temp]) == str:
+                        self.answerMatrix[row_temp][col_temp] += victimType
+                    else:
+                        self.answerMatrix[row_temp][col_temp] = victimType
                     
             
             for i in range(len(self.answerMatrix)):

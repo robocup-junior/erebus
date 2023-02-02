@@ -7,7 +7,6 @@ PROTO Victim [
     field SFString   name              "Victim"
     field SFString   type              "harmed"
     field SFInt32    scoreWorth        10
-	field SFBool     room4	           FALSE
 ]
 {
     %{
