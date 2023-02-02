@@ -65,7 +65,7 @@ Please report bugs and potential fixes either through:
 
 ### Fixed
 
-- 🐛: Fixed a bug where the map answer wasn't being calculated correctly for room 4 entrances.
+- 🐛: Fixed a bug where the map bonus answer matrix wasn't being calculated correctly for room 4 entrances.
 
 
 ## [Release v23.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.0) - 2023-01-27
