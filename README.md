@@ -17,7 +17,7 @@ Later releases of this platform will be used for the RCJ Rescue 2021 Internation
 
 ## Documentation
 
-Documentation for the platform can be accessed through [this link](https://v22.erebus.rcj.cloud/docs/).  
+Documentation for the platform can be accessed through [this link](https://v23.erebus.rcj.cloud/docs/).  
 However, some pages are currently under construction.
 
 ## Robot Customization
