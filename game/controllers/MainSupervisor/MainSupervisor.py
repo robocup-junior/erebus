@@ -1,7 +1,6 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
-from tkinter import N
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -231,24 +230,18 @@ class Game(Supervisor):
 
 
     def add_robot(self):
-        '''Add robot via .wbo file'''
-        # Get relative path
-        filePath = os.path.dirname(os.path.abspath(__file__))
+        '''Add robot via MFNode from a string'''
         
-        controller = "robot0controller"
+        controller = "robot0Controller"
         if self.remoteEnabled:
             controller = "<extern>"
 
         # Get webots root
         root = self.getRoot()
         root_children_field = root.getField('children')
-        # Get .wbo file to insert into world
-        if filePath[-4:] == "game":
-            root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
-        else:
-            root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+        # Get robot to insert into world
+        root_children_field.importMFNodeFromString(
+                -1, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
         self.rws.send("robotInSimulation0")
 
