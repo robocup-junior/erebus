@@ -467,9 +467,9 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 		var nameParts = file.name.split(".");
 
 		//If there are parts to the name
-		if (nameParts.length > 1){
-			//If the last part is "py" - a python file
-			if(acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
+		if (nameParts.length >= 1){
+			//If the file extension is valid
+			if(nameParts.length == 1 || acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
 				const fd = new FormData();
 				for (let i = 0; i < files.length; i++) {
 					const f = files[i];
@@ -491,11 +491,11 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 				xmlhttp.send(fd);
 			}else{
 				//Tell the user to select a program
-				alert("Please select a controller with a valid file type from: .py, .exe, .class, .jar, .bsg, .m");
+				alert("Please select a controller with a valid file type from: .py, .exe, .class, .jar, .bsg, .m or no extension (for Linux/Mac users)");
 			}
 		}else{
 			//Tell the user to select a program
-			alert("Please select a controller program with a file extension");
+			alert("Please select a controller program");
 		}
 
 	}
