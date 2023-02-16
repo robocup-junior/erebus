@@ -74,10 +74,9 @@ class Game(Supervisor):
         
         # Version info
         self.stream = 23
-        self.version = "23.0.1"
+        self.version = "23.0.2"
         
-        uploader = threading.Thread(target=ControllerUploader.start)
-        uploader.setDaemon(True)
+        uploader = threading.Thread(target=ControllerUploader.start, daemon=True)
         uploader.start()
         
         # Get this supervisor node - so that it can be rest when game restarts
