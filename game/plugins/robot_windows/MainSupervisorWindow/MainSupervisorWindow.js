@@ -5,7 +5,7 @@ Changelog:
  - Added human loaded indicator
 */
 
-import RobotWindow from 'https://cyberbotics.com/wwi/R2022b/RobotWindow.js';
+import RobotWindow from 'https://cyberbotics.com/wwi/R2023a/RobotWindow.js';
 
 
 var visable = false;
@@ -489,14 +489,13 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 				disableWhileSending(true);
 				xmlhttp.open("POST", "http://127.0.0.1:60520/"+location+"/", true);
 				xmlhttp.send(fd);
-
 			}else{
 				//Tell the user to select a program
-				alert("Please select your controller program.1");
+				alert("Please select a controller with a valid file type from: .py, .exe, .class, .jar, .bsg, .m");
 			}
 		}else{
 			//Tell the user to select a program
-			alert("Please select your controller program.");
+			alert("Please select a controller program with a file extension");
 		}
 
 	}
