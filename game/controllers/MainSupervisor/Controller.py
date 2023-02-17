@@ -19,15 +19,15 @@ class Controller():
         else:
             path = os.path.join(path, "../robot0Controller")
 
+        files = glob.glob(os.path.join(path, "*"))
         if self.keepController and not manual:
-            files = glob.glob(os.path.join(path, "*"))
             if len(files) > 0:
                 supervisor.rws.send("loaded0")
             return
 
-        file_path = os.path.join(path, "robot0controller.py")
-        if not os.access(file_path, os.W_OK):
-            os.chmod(file_path, stat.S_IWUSR)
+        for file_path in files:
+            if not os.access(file_path, os.W_OK):
+                os.chmod(file_path, stat.S_IWUSR)
             
         shutil.rmtree(path)
         os.mkdir(path)
