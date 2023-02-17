@@ -257,7 +257,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         to copy binary data as well.
 
         """
-        shutil.copyfileobj(source, outputfile)
+        shutil.copy(source, outputfile)
 
     def guess_type(self, path):
         """Guess the type of a file.
@@ -273,17 +273,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         slow) to look inside the data to make a better guess.
 
         """
-        if not mimetypes.inited:
-            mimetypes.init() # try to read system mime.types
-        self.extensions_map = mimetypes.types_map.copy()
-        self.extensions_map.update({
-            '': 'application/octet-stream', # Default
-            '.py': 'text/plain',
-            '.c': 'text/plain',
-            '.h': 'text/plain',
-            '.proto': 'text/plain',
-            })
-        
+
         base, ext = posixpath.splitext(path)
         if ext in self.extensions_map:
             return self.extensions_map[ext]
@@ -293,7 +283,16 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             return self.extensions_map['']
 
-    
+    if not mimetypes.inited:
+        mimetypes.init() # try to read system mime.types
+    extensions_map = mimetypes.types_map.copy()
+    extensions_map.update({
+        '': 'application/octet-stream', # Default
+        '.py': 'text/plain',
+        '.c': 'text/plain',
+        '.h': 'text/plain',
+        '.proto': 'text/plain',
+        })
 
 
 def start(HandlerClass = SimpleHTTPRequestHandler, ServerClass = http.server.ThreadingHTTPServer):
