@@ -1,6 +1,7 @@
 import os
 import shutil
 import glob
+import stat
 
 
 class Controller():
@@ -24,6 +25,10 @@ class Controller():
                 supervisor.rws.send("loaded0")
             return
 
+        file_path = os.path.join(path, "robot0controller.py")
+        if not os.access(file_path, os.W_OK):
+            os.chmod(file_path, stat.S_IWUSR)
+            
         shutil.rmtree(path)
         os.mkdir(path)
         # 2022b bug: if a player controller crashes, the mainsupervisor will not
