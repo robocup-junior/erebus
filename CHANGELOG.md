@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
-- Fixed deprecated `getData` methods in example player controller code
+- Fixed deprecated Python `getData` methods in example player controller code
 - Fixed deprecated `setDaemon` warning for Python versions 3.10+
 - Fixed a bug where controllers weren't working on linux/mac users
 

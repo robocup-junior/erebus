@@ -59,7 +59,19 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Latest Release v23.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.1) - 2023-02-02
+## [Latest Release v23.0.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.2) - 2023-02-19
+
+### Changed
+
+- Linux/Mac users can now use controller files with no file extension
+
+### Fixed
+
+- Fixed deprecated Python `getData` methods in example player controller code
+- Fixed deprecated `setDaemon` warning for Python versions 3.10+
+- Fixed a bug where controllers weren't working on linux/mac users
+
+## [Release v23.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.1) - 2023-02-02
 
 > Please see the changelog for v23.0.0 as well, since this update builds upon it.
 
