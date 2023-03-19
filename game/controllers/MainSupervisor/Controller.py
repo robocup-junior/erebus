@@ -27,7 +27,8 @@ class Controller():
 
         for file_path in files:
             if not os.access(file_path, os.W_OK):
-                os.chmod(file_path, stat.S_IWUSR)
+                currentPermissions = os.stat(file_path).st_mode
+                os.chmod(file_path, currentPermissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             
         shutil.rmtree(path)
         os.mkdir(path)

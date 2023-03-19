@@ -130,7 +130,8 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         if len(uploaded_files) == 1:
             newpath = os.path.join(os.path.dirname(uploaded_files[0]), os.path.basename(os.path.dirname(uploaded_files[0]))  + os.path.splitext(uploaded_files[0])[1])
             os.rename(uploaded_files[0],newpath)
-            os.chmod(newpath, stat.S_IXUSR)
+            currentPermissions = os.stat(newpath).st_mode
+            os.chmod(newpath, currentPermissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             return (True, "OK")
         return (False, "Built-in compilation is not supported at this time. Select only one file to be executed.")
 
