@@ -8,7 +8,7 @@ class MapAnswer:
     def __init__(self, supervisor):
         self.supervisor = supervisor
         #Count the number of tiles
-        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount() - 1
+        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
         #Retrieve the node containing the tiles
         self.tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
         
