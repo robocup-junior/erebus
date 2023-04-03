@@ -12,6 +12,9 @@ class MapAnswer:
         #Retrieve the node containing the tiles
         self.tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
         
+        if self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "TILE":
+            self.numberTiles -= 1
+        
         self.xPos = [self.tileNodes.getMFNode(i).getField("xPos").getSFInt32() for i in range(self.numberTiles)]
         self.zPos = [self.tileNodes.getMFNode(i).getField("zPos").getSFInt32() for i in range(self.numberTiles)]
 
