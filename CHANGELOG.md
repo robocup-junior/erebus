@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v23.0.3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.3) - 2023-04-04
+
+### Fixed
+
+- Fixed a bug where controllers weren't correctly being uploaded on linux/mac users
+- Fixed a bug in the map scorer where the last tile wasn't being calculated correctly
+
 ## [Release v23.0.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.2) - 2023-02-19
 
 ### Changed
