@@ -255,7 +255,7 @@ Robot {
       rotation 0 1 0 0
     }
     DistanceSensor {
-      translation 0.00941437 0.04 -0.0401418
+      translation 0.00941437 0.04 -0.037
       rotation 0 -1 0 -1.323615307179586
       name "ps0"
       lookupTable [
@@ -270,7 +270,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation 0.0228994 0.04 -0.0255021
+      translation 0.025 0.04 -0.0255
       rotation 0 -1 0 -0.8000153071795859
       name "ps1"
       lookupTable [
@@ -285,7 +285,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation 0.0298508 0.04 -0.0104376
+      translation 0.035 0.04 -0.0104
       rotation 0 1 0 0.0146173
       name "ps2"
       lookupTable [
@@ -315,7 +315,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation -0.0245787 0.04 0.0290224
+      translation -0.025 0.04 0.0290224
       rotation 0 1 0 -2.079785307179586
       name "ps4"
       lookupTable [
@@ -330,7 +330,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation -0.0401416 0.04 -0.00941437
+      translation -0.035 0.04 -0.00941437
       rotation 0 1 0 -3.126975307179586
       name "ps5"
       lookupTable [
@@ -345,7 +345,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation -0.0270952 0.04 -0.0247711
+      translation -0.025 0.04 -0.0247711
       rotation 0 1 0 2.37081
       name "ps6"
       lookupTable [
@@ -360,7 +360,7 @@ Robot {
       }
     }
     DistanceSensor {
-      translation -0.0105835 0.04 -0.0398497
+      translation -0.0105835 0.04 -0.037
       rotation 0 1 0 1.84721
       name "ps7"
       lookupTable [
