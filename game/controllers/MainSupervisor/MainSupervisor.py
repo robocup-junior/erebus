@@ -73,7 +73,7 @@ class Game(Supervisor):
         
         # Version info
         self.stream = 23
-        self.version = "23.0.3"
+        self.version = "23.0.4"
         
         uploader = threading.Thread(target=ControllerUploader.start, daemon=True)
         uploader.start()
@@ -434,10 +434,12 @@ ROBOT_0: {str(self.robot0Obj.name)}
             
             iterator = self.victimManager.humans
             name = 'Victim'
+            correctTypeBonus = 10
 
             if est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
                 iterator = self.victimManager.hazards
                 name = 'Hazard'
+                correctTypeBonus = 20
 
             misidentification = True
             
@@ -468,7 +470,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Update score and history
                 if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                     self.robot0Obj.increaseScore(
-                        f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                        f"Successful {name} Type Correct Bonus", correctTypeBonus, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                         
                 self.robot0Obj.increaseScore(
                     f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])

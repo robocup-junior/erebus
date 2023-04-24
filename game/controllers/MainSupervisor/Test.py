@@ -3,6 +3,7 @@ import struct
 import AutoInstall
 from abc import abstractmethod
 import math
+from Victim import HazardMap
 
 AutoInstall._import("np", "numpy")
 
@@ -53,7 +54,10 @@ class TestVictim(Test):
         if self.offset > 0.09:
             self.setTestReport(f"Expected score: {self.startScore - 5}, but was: {supervisor.robot0Obj.getScore()}")
             return supervisor.robot0Obj.getScore() == self.startScore - 5
-        return supervisor.robot0Obj.getScore() - self.startScore == (10 * multiplier) + ( self.victim.scoreWorth * multiplier)
+        correctTypeBonus = 10
+        if type(self.victim) == HazardMap:
+            correctTypeBonus = 20
+        return supervisor.robot0Obj.getScore() - self.startScore == (correctTypeBonus * multiplier) + ( self.victim.scoreWorth * multiplier)
     
     def postTest(self, supervisor):
         supervisor.victimManager.resetVictimsTextures()

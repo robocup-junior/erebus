@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v23.0.4]() - Unreleased
+
+### Fixed
+
+- Hazard maps now give +20 score bonus for the correct type bonus (from 10 before, to reflect the Erebus rules).
+- Moved default robot distance sensors to be more symmetrical.
+
 ## [Release v23.0.3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.3) - 2023-04-04
 
 ### Fixed
