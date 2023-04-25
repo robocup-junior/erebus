@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Release v23.0.4]() - Unreleased
 
+### Added
+
+- Added a new example world containing a room 4. The corresponding json file is also included in the worlds folder.
+
 ### Fixed
 
 - Hazard maps now give +20 score bonus for the correct type bonus (from 10 before, to reflect the Erebus rules).
