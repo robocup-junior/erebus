@@ -61,9 +61,13 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Latest Release v23.0.3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.3) - 2023-04-04
+## [Release v23.0.4](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.4) - 2023-05-03
+
+### Added
+
+- Added a new example world containing a 4th room. The corresponding json file is also included in the worlds folder.
 
 ### Fixed
 
-- Fixed a bug where controllers weren't correctly being uploaded on linux/mac
-- Fixed a bug in the map scorer where the last tile wasn't being calculated correctly
+- Hazard maps now give +20 score bonus for the correct type bonus (from 10 before, to reflect the Erebus rules).
+- Moved default robot distance sensors to be more symmetrical.
