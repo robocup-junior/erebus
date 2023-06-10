@@ -3,6 +3,44 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v23.0.4](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.4) - 2023-05-03
+
+### Added
+
+- Added a new example world containing a 4th room. The corresponding json file is also included in the worlds folder.
+
+### Fixed
+
+- Hazard maps now give +20 score bonus for the correct type bonus (from 10 before, to reflect the Erebus rules).
+- Moved default robot distance sensors to be more symmetrical.
+
+## [Release v23.0.3](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.3) - 2023-04-04
+
+### Fixed
+
+- Fixed a bug where controllers weren't correctly being uploaded on linux/mac
+- Fixed a bug in the map scorer where the last tile wasn't being calculated correctly
+
+## [Release v23.0.2](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.2) - 2023-02-19
+
+### Changed
+
+- Linux/Mac users can now use controller files with no file extension
+
+### Fixed
+
+- Fixed deprecated Python `getData` methods in example player controller code
+- Fixed deprecated `setDaemon` warning for Python versions 3.10+
+- Fixed a bug where controllers weren't working on linux/mac users
+
+## [Release v23.0.1](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.1) - 2023-02-02
+
+> Please see the changelog for v23.0.0 as well, since this update builds upon it.
+
+### Fixed
+
+- 🐛: Fixed a bug where the map bonus answer matrix wasn't being calculated correctly for room 4 entrances.
+
 ## [Release v23.0.0](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.0) - 2023-01-27
 
 > Please see the changelog for v22.0.0 as well, since this update builds upon it.

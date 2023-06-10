@@ -5,7 +5,7 @@ Changelog:
  - Added human loaded indicator
 */
 
-import RobotWindow from 'https://cyberbotics.com/wwi/R2022b/RobotWindow.js';
+import RobotWindow from 'https://cyberbotics.com/wwi/R2023a/RobotWindow.js';
 
 
 var visable = false;
@@ -467,9 +467,9 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 		var nameParts = file.name.split(".");
 
 		//If there are parts to the name
-		if (nameParts.length > 1){
-			//If the last part is "py" - a python file
-			if(acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
+		if (nameParts.length >= 1){
+			//If the file extension is valid
+			if(nameParts.length == 1 || acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
 				const fd = new FormData();
 				for (let i = 0; i < files.length; i++) {
 					const f = files[i];
@@ -489,14 +489,13 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 				disableWhileSending(true);
 				xmlhttp.open("POST", "http://127.0.0.1:60520/"+location+"/", true);
 				xmlhttp.send(fd);
-
 			}else{
 				//Tell the user to select a program
-				alert("Please select your controller program.1");
+				alert("Please select a controller with a valid file type from: .py, .exe, .class, .jar, .bsg, .m or no extension (for Linux/Mac users)");
 			}
 		}else{
 			//Tell the user to select a program
-			alert("Please select your controller program.");
+			alert("Please select a controller program");
 		}
 
 	}

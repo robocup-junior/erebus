@@ -24,7 +24,7 @@ while robot.step(timeStep) != -1:
         lastRequestTime = robot.getTime()
     
     if receiver.getQueueLength() > 0: # Check if receiver queue size is not empty
-        receivedData = receiver.getData()
+        receivedData = receiver.getBytes()
         # Get length of bytes
         rDataLen = len(receivedData)
         if rDataLen == 12:

@@ -1,7 +1,6 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
-from tkinter import N
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -74,10 +73,9 @@ class Game(Supervisor):
         
         # Version info
         self.stream = 23
-        self.version = "23.0.0"
+        self.version = "23.0.4"
         
-        uploader = threading.Thread(target=ControllerUploader.start)
-        uploader.setDaemon(True)
+        uploader = threading.Thread(target=ControllerUploader.start, daemon=True)
         uploader.start()
         
         # Get this supervisor node - so that it can be rest when game restarts
@@ -232,24 +230,18 @@ class Game(Supervisor):
 
 
     def add_robot(self):
-        '''Add robot via .wbo file'''
-        # Get relative path
-        filePath = os.path.dirname(os.path.abspath(__file__))
+        '''Add robot via MFNode from a string'''
         
-        controller = "robot0controller"
+        controller = "robot0Controller"
         if self.remoteEnabled:
             controller = "<extern>"
 
         # Get webots root
         root = self.getRoot()
         root_children_field = root.getField('children')
-        # Get .wbo file to insert into world
-        if filePath[-4:] == "game":
-            root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
-        else:
-            root_children_field.importMFNodeFromString(
-                12, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
+        # Get robot to insert into world
+        root_children_field.importMFNodeFromString(
+                -1, 'DEF ROBOT0 custom_robot { translation 1000 1000 1000 rotation 0 1 0 0 name "'+ROBOT_NAME+'" controller "'+controller+'" camera_fieldOfView 1 camera_width 64 camera_height 40 }')
         # Update robot window to say robot is in simulation
         self.rws.send("robotInSimulation0")
 
@@ -442,10 +434,12 @@ ROBOT_0: {str(self.robot0Obj.name)}
             
             iterator = self.victimManager.humans
             name = 'Victim'
+            correctTypeBonus = 10
 
             if est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
                 iterator = self.victimManager.hazards
                 name = 'Hazard'
+                correctTypeBonus = 20
 
             misidentification = True
             
@@ -476,7 +470,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Update score and history
                 if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
                     self.robot0Obj.increaseScore(
-                        f"Successful {name} Type Correct Bonus", 10, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                        f"Successful {name} Type Correct Bonus", correctTypeBonus, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                         
                 self.robot0Obj.increaseScore(
                     f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
