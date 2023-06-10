@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v23.0.5]() - 2023-05-XX
+
+### Changed
+
+- Updated room4_small json
+
+### Fixed
+
+- Fixed a bug in the map scorer where the last tile wasn't being calculated correctly (again)
+
+
 ## [Release v23.0.4](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.4) - 2023-05-03
 
 ### Added
