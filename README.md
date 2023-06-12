@@ -54,20 +54,19 @@ Announcements will be made in a number of different locations.
 Please report bugs and potential fixes either through:
 
 - Raising issues on this repository
-    - [Erebus issues](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
+    - [Erebus issues page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
     - [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
 - Pull requests
 - Through the community Discord server
 
 ## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
 
-## [Release v23.0.4](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.4) - 2023-05-03
+## [Release v23.0.5](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases/v23.0.5) - 2023-06-12
 
-### Added
+### Changed
 
-- Added a new example world containing a 4th room. The corresponding json file is also included in the worlds folder.
+- Updated room4_small json to work with the new world generator room 4 scoring bug update (Thanks @aZeroTickPulse)
 
 ### Fixed
 
-- Hazard maps now give +20 score bonus for the correct type bonus (from 10 before, to reflect the Erebus rules).
-- Moved default robot distance sensors to be more symmetrical.
+- Fixed a bug causing the map scorer to not count a starting tile if it was the last tile (Thanks @aZeroTickPulse)
