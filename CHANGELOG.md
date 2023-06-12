@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Updated room4_small json to work with the new world generator room 4 scoring bug update (Thanks @aZeroTickPulse)
 
+- Changed a victim in the room4_small world's room 4 to be a hazard.
+
 ### Fixed
 
 - Fixed a bug causing the map scorer to not count a starting tile if it was the last tile (Thanks @aZeroTickPulse)
