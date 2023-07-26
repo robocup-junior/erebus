@@ -451,12 +451,14 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
                 Console.log_debug(f"On same side: {h.onSameSide(self.robot0Obj.position)}")
                 Console.log_debug(f"Identified: {h.identified}")
-            Console.log_debug(f"--- ----------- ---")
             Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
+            Console.log_debug(f"--- ----------- ---")
             
             if len(nearby_map_issues) > 0:
-                # TODO Should it iterate through all nearby map issues or just take the first one???
-                nearby_issue = nearby_map_issues[0]
+                # TODO should it take the nearest, or perhaps also account for which victim type was trying to be identified?
+                # Take the nearest map issue by distance to the estimated coordinate
+                distances = [h.getDistance(est_vic_pos) for h in nearby_map_issues]
+                nearby_issue = nearby_map_issues[np.argmin(distances)]
                 
                 misidentification = False
                 # Get points scored depending on the type of victim
