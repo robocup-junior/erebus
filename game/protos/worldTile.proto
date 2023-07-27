@@ -347,7 +347,7 @@ PROTO worldTile [
 				%{if fields.trap.value == true then}%
 
 							DEF FLOOR Transform {
-								translation 0 -0.205 0
+								translation 0 %{=-0.205 * scaleY}% 0
 								children [
 									Shape {
 										appearance Appearance {
@@ -356,14 +356,14 @@ PROTO worldTile [
 											}
 										}
 										geometry DEF FLOORBOX Box {
-											size 0.3 0.02 0.3
+											size %{=0.3 * scaleX}% %{=0.02 * scaleY}% %{=0.3 * scaleZ}%
 										}
 										isPickable  FALSE
 									}
 								]
 							}
 							Transform {
-							  translation -2.8549e-07 -0.135 -0.13
+							  translation 0 %{=-0.135 * scaleY}% %{=-0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
@@ -374,46 +374,46 @@ PROTO worldTile [
 									}
 								  }
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation -2.03924e-08 -0.135 0.13
+							  translation 0 %{=-0.135 * scaleY}% %{=0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation -0.13 -0.135 2.06647e-15
+							  translation %{=-0.13 * scaleY}% %{=-0.135 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation 0.13 -0.135 6.89936e-07
+							  translation %{=0.13 * scaleY}% %{=-0.135 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
