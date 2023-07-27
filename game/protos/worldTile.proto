@@ -363,7 +363,7 @@ PROTO worldTile [
 								]
 							}
 							Transform {
-							  translation 0 %{=-0.135 * scaleY}% %{=-0.13 * scaleZ}%
+							  translation 0 %{=-0.1350125 * scaleY}% %{=-0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
@@ -381,7 +381,7 @@ PROTO worldTile [
 							  ]
 							}
 							Transform {
-							  translation 0 %{=-0.135 * scaleY}% %{=0.13 * scaleZ}%
+							  translation 0 %{=-0.1350125 * scaleY}% %{=0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
@@ -394,7 +394,7 @@ PROTO worldTile [
 							  ]
 							}
 							Transform {
-							  translation %{=-0.13 * scaleY}% %{=-0.135 * scaleY}% 0
+							  translation %{=-0.13 * scaleY}% %{=-0.1350125 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
@@ -407,7 +407,7 @@ PROTO worldTile [
 							  ]
 							}
 							Transform {
-							  translation %{=0.13 * scaleY}% %{=-0.135 * scaleY}% 0
+							  translation %{=0.13 * scaleY}% %{=-0.1350125 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
