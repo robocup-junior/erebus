@@ -218,6 +218,9 @@ class Game(Supervisor):
         '''Quit robot from simulation'''
         # Quit robot if present
         if self.robot0Obj.inSimulation:
+            # Add swamp detection penalty
+            swamp_penalty: int = int(self.robot0Obj.getScore() * self.tileManager.getSwampPenalty())
+            self.robot0Obj.increaseScore(f"-{int(self.tileManager.getSwampPenalty() * 100)}% swamp detection penalty: ", -swamp_penalty, self)
             # Remove webots node
             self.robot0Obj.wb_node.remove()
             self.robot0Obj.inSimulation = False
@@ -724,6 +727,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.lastTime = self.getTime()
             # Step the simulation on
             step = self.step(TIME_STEP)
+            # Update robot velocity
+            self.robot0Obj.updateVelocity(frameTime)
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating

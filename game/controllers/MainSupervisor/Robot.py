@@ -1,3 +1,4 @@
+import math
 import AutoInstall
 import datetime
 import os
@@ -62,15 +63,13 @@ class RobotHistory(Queue):
 class Robot:
     '''Robot object to hold values whether its in a base or holding a human'''
 
+    WHEEL_CIRCUMFERENCE = 2 * 3.14 * 0.02
+
     def __init__(self):
         '''Initialises the in a base, has a human loaded and score values'''
 
-        #webots node
-        # self.wb_node = node
-
-        # if self.wb_node != None:
-        #     self.wb_translationField = self.wb_node.getField('translation')
-        #     self.wb_rotationField = self.wb_node.getField('rotation')
+        self.velocity: float = 0
+        self.prev_position: list[float] = [0,0,0]
 
         self.inCheckpoint = True
         self.inSwamp = False
@@ -122,6 +121,17 @@ class Robot:
     @rotation.setter
     def rotation(self, pos: list) -> None:
         self.wb_rotationField.setSFRotation(pos)
+        
+    def updateVelocity(self, frame_time: float) -> None:
+        if frame_time == 0:
+            return
+        a = self.position[0] - self.prev_position[0]
+        b = self.position[2] - self.prev_position[2]
+        self.velocity = math.sqrt(a ** 2 + b ** 2) / frame_time
+        self.prev_position = self.position
+    
+    def fasterThan(self, motorMulti: float) -> bool:
+        return abs(self.velocity) > motorMulti * Robot.WHEEL_CIRCUMFERENCE
         
     def add_node(self, node):
         self.wb_node = node

@@ -199,10 +199,12 @@ function activityUnloadedColour(id){
 }
 function updateHistory(history0){
 	let html = "<tr>";
+	console.log(history0[1])
+	console.log(history0[1].includes("penalty"))
 	if(history0[0].indexOf(":") != -1){
 		if(history0[1].indexOf("+") != -1){
 			html += `<td style='font-size:18px;color:#2980b9;width:'>${history0[0]}</td><td style='font-size:18px;color:#2980b9;'>${history0[1]}</td>`;
-		}else if(history0[1].indexOf("-") != -1){
+		}else if(history0[1].indexOf("-") != -1 || history0[1].includes("penalty")){
 			html += `<td style='font-size:18px;color:#c0392b;'>${history0[0]}</td><td style='font-size:18px;color:#c0392b;'>${history0[1]}</td>`;
 		}else{
 			html += `<td style='font-size:18px;color:#2c3e50;'>${history0[0]}</td><td style='font-size:18px;color:#2c3e50;'>${history0[1]}</td>`;

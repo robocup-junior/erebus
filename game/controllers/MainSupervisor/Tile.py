@@ -1,5 +1,8 @@
 
 
+from ConsoleLog import Console
+
+
 class Tile():
     '''Tile object holding the boundaries'''
 
@@ -48,6 +51,7 @@ class TileManager():
     # Room multipliers
     ROOM_MULT = [1, 1.25, 1.5, 2]
     SWAMP_SLOW_MULT = 0.32
+    SWAMP_PENALTY = 0.2
     
     def __init__(self):
         self.numberOfSwamps = 0
@@ -55,6 +59,13 @@ class TileManager():
         
         self.checkpoints = []
         self.swamps = []
+        
+        self.s_frame_count = 0
+        self.is_penalised = False
+        self.swamp_penalty_count = 0
+        
+    def getSwampPenalty(self) -> float:
+        return self.swamp_penalty_count * TileManager.SWAMP_PENALTY
     
     def getSwamps(self, supervisor):
         '''Get swamps in simulation'''
@@ -119,23 +130,30 @@ class TileManager():
             robotObj.increaseScore("Found checkpoint", 10, supervisor, multiplier=TileManager.ROOM_MULT[roomNum])
             
     def updateInSwamp(self, robotObj, inSwamp, max_velocity, supervisor):
+        if robotObj.inSwamp and not self.is_penalised:
+            # Swamp frame counter used to delay swamp slow detection
+            # since the engine takes a couple ticks to slow the robot down
+            self.s_frame_count += 1
+            if robotObj.fasterThan(TileManager.SWAMP_SLOW_MULT) and self.s_frame_count > 2:
+                Console.log_debug("Swamp detection fail at velocity : " + str(robotObj.velocity)) 
+                robotObj.history.enqueue(f"Swamp detection fail: {int(TileManager.SWAMP_PENALTY*100)}% penalty", supervisor)
+                self.is_penalised = True
+                self.swamp_penalty_count += 1
         # Check if robot is in swamp
         if robotObj.inSwamp != inSwamp:
+            self.is_penalised = False
+            self.s_frame_count = 0
             robotObj.inSwamp = inSwamp
             if robotObj.inSwamp:
-                # Cap the robot's velocity to 2
-                # robotObj.setMaxVelocity(2)
+                # Cap the robot's motor rotation by a set multiplier 
                 robotObj.setMaxVelocity(TileManager.SWAMP_SLOW_MULT)
-                # Reset physics
-                robotObj.wb_node.resetPhysics()
                 # Update history
                 robotObj.history.enqueue("Entered swamp", supervisor)
             else:
                 # If not in swamp, reset max velocity to default
-                # robotObj.setMaxVelocity(max_velocity)
                 robotObj.setMaxVelocity(max_velocity)
-                # Reset physics
-                robotObj.wb_node.resetPhysics()
                 # Update history
-                robotObj.history.enqueue("Exited swamp,", supervisor)
+                robotObj.history.enqueue("Exited swamp", supervisor)
+            
+
             
