@@ -387,10 +387,10 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         "Exit Bonus", self.robot0Obj.getScore() * 0.1, self)
                 else:
                     self.robot0Obj.history.enqueue("No Exit Bonus", self)
-                self.add_map_multiplier()
-                # Update score and history
-                self.robot_quit(0, False)
-                self.lastFrame = True
+            self.add_map_multiplier()
+            # Update score and history
+            self.robot_quit(0, False)
+            self.lastFrame = True
 
         elif robotMessage[0] == 'M':
             try:
