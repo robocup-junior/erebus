@@ -59,7 +59,6 @@ PROTO worldTile [
 	  }%
 
 	  translation %{=x}% 0 %{=z}%
-	  scale %{=scaleX}% %{=scaleY}% %{=scaleZ}%
 	  contactMaterial "TILE"
 
       children[
@@ -93,7 +92,7 @@ PROTO worldTile [
 				}%
 					%{if fields.checkpoint.value == false and fields.swamp.value == false and fields.start.value == false then}%
 						DEF FLOOR Transform {
-							translation %{=x_shift}% -0.085 %{=z_shift}%
+							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
 							children [
 								Shape {
 									appearance Appearance {
@@ -102,7 +101,7 @@ PROTO worldTile [
 										}
 									}
 									geometry DEF FLOORBOX Box {
-										size %{=x_size}% %{=tileThickness}% %{=z_size}%
+										size %{=x_size * scaleX}% %{=tileThickness * scaleY}% %{=z_size * scaleZ}%
 									}
 									isPickable  FALSE
 								}
@@ -111,13 +110,13 @@ PROTO worldTile [
 					%{end}%
 					%{if fields.checkpoint.value == true then}%
 						DEF CHECKPOINT Transform {
-							translation %{=x_shift}% -0.085 %{=z_shift}%
+							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
 									children [
 										Shape {
 											appearance CorrodedMetal  {
 											}
 											geometry Box {
-												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+												size %{=x_size * scaleX}% %{=tileThickness * scaleY}% %{=z_size * scaleZ}%
 											}
 											isPickable  FALSE
 										}
@@ -126,7 +125,7 @@ PROTO worldTile [
 					%{end}%
 					%{if fields.swamp.value == true then}%
 						DEF FLOOR Transform {
-							translation %{=x_shift}% -0.085 %{=z_shift}%
+							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
 									children [
 										Shape {
 											appearance Appearance {
@@ -135,7 +134,7 @@ PROTO worldTile [
 												}
 											}
 											geometry Box {
-												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+												size %{=x_size * scaleX}% %{=tileThickness * scaleY}% %{=z_size * scaleZ}%
 											}
 											isPickable  FALSE
 										}
@@ -144,7 +143,7 @@ PROTO worldTile [
 					%{end}%
 					%{if fields.start.value == true then}%
 						DEF START Transform {
-							translation %{=x_shift}% -0.085 %{=z_shift}%
+							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
 									children [
 										Shape {
 											appearance Appearance {
@@ -156,7 +155,7 @@ PROTO worldTile [
 
 											}
 											geometry Box {
-												size %{=x_size}% %{=tileThickness}% %{=z_size}%
+												size %{=x_size * scaleX}% %{=tileThickness * scaleY}% %{=z_size * scaleZ}%
 											}
 											isPickable  FALSE
 										}
@@ -185,7 +184,7 @@ PROTO worldTile [
 				
 				}%
 					DEF RIGHTWALL Transform {
-						translation .15 %{=y_shift}% %{=z_shift}%
+						translation %{=.15 * scaleX}% %{=y_shift * scaleY}% %{=z_shift * scaleZ}%
 						children [
 							Shape {
 								appearance Appearance {
@@ -194,7 +193,7 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF BACKWALLBOX Box {
-								size %{=wallThickness}% %{=y_size}% %{=z_size}%
+								size %{=wallThickness * scaleX}% %{=y_size * scaleY}% %{=z_size * scaleY}%
 								}
 								isPickable  FALSE
 							}
@@ -227,7 +226,7 @@ PROTO worldTile [
 				
 				}%
 					DEF FRONTWALL Transform {
-						translation %{=x_shift}% %{=y_shift}% .15
+						translation %{=x_shift * scaleX}% %{=y_shift * scaleY}% %{=.15 * scaleZ}%
 						children [
 							Shape {
 								appearance Appearance {
@@ -236,7 +235,7 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF BACKWALLBOX Box {
-								size %{=x_size}% %{=y_size}% %{=wallThickness}%
+								size %{=x_size * scaleX}% %{=y_size * scaleY}% %{=wallThickness * scaleZ}%
 								}
 								isPickable  FALSE
 							}
@@ -245,7 +244,7 @@ PROTO worldTile [
 					%{if fields.rightWall.value > 0 and fields.rightExternal.value == true and fields.bottomExternal.value == false then}%
 
 					Transform {
-						translation .15 %{=-wallHeight/2-tileThickness/2}% .15
+						translation %{=.15 * scaleX}% %{=(-wallHeight/2-tileThickness/2) * scaleY}% %{=.15 * scaleZ}%
 						children [
 								Shape {
 									appearance Appearance {
@@ -254,7 +253,7 @@ PROTO worldTile [
 										}
 									}
 									geometry DEF BACKWALLBOX Box {
-										size %{=wallThickness}% %{=tileThickness}% %{=wallThickness}%
+										size %{=wallThickness * scaleX}% %{=tileThickness * scaleY}% %{=wallThickness * scaleZ}%
 									}
 									isPickable  FALSE
 								}
@@ -287,7 +286,7 @@ PROTO worldTile [
 					end
 				}%
 					Transform {
-						translation %{=x_shift}% %{=y_shift}% -.15
+						translation %{=x_shift * scaleX}% %{=y_shift * scaleY}% %{=-.15 * scaleZ}%
 						children [
 								Shape {
 									appearance Appearance {
@@ -296,7 +295,7 @@ PROTO worldTile [
 										}
 									}
 									geometry DEF BACKWALLBOX Box {
-										size %{=x_size}% %{=y_size}% %{=wallThickness}%
+										size %{=x_size * scaleX}% %{=y_size * scaleY}% %{=wallThickness * scaleZ}%
 									}
 									isPickable  FALSE
 								}
@@ -328,7 +327,7 @@ PROTO worldTile [
 					end
 				}%
 					Transform {
-						translation -.15 %{=y_shift}% %{=z_shift}%
+						translation %{=-.15 * scaleX}% %{=y_shift * scaleY}% %{=z_shift * scaleZ}%
 						rotation 0 1 0 1.570796
 						children [
 									Shape {
@@ -338,7 +337,7 @@ PROTO worldTile [
 											}
 										}
 										geometry DEF BACKWALLBOX Box {
-											size %{=z_size}% %{=y_size}% %{=wallThickness}%
+											size %{=z_size * scaleX}% %{=y_size * scaleY}% %{=wallThickness * scaleZ}%
 										}
 										isPickable  FALSE
 									}
@@ -348,7 +347,7 @@ PROTO worldTile [
 				%{if fields.trap.value == true then}%
 
 							DEF FLOOR Transform {
-								translation 0 -0.205 0
+								translation 0 %{=-0.205 * scaleY}% 0
 								children [
 									Shape {
 										appearance Appearance {
@@ -357,14 +356,14 @@ PROTO worldTile [
 											}
 										}
 										geometry DEF FLOORBOX Box {
-											size 0.3 0.02 0.3
+											size %{=0.3 * scaleX}% %{=0.02 * scaleY}% %{=0.3 * scaleZ}%
 										}
 										isPickable  FALSE
 									}
 								]
 							}
 							Transform {
-							  translation -2.8549e-07 -0.135 -0.13
+							  translation 0 %{=-0.1350125 * scaleY}% %{=-0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
@@ -375,46 +374,46 @@ PROTO worldTile [
 									}
 								  }
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation -2.03924e-08 -0.135 0.13
+							  translation 0 %{=-0.1350125 * scaleY}% %{=0.13 * scaleZ}%
 							  rotation 0 1 0 -1.5707953071795862
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation -0.13 -0.135 2.06647e-15
+							  translation %{=-0.13 * scaleY}% %{=-0.1350125 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
 							  ]
 							}
 							Transform {
-							  translation 0.13 -0.135 6.89936e-07
+							  translation %{=0.13 * scaleY}% %{=-0.1350125 * scaleY}% 0
 							  rotation 0 1 0 3.14159
 							  children [
 								Shape {
 								  appearance USE TRAPAPP
 								  geometry DEF TRAPEDGEBOX Box {
-									size 0.04 0.12 0.3
+									size %{=0.04 * scaleX}% %{=0.12 * scaleY}% %{=0.3 * scaleZ}%
 								  }
 								  isPickable  FALSE
 								}
@@ -425,6 +424,9 @@ PROTO worldTile [
 					curvedWall {
 						rot %{= fields.curveDir.value}%
 						isHalf %{= fields.isHalf.value and "TRUE" or "FALSE"}%
+						xScale %{=scaleX}%
+						yScale %{=scaleY}%
+						zScale %{=scaleZ}%
 					}
 				%{end}%
 				%{if fields.obstacle.value == true then}%
@@ -443,7 +445,7 @@ PROTO worldTile [
 						
 					}%
 					DEF OBSTACLE Transform {
-						translation %{=obs_xoff}% 0 %{=obs_yoff}% 
+						translation %{=obs_xoff * scaleX}% 0 %{=obs_yoff * scaleZ}% 
 						rotation IS obstacleRotation
 						children [
 							Shape {
@@ -453,7 +455,7 @@ PROTO worldTile [
 									}
 								}
 								geometry DEF OBSTACLEBOX Box {
-									size 0.1 0.18 0.084
+									size %{=0.1 * scaleX}% %{=0.18 * scaleY}% %{=0.084 * scaleZ}%
 								}
 							}
 						]

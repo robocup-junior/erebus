@@ -39,7 +39,7 @@ PROTO HazardMap [
             end
         end
     }%
-    Transform{
+    Pose {
         translation IS translation
         rotation IS rotation
         children [

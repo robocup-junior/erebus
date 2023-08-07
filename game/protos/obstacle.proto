@@ -18,7 +18,7 @@ PROTO obstacle[
 ]
 
 {
-    DEF OBSTACLE Transform {
+    DEF OBSTACLE Pose {
 
         %{
             x = fields.xPos.value
@@ -34,7 +34,6 @@ PROTO obstacle[
         }%
 
         translation %{=x}% %{=y}% %{=z}%
-        scale 1 1 1
         rotation 0 1 0 %{=yRot}% 
 
         children[
