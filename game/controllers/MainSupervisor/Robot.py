@@ -63,7 +63,7 @@ class RobotHistory(Queue):
 class Robot:
     '''Robot object to hold values whether its in a base or holding a human'''
 
-    WHEEL_CIRCUMFERENCE = 2 * math.pi * 0.02
+    WHEEL_CIRCUMFERENCE = 2 * math.pi * 0.02 * 1.01 # * 1.01 to account for physics inaccuracies
 
     def __init__(self):
         '''Initialises the in a base, has a human loaded and score values'''

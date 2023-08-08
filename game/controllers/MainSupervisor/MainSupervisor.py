@@ -203,6 +203,7 @@ class Game(Supervisor):
 
         # Reset physics
         self.robot0Obj.wb_node.resetPhysics()
+        self.robot0Obj.velocity = 0
 
         # Notify robot
         self.emitter.send(struct.pack("c", bytes("L", "utf-8")))

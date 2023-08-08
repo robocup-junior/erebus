@@ -1,5 +1,5 @@
 class Console:
-    DEBUG_MODE = False
+    DEBUG_MODE = True
     
     PREFIX_DEBUG: str = "EREBUS DEBUG"
     PREFIX_PASS: str = "EREBUS PASS"
