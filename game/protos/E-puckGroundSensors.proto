@@ -6,18 +6,18 @@
 # It includes three infra-red proximity sensors
 # pointing down to the ground in front of the robot.
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/appearances/protos/Pcb.proto"
 
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/50c3f419b5da49a2af606297049ee91e8adbc92e/projects/appearances/protos/Pcb.proto"
 PROTO E-puckGroundSensors [
   field SFVec3f    translation  0 0 0
   field SFRotation rotation    0 0 1 1.5708
 ]
 {
-  Transform {
+  Pose {
     translation IS translation
     rotation IS rotation
     children [
-      DEF EPUCK_GROUND_SENSOR_CIRCUIT Transform {
+      DEF EPUCK_GROUND_SENSOR_CIRCUIT Pose {
         translation 0 0.014 0
         children [
           Shape {
@@ -29,7 +29,7 @@ PROTO E-puckGroundSensors [
           }
         ]
       }
-      DEF EPUCK_GS0 DistanceSensor {
+DEF EPUCK_GS0 DistanceSensor {
         translation -0.01 0.003 0
         rotation 0 0 1 -1.57
         children [
@@ -46,12 +46,11 @@ PROTO E-puckGroundSensors [
         ]
         name "gs0"
         lookupTable [
-          0 1000 0.002
-          0.016 300 0.004
+          0 1000 0.002 0.016 300 0.004 
         ]
         type "infra-red"
       }
-      DEF EPUCK_GS1 DistanceSensor {
+DEF EPUCK_GS1 DistanceSensor {
         translation 0 0.003 0
         rotation 0 0 1 -1.57
         children [
@@ -59,12 +58,11 @@ PROTO E-puckGroundSensors [
         ]
         name "gs1"
         lookupTable [
-          0 1000 0.002
-          0.016 300 0.004
+          0 1000 0.002 0.016 300 0.004 
         ]
         type "infra-red"
       }
-      DEF EPUCK_GS2 DistanceSensor {
+DEF EPUCK_GS2 DistanceSensor {
         translation 0.01 0.003 0
         rotation 0 0 1 -1.57
         children [
@@ -72,8 +70,7 @@ PROTO E-puckGroundSensors [
         ]
         name "gs2"
         lookupTable [
-          0 1000 0.002
-          0.016 300 0.004
+          0 1000 0.002 0.016 300 0.004 
         ]
         type "infra-red"
       }

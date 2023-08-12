@@ -34,7 +34,7 @@ PROTO halfTile [
 		field SFInt32 room 0
 ]
 {
-      DEF TILE Transform {
+DEF TILE Pose {
 
 	  %{
 	  scaleX = fields.xScale.value
@@ -47,10 +47,12 @@ PROTO halfTile [
 	  }%
 
 	  translation %{=x}% 0 %{=z}%
-	  scale %{=scaleX}% %{=scaleY}% %{=scaleZ}%
 
       children[
           DEF TILE worldTile {
+            xScale %{=scaleX}%
+            yScale %{=scaleY}%
+            zScale %{=scaleZ}%
             xPos 0 
             zPos 0  
             topWall IS topWall
@@ -72,9 +74,9 @@ PROTO halfTile [
           DEF TILE worldTile {
             xPos 0 
             zPos 0 
-            xScale .5 
-            yScale .5 
-            zScale .5 
+            xScale %{=scaleX * .5}%
+            yScale %{=scaleY * .5}%
+            zScale %{=scaleZ * .5}%
             width 1 
             height 1
             topWall %{= fields.tile1Walls.value[1] }%
@@ -92,9 +94,9 @@ PROTO halfTile [
           DEF TILE worldTile {
             xPos 1
             zPos 0
-            xScale .5 
-            yScale .5 
-            zScale .5  
+            xScale %{=scaleX * .5}%
+            yScale %{=scaleY * .5}%
+            zScale %{=scaleZ * .5}% 
             width 1
             height 1
             topWall %{= fields.tile2Walls.value[1] }%
@@ -113,9 +115,9 @@ PROTO halfTile [
           DEF TILE worldTile {
             xPos 0 
             zPos 1
-            xScale .5  
-            yScale .5  
-            zScale .5  
+            xScale %{=scaleX * .5}%
+            yScale %{=scaleY * .5}%
+            zScale %{=scaleZ * .5}% 
             width 1
             height 1
             topWall %{= fields.tile3Walls.value[1] }%
@@ -134,9 +136,9 @@ PROTO halfTile [
           DEF TILE worldTile {
             xPos 1
             zPos 1
-            xScale .5  
-            yScale .5  
-            zScale .5  
+            xScale %{=scaleX * .5}%
+            yScale %{=scaleY * .5}%
+            zScale %{=scaleZ * .5}%
             width 1
             height 1
             topWall %{= fields.tile4Walls.value[1] }%
