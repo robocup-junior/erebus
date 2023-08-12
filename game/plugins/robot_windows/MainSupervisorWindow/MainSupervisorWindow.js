@@ -104,6 +104,15 @@ function updateWorld(worlds_str){
 		};
 		button.setAttribute("class","btn-world");
 
+		// Add thumbnail to button
+		let thumbnail = document.createElement("img");
+		// Strip .wbt from name
+		thumbnail.src = "./thumbnails/"+worlds[i].replace(/\.[^/.]+$/, "")+".png";
+		thumbnail.height = 20;
+		thumbnail.style = "vertical-align: middle;margin: 5px;";
+		thumbnail.onerror = () => thumbnail.src = "./thumbnails/missing.png";
+		button.appendChild(thumbnail)
+
 		document.getElementById("worlds_div").appendChild(button);
 		
 	}

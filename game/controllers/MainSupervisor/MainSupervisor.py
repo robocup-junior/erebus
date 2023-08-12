@@ -34,6 +34,7 @@ from Robot import *
 from Recorder import Recorder
 from Test import TestRunner
 from RobotWindowSender import RWSender
+from ThumbnailWriter import export_map_to_img
 
 
 
@@ -154,6 +155,8 @@ class Game(Supervisor):
         # Calculate the solution arrays for the map layout
         self.MapAnswer = mapAnswer.MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
+        
+        export_map_to_img(self, self.mapSolution)
         
         self.testRunner = TestRunner(self)
         self.runTests = False
