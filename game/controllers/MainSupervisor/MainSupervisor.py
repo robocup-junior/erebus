@@ -111,7 +111,7 @@ class Game(Supervisor):
         if self.getCustomData() != '':
             customData = self.getCustomData().split(',')
             self.maxTime = int(customData[0])
-        self.maxRealWorldTime = max(self.maxTime + 60, self.maxTime * 1.25)
+        self.maxRealWorldTime: int = int(max(self.maxTime + 60, self.maxTime * 1.25))
         self.rws.send("update", str(0) + "," + str(0) + "," + str(self.maxTime) + "," + str(0))
         
         self.getSimulationVersion()
@@ -422,8 +422,16 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.robot0Obj.resetTimeStopped()
 
         elif robotMessage[0] == 'G':
-            self.emitter.send(struct.pack("c f i", bytes(
-                "G", "utf-8"), round(self.robot0Obj.getScore(), 2), self.maxTime - int(self.timeElapsed)))
+            # Send game info in format: (G, score, game time left, real time left)
+            self.emitter.send(
+                struct.pack(
+                    "c f i i", 
+                    bytes("G", "utf-8"),
+                    round(self.robot0Obj.getScore(), 2),
+                    self.maxTime - int(self.timeElapsed),
+                    self.maxRealWorldTime - int(self.realTimeElapsed)
+                )
+            )
 
         # If robot stopped for 1 second
         elif self.robot0Obj.timeStopped(self) >= 1.0:
