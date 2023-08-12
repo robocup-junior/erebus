@@ -1,5 +1,38 @@
+from abc import abstractmethod
 import math
+import AutoInstall
+from Robot import Robot
+from ConsoleLog import Console
 
+AutoInstall._import("np", "numpy")
+
+
+def rotate_2d_vector(
+    v: np.array, 
+    theta: float
+) -> np.array:
+    """Rotate 2D vector by angle (in radians)
+
+    Args:
+        v (np.array): Vector to rotate
+        theta (float): Angle to rotate by (in radias)
+
+    Returns:
+        np.array: Output rotated angle
+    """
+    rot_matrix = np.array([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]])
+    return np.dot(rot_matrix, v)
+
+def normalise_vector(v: np.array) -> np.array:
+    """Normalise vector
+
+    Args:
+        v (np.array): Vector to normalise
+
+    Returns:
+        np.array: Normalised vector
+    """
+    return v / np.linalg.norm(v)
 
 class VictimObject():
     '''Victim object holding the boundaries'''
@@ -23,7 +56,7 @@ class VictimObject():
         self.simple_victim_type = self.get_simple_type()
 
     @property
-    def position(self) -> list:
+    def position(self) -> list[float]:
         return self.wb_translationField.getSFVec3f()
 
     @position.setter
@@ -31,7 +64,7 @@ class VictimObject():
         self.wb_translationField.setSFVec3f(pos)
 
     @property
-    def rotation(self) -> list:
+    def rotation(self) -> list[float]:
         return self.wb_rotationField.getSFRotation()
 
     @rotation.setter
@@ -54,6 +87,7 @@ class VictimObject():
     def identified(self, idfy: int):
         self.wb_foundField.setSFBool(idfy)
 
+    @abstractmethod
     def get_simple_type(self):
         # Will be overrided
         pass
@@ -66,44 +100,54 @@ class VictimObject():
     
     def getDistance(self, pos: list):
         return math.sqrt(((self.position[0] - pos[0])**2) + ((self.position[2] - pos[2])**2))
+    
+    def get_surface_normal(self) -> np.array:  
+        """Gets the victim's webots object surface normal vector
+        """
+        # Angle of 0 (no rotation), e.g. [0,0,0,0], points upwards, therefore
+        # has surface normal of [0,0,-1]
         
-    def onSameSide(self, pos: list) -> bool:
-        #Get side the victim pointing at
+        # Rotate by rotation of victim
+        rot: np.array = rotate_2d_vector(np.array([0,-1]), -self.rotation[3]) 
+        # Convert back to 3d vector
+        return np.array([rot[0], 0, rot[1]])
+    
+    def _get_vec_to_robot(
+        self, 
+        robot: Robot
+    ) -> np.array:
+        """Get normalised direction vector from victim to robot
 
-        #0 1 0 -pi/2 -> X axis
-        #0 1 0 pi/2 -> -X axis
-        #0 1 0 pi -> Z axis
-        #0 1 0 0 -> -Z axis
-        
-        rot = self.rotation[3]
-        rot = round(rot, 2)
+        Args:
+            robot (Robot): Robot object
 
-        if rot == -1.57:
-            #X axis
-            robot_x = pos[0]
-            if robot_x > self.position[0]:
-                return True
-        elif rot == 1.57:
-            #-X axis
-            robot_x = pos[0]
-            if robot_x < self.position[0]:
-                return True
-        elif rot == 3.14:
-            #Z axis
-            robot_z = pos[2]
-            if robot_z > self.position[2]:
-                return True
-        elif rot == 0:
-            #-Z axis
-            robot_z = pos[2]
-            if robot_z < self.position[2]:
-                return True
-        else:
-            return True
+        Returns:
+            np.array: Normalised vector pointing to robot direction
+        """
+        vec: np.array = np.array(robot.position) - np.array(self.position)
+        # Normalise vector
+        return normalise_vector(vec)
+    
+    def on_same_side(
+        self, 
+        robot: Robot
+    ) -> bool:
+        """Check if a robot is on the same side as the victim is facing
 
-        return False
+        Args:
+            robot (Robot): Robot object
 
-    def getSide(self) -> str:
+        Returns:
+            bool: True if the robot is on the same side as the victim
+        """
+        norm: np.array = self.get_surface_normal()
+        to_bot: np.array = self._get_vec_to_robot(robot)
+        # https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python
+        angle: float = np.arccos(np.clip(np.dot(norm, to_bot), -1.0, 1.0))
+        # Return if angle between two vectors is less than 90 degrees
+        return angle < math.pi/2
+
+    def get_side(self) -> str:
         #Get side the victim pointing at
         rot = self.rotation[3]
         rot = round(rot, 2)

@@ -432,9 +432,9 @@ ROBOT_0: {str(self.robot0Obj.name)}
             est_vic_pos = robotMessage[0]
             est_vic_type = robotMessage[1]
             
-            iterator = self.victimManager.humans
-            name = 'Victim'
-            correctTypeBonus = 10
+            iterator: list[VictimObject] = self.victimManager.humans
+            name: str = 'Victim'
+            correctTypeBonus: int = 10
 
             if est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
                 iterator = self.victimManager.hazards
@@ -443,13 +443,13 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             misidentification = True
             
-            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.onSameSide(self.robot0Obj.position) and not h.identified]
+            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.on_same_side(self.robot0Obj) and not h.identified]
             
             Console.log_debug(f"--- Victim Data ---")
             for h in iterator:
                 Console.log_debug(f"Distance {h.getDistance(self.robot0Obj.position)}/0.09 in range ({h.checkPosition(self.robot0Obj.position)})")
                 Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
-                Console.log_debug(f"On same side: {h.onSameSide(self.robot0Obj.position)}")
+                Console.log_debug(f"On same side: {h.on_same_side(self.robot0Obj)}")
                 Console.log_debug(f"Identified: {h.identified}")
             Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
             Console.log_debug(f"--- ----------- ---")
@@ -622,12 +622,12 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             # Automatic camera movement
             if self.config.automatic_camera and self.camera.wb_viewpoint_node:
-                nearVictims = [h for h in (self.victimManager.humans + self.victimManager.hazards) if h.checkPosition(self.robot0Obj.position, 0.20) and h.onSameSide(self.robot0Obj.position)]
+                nearVictims = [h for h in (self.victimManager.humans + self.victimManager.hazards) if h.checkPosition(self.robot0Obj.position, 0.20) and h.on_same_side(self.robot0Obj)]
                 if len(nearVictims) > 0:
                     if(len(nearVictims) > 1):
                         # Sort by closest
                         nearVictims.sort(key=lambda v: v.getDistance(self.robot0Obj.position))
-                    side = nearVictims[0].getSide()
+                    side = nearVictims[0].get_side()
                     self.camera.updateView(side, self.robot0Obj)
 
             # Test if the robots are in checkpoints
