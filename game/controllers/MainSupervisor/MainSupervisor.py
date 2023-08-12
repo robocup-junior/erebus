@@ -59,6 +59,7 @@ class Config():
         # [1]: Disable auto LoP
         # [2]: Recording
         # [3]: Automatic camera
+        # [4]: Keep remote
         self.configDataList = configData
         self.path = path
         
@@ -66,14 +67,17 @@ class Config():
         self.disableLOP = bool(configData[1])
         self.recording = bool(configData[2])
         self.automatic_camera = bool(configData[3])   
+        self.keep_remote = False # Keep v23 compatibility
+        if len(configData) == 5:
+            self.keep_remote = bool(configData[4])   
         
 class Game(Supervisor):
     def __init__(self):
         super().__init__()
         
         # Version info
-        self.stream = 23
-        self.version = "23.0.5"
+        self.stream = 24
+        self.version = "24.0.0"
         
         uploader = threading.Thread(target=ControllerUploader.start, daemon=True)
         uploader.start()
@@ -156,6 +160,7 @@ class Game(Supervisor):
         
         # Toggle for enabling remote webots controllers
         self.remoteEnabled = False
+        self.update_remote_enabled()
     
     def game_init(self):
         # If recording
@@ -578,7 +583,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.config.disableLOP = True
             if parts[0] == 'rw_reload':
                 self.rws.sendAll()
-                # TODO might be better way -- may cause bugs
                 configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
                 self.config = self.getConfig(configFilePath)
                 
@@ -605,6 +609,13 @@ ROBOT_0: {str(self.robot0Obj.name)}
         configData = list(map((lambda x: int(x)), configData))
         
         return Config(configData, configFilePath)
+
+    def update_remote_enabled(self):
+        self.remoteEnabled = self.config.keep_remote
+        if self.remoteEnabled:
+            self.rws.updateHistory("remoteEnabled")
+        else:
+            self.rws.updateHistory("remoteDisabled")
 
     def update(self):
         

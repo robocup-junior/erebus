@@ -1,22 +1,4 @@
-/*
-MainSupervisorWindow.js v2
-
-Changelog:
- - Added human loaded indicator
-*/
-
 import RobotWindow from 'https://cyberbotics.com/wwi/R2023a/RobotWindow.js';
-
-
-var visable = false;
-
-var robot0Name = "Robot 0";
-var robot1Name = "Robot 1";
-
-var scores = [0,0];
-
-const stream = "21";
-const version = "21.0.0 Beta-3";
 
 let historyHtml = "";
 
@@ -61,49 +43,9 @@ function receive (message){
 				//The game is over
 				endGame();
 				break;
-			case "humanLoaded0":
-				//Robot 0's human is loaded
-				humanLoadedColour(0);
-				break;
-			case "humanUnloaded0":
-				//Robot 0's human is unloaded
-				humanUnloadedColour(0);
-				break;
-			case "humanLoaded1":
-				//Robot 1's human is loaded
-				humanLoadedColour(1);
-				break;
-			case "humanUnloaded1":
-				//Robot 1's human is unloaded
-				humanUnloadedColour(1);
-				break;
-			case "activityLoaded0":
-				activityLoadedColor(0,parts[1],parts[2],parts[3])
-				break;
-			case "activityUnloaded0":
-				activityUnloadedColour(0)
-				break;
-			case "activityLoaded1":
-				activityLoadedColor(1,parts[1],parts[2],parts[3])
-				break;
-			case "activityUnloaded1":
-				activityUnloadedColour(1)
-				break;
 			case "historyUpdate":
 				let history0 = message.split(",").slice(1,message.length-1)
 				updateHistory(history0)
-				break;
-			case "robotInSimulation0":
-				robotQuitColour(0);
-				break;
-			case "robotInSimulation1":
-				robotQuitColour(1);
-				break;
-			case "robotNotInSimulation0":
-				robotQuitUnavailableColour(0);
-				break;
-			case "robotNotInSimulation1":
-				robotQuitUnavailableColour(1);
 				break;
 			case "latest":
 				document.getElementById("versionInfo").style.color = "#27ae60";
@@ -167,36 +109,7 @@ function updateWorld(worlds_str){
 	}
 }
 
-function robotQuitColour(id){
-	// setEnableButton('quit'+id, true)
-	// setEnableButton('relocate'+id, true)
-	// setEnableButton('load'+id, true)
-	// setEnableButton('unload'+id, true)
-}
-function robotQuitUnavailableColour(id){
-	// setEnableButton('quit'+id, false)
-	// setEnableButton('relocate'+id, false)
-	// setEnableButton('load'+id, false)
-	// setEnableButton('unload'+id, false)
-}
 
-function humanLoadedColour(id){
-	// Changes svg human indicator to gold to indicate a human is loaded
-	document.getElementById("human"+id+"a").style.stroke = "#edae39";
-	document.getElementById("human"+id+"b").style.stroke = "#edae39";
-}
-function humanUnloadedColour(id){
-	// Changes svg human indicator to black to indicate a human is unloaded
-	document.getElementById("human"+id+"a").style.stroke = "black";
-	document.getElementById("human"+id+"b").style.stroke = "black";
-}
-
-function activityLoadedColor(id,r,g,b){
-	document.getElementById("activity"+id).style.stroke = "rgb("+(Number(r)*255).toString()+","+(Number(g)*255).toString()+", "+(Number(b)*255).toString()+")";
-}
-function activityUnloadedColour(id){
-	document.getElementById("activity"+id).style.stroke = "black";
-}
 function updateHistory(history0){
 	let html = "<tr>";
 	if(history0[0].indexOf(":") != -1){
@@ -221,6 +134,7 @@ function resetHistory() {
 function loadedController(id){
 	//A controller has been loaded into a robot id is 0 or 1 and name is the name of the robot
 	//Set name and toggle to unload button for robot 0
+	if (document.getElementById("keepRemote").checked) return
 	document.getElementById("load"+ id).style.display = "none";
 	document.getElementById("unload"+ id).style.display = "inline-block";
 	disableWhileSending(false);
@@ -271,10 +185,8 @@ window.getWorlds = function() {
 
 function update (data){
 	//Update the ui each frame of the simulation
-	//Sets the scores and the timer
+	//Sets the the timer
 	document.getElementById("score0").innerHTML = String(data[0]);
-
-	scores = [data[0],0]
 
 	//The total time at the start
 	let maxTime = 8 * 60; 
@@ -297,16 +209,25 @@ function updateConfig (data){
 	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
 	document.getElementById("recording").checked = Boolean(Number(data[2]));
 	document.getElementById("autoCam").checked = Boolean(Number(data[3]));
+	if (data.length == 5) {
+		document.getElementById("keepRemote").checked = Boolean(Number(data[4]));
+		if (Boolean(Number(data[4]))) window.enableRemotePressed()
+		else window.disableRemotePressed()
+	}
 
 	updateTestBtnState(Boolean(Number(data[0])))
 }
 
 window.configChanged = function(){
-	let data = [0,0,0,0];
+	let data = [0,0,0,0,0];
 	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
 	data[2] = String(Number(document.getElementById("recording").checked));
 	data[3] = String(Number(document.getElementById("autoCam").checked));
+	data[4] = String(Number(document.getElementById("keepRemote").checked));
+	if (document.getElementById("keepRemote").checked) window.enableRemotePressed()
+	else window.disableRemotePressed()
+
 	updateTestBtnState(document.getElementById("autoRemoveFiles").checked)
 	window.robotWindow.send(`config,${data.join(',')}`);
 }
@@ -561,5 +482,8 @@ window.disableRemotePressed = function() {
 	setEnableButton("load0", true);
 	setEnableButton("unload0", true);
 	setEnableRemoteBtn();
+	let keep_before = document.getElementById("keepRemote").checked
+	document.getElementById("keepRemote").checked = false
+	if (keep_before) configChanged()
 	window.robotWindow.send("remoteDisable");
 }
