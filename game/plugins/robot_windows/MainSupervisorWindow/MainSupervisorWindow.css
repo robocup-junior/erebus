@@ -3,6 +3,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	font-weight: 500;
 }
+
 body{
   background: white;
 }
@@ -355,7 +356,7 @@ span{
   padding: 0;
   overflow: hidden;
   opacity: 0;
-  transition: 0.6s;
+  transition: 0.4s;
 }
 
 .hidden_box_worlds input:checked ~ .hidden_show_worlds {
@@ -364,14 +365,18 @@ span{
   opacity: 1;
 }
 
+.hidden_box_worlds button, .tab, .btn-refresh {
+  cursor: pointer;
+}
+
 .switch__label {
   width: 50px;
   position: relative;
   display: inline-block;
+  cursor: pointer;
 }
 .switch__content {
   display: block;
-  cursor: pointer;
   position: relative;
   border-radius: 30px;
   height: 31px;
@@ -516,4 +521,8 @@ hr {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+*:disabled {
+  cursor:default;
 }
