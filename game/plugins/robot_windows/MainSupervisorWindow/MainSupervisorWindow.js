@@ -298,6 +298,8 @@ function preRun() {
 
 	setEnableButton("enableRemote", false);
 	setEnableButton("disableRemote", false);
+
+	setEnableButton("dockerPath", false);
 }
 
 window.runPressed = function(){
