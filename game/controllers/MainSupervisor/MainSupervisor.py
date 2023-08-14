@@ -1,6 +1,8 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
+import fcntl
+import subprocess
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -35,6 +37,7 @@ from Recorder import Recorder
 from Test import TestRunner
 from RobotWindowSender import RWSender
 from ThumbnailWriter import export_map_to_img
+from DockerHelper import run_docker_container
 
 
 
@@ -107,6 +110,7 @@ class Game(Supervisor):
         self.lastSentRealTime = 0
 
         self.robotInitialized = False
+        self.docker_process: subprocess.Popen | None = None
                 
         # Maximum time for a match
         self.maxTime = 8 * 60
@@ -507,6 +511,16 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Start running the match
                 self.gameState = MATCH_RUNNING
                 self.rws.updateHistory("runPressed")
+            if parts[0] == "runDocker":
+                self.docker_process = run_docker_container(parts[1])
+                if self.docker_process != None:
+                    self.remoteEnabled = True
+                    # Start running the match
+                    self.gameState = MATCH_RUNNING
+                    self.rws.updateHistory("runDockerPressed")
+                    self.rws.send("dockerSuccess")
+                else:
+                    self.step(TIME_STEP)
             if parts[0] == "pause":
                 # Pause the match
                 self.gameState = MATCH_PAUSED
@@ -746,6 +760,17 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.lastTime = self.getTime()
             # Step the simulation on
             step = self.step(TIME_STEP)
+            # Print docker container output (if applicable)
+            if self.docker_process:
+                # https://gist.github.com/sebclaeys/1232088
+                if self.docker_process.stdout:
+                    fd = self.docker_process.stdout.fileno()
+                    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+                    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+                    try:
+                        Console.log_controller(self.docker_process.stdout.read().decode())
+                    except:
+                        pass
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating

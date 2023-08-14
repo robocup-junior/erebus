@@ -14,8 +14,7 @@ def _erebus_image_exists() -> bool:
     """
     try:
         process: subprocess.CompletedProcess = subprocess.run(
-            [f"docker inspect {EREBUS_IMAGE}"],
-            shell=True,
+            ["docker", "inspect", EREBUS_IMAGE],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
@@ -49,7 +48,7 @@ def _get_local_ip() -> str:
         sock.close()
     return ip_addr
 
-def run_docker_container(project_dir: str) -> bool:
+def run_docker_container(project_dir: str) -> subprocess.Popen | None:
     """Run a controller via a docker container
 
     Args:
@@ -61,50 +60,43 @@ def run_docker_container(project_dir: str) -> bool:
     Console.log_info(f"Checking if erebus image exists (tag={EREBUS_IMAGE})")
     if not _erebus_image_exists():
         Console.log_err(f"Could not find docker image {EREBUS_IMAGE}. Run: docker pull {EREBUS_IMAGE} to download the latest version.")
-        return False
+        return None
     
     try:
         ip_address = _get_local_ip()
     except Exception as e:
         Console.log_err(f"{e}. Unable to run docker container")
-        return False
+        return None
     Console.log_info(f"Using local ip address: {ip_address}")
     
     # Build container
     try:
-        command: str = f"docker build --tag {EREBUS_CONTROLLER_TAG} {project_dir}"
-        Console.log_info(f"Building project image ($ {command})")
+        command: list[str] = ["docker", "build", "--tag" ,EREBUS_CONTROLLER_TAG, project_dir]
+        Console.log_info(f"Building project image ($ {' '.join(command)})")
         build_process: subprocess.CompletedProcess = subprocess.run(
             command,
-            shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
     except Exception as e:
         Console.log_err(f"Error building project image - {e}")
-        return False
+        return None
     
     if build_process.returncode != 0:
         Console.log_err(f"Unable to build project image - {build_process.stdout.decode().strip()}")
-        return False
+        return None
     
     # Run container
     try:
-        command: str = f"docker run --env EREBUS_SERVER={ip_address} --rm '{EREBUS_CONTROLLER_TAG}'"
-        Console.log_info(f"Running container ($ {command})")
+        command: list[str] = ["docker", "run", "--env", f"EREBUS_SERVER={ip_address}", "--rm", EREBUS_CONTROLLER_TAG]
+        Console.log_info(f"Running container ($ {' '.join(command)})")
         run_process: subprocess.Popen = subprocess.Popen(
             command,
-            shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
     except Exception as e:
         Console.log_err(f"Error running project image - {e}")
-        return False
+        return None
     
-    while run_process.poll() is None:
-        if run_process.stdout:
-            line = run_process.stdout.readline().rstrip()
-            Console.log_controller(line.decode())
-    
-    return True
+    return run_process

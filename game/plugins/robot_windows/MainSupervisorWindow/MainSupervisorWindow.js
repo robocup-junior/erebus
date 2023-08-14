@@ -77,6 +77,9 @@ function receive (message){
 			case "runPressed":
 				window.runPressed();
 				break;
+			case "runDockerPressed":
+				window.runDockerPressed();
+				break;
 			case "pausedPressed":
 				window.pausePressed();
 				break;
@@ -85,6 +88,9 @@ function receive (message){
 				break;
 			case "remoteDisabled":
 				window.disableRemotePressed();
+				break;
+			case "dockerSuccess":
+				preRun();
 				break;
 		}
 	}
@@ -172,6 +178,8 @@ function startup (){
 	unloadedController(1);
 	//Turn on the run button and reset button when the program has loaded
 	setEnableButton("runButton", true);
+	setEnableButton("runDockerButton", true);
+
 	setEnableButton("pauseButton", false);
 	setEnableButton('lopButton', false)
 
@@ -278,6 +286,7 @@ function preRun() {
 	//When the run button is pressed
 	//Disable the run button
 	setEnableButton("runButton", false);
+	setEnableButton("runDockerButton", false);
 	//Send a run command
 	//Enable the pause button
 	setEnableButton("pauseButton", true);
@@ -294,6 +303,11 @@ function preRun() {
 window.runPressed = function(){
 	preRun();
 	window.robotWindow.send("run");
+}
+
+window.runDockerPressed = function(){
+	let docker_input = document.getElementById("dockerPath");
+	window.robotWindow.send("runDocker,"+docker_input.value);
 }
 
 window.pausePressed = function(){

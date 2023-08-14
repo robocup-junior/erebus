@@ -8,11 +8,13 @@ class Console:
     PREFIX_WARN: str = "EREBUS WARNING"
     PREFIX_SUCC: str = "EREBUS"
     PREFIX_INFO: str = "EREBUS INFO"
+    PREFIX_CONTROLLER: str = "EREBUS CONTROLLER"
 
     COLOR_ERROR: str = "red"
     COLOR_WARN: str = "magenta"
     COLOR_SUCC: str = "green"
     COLOR_INFO: str = "blue"
+    COLOR_CONTROLLER: str = "blue"
     COLOR_DEBUG: str = "yellow"
     
     COLORS = dict(
@@ -58,6 +60,10 @@ class Console:
     @staticmethod
     def log_info(msg: str) -> None:
         Console._log(Console.PREFIX_INFO, msg, Console.COLOR_INFO)
+        
+    @staticmethod
+    def log_controller(msg: str) -> None:
+        Console._log(Console.PREFIX_CONTROLLER, msg.strip(), Console.COLOR_CONTROLLER)
         
     @staticmethod
     def log_debug(msg: str) -> None:
