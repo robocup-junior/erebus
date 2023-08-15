@@ -64,16 +64,20 @@ class Config():
         # [2]: Recording
         # [3]: Automatic camera
         # [4]: Keep remote
-        self.configDataList = configData
+        # [5]: Docker path
+                
         self.path = path
         
-        self.keep_controller = bool(configData[0])
-        self.disableLOP = bool(configData[1])
-        self.recording = bool(configData[2])
-        self.automatic_camera = bool(configData[3])   
+        self.keep_controller = bool(int(configData[0]))
+        self.disableLOP = bool(int(configData[1]))
+        self.recording = bool(int(configData[2]))
+        self.automatic_camera = bool(int(configData[3]))
         self.keep_remote = False # Keep v23 compatibility
-        if len(configData) == 5:
-            self.keep_remote = bool(configData[4])   
+        self.docker_path = ""
+        
+        if len(configData) >= 5:
+            self.keep_remote = bool(int(configData[4]))
+            self.docker_path = str(configData[5])
         
 class Game(Supervisor):
     def __init__(self):
@@ -582,7 +586,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     self.process_robot_json(data[1])
 
             if parts[0] == 'config':
-                configData = list(map((lambda x: int(x)), message.split(",")[1:]))
+                configData = message.split(",")[1:]
                 self.config = Config(configData, self.config.path)
                 self.robot0Obj.updateConfig(self.config)
                 
@@ -623,7 +627,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
             configData = f.read().split(',')
             
         self.rws.send("config",  ','.join(configData))
-        configData = list(map((lambda x: int(x)), configData))
         
         return Config(configData, configFilePath)
 

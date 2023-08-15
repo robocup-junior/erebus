@@ -43,7 +43,7 @@
 						</div>
 						<div>
 							<span style="line-height: 2em;">Docker path:</span>
-							<input class="dockerInput" id="dockerPath"/>
+							<input class="dockerInput" id="dockerPath" onchange="configChanged()"/>
 						</div>
 					</div>
 					<div class="col-6">
@@ -78,58 +78,65 @@
 							<span>Robot Customiser <a href="https://v23.robot.erebus.rcj.cloud/" target="_blank">link</a></span>
 						</div>
 						<hr>
-						<div class="col-12">
-							<span>Keep controller/robot files</span>
-							<div class="switch">
-								<label class="switch__label">
-									<input type="checkbox" class="switch__input" id="autoRemoveFiles" onchange="configChanged()"/>
-									<span class="switch__content"></span>
-									<span class="switch__circle"></span>
-								</label>
-							</div>
-						</div>
-						<div class="col-12">
-								<span>Disable automatic LoP (For debugging purposes)</span>
+						<div class="col-2"></div>
+						<div class="col-4">
+							<div class="col-12">
+								<span>Keep controller/robot files</span>
 								<div class="switch">
 									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="autoLoP" onchange="configChanged()"/>
+										<input type="checkbox" class="switch__input" id="autoRemoveFiles" onchange="configChanged()"/>
 										<span class="switch__content"></span>
 										<span class="switch__circle"></span>
 									</label>
 								</div>
+							</div>
+							<div class="col-12">
+									<span>Disable automatic LoP (For debugging purposes)</span>
+									<div class="switch">
+										<label class="switch__label">
+											<input type="checkbox" class="switch__input" id="autoLoP" onchange="configChanged()"/>
+											<span class="switch__content"></span>
+											<span class="switch__circle"></span>
+										</label>
+									</div>
+							</div>
+							<div class="col-12">
+								<span>Automatic camera</span>
+								<div class="switch">
+									<label class="switch__label">
+										<input type="checkbox" class="switch__input" id="autoCam" onchange="configChanged()"/>
+										<span class="switch__content"></span>
+										<span class="switch__circle"></span>
+									</label>
+								</div>
+							</div>
+							<div class="col-12">
+								<span>Recording</span>
+								<div class="switch">
+									<label class="switch__label">
+										<input type="checkbox" class="switch__input" id="recording" onchange="configChanged()"/>
+										<span class="switch__content"></span>
+										<span class="switch__circle"></span>
+									</label>
+								</div>
+							</div>
+							
+
 						</div>
-						<div class="col-12">
-							<span>Automatic camera</span>
-							<div class="switch">
-								<label class="switch__label">
-									<input type="checkbox" class="switch__input" id="autoCam" onchange="configChanged()"/>
-									<span class="switch__content"></span>
-									<span class="switch__circle"></span>
-								</label>
+						<div class="col-4">
+							<div class="col-12">
+								<span>Keep remote controller on</span>
+								<div class="switch">
+									<label class="switch__label">
+										<input type="checkbox" class="switch__input" id="keepRemote" onchange="configChanged()"/>
+										<span class="switch__content"></span>
+										<span class="switch__circle"></span>
+									</label>
+								</div>
 							</div>
 						</div>
 						<div class="col-12">
-							<span>Recording</span>
-							<div class="switch">
-								<label class="switch__label">
-									<input type="checkbox" class="switch__input" id="recording" onchange="configChanged()"/>
-									<span class="switch__content"></span>
-									<span class="switch__circle"></span>
-								</label>
-							</div>
-						</div>
-						<div class="col-12">
-							<span>Keep remote controller on</span>
-							<div class="switch">
-								<label class="switch__label">
-									<input type="checkbox" class="switch__input" id="keepRemote" onchange="configChanged()"/>
-									<span class="switch__content"></span>
-									<span class="switch__circle"></span>
-								</label>
-							</div>
-						</div>
-						<hr>
-						<div class="col-12">
+							<hr><br>
 							<span>Dev - Tests</span>
 							<div>
 								<button class="btn-test" type="button" onclick="testPressed()" id="test">Run Tests (must disable 'Keep controller')</button>

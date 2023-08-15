@@ -191,6 +191,7 @@ function startup (){
 
 	setEnableButton("enableRemote", true);
 	setEnableButton("disableRemote", true);
+	setEnableButton("dockerPath", true);
 	setEnableRemoteBtn();
 	getWorlds();
 }
@@ -226,22 +227,24 @@ function updateConfig (data){
 	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
 	document.getElementById("recording").checked = Boolean(Number(data[2]));
 	document.getElementById("autoCam").checked = Boolean(Number(data[3]));
-	if (data.length == 5) {
+	if (data.length >= 5) {
 		document.getElementById("keepRemote").checked = Boolean(Number(data[4]));
 		if (Boolean(Number(data[4]))) window.enableRemotePressed()
 		else window.disableRemotePressed()
+		document.getElementById("dockerPath").value = String(data[5])
 	}
 
 	updateTestBtnState(Boolean(Number(data[0])))
 }
 
 window.configChanged = function(){
-	let data = [0,0,0,0,0];
+	let data = [0,0,0,0,0,""];
 	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
 	data[2] = String(Number(document.getElementById("recording").checked));
 	data[3] = String(Number(document.getElementById("autoCam").checked));
 	data[4] = String(Number(document.getElementById("keepRemote").checked));
+	data[5] = String(document.getElementById("dockerPath").value)
 	if (document.getElementById("keepRemote").checked) window.enableRemotePressed()
 	else window.disableRemotePressed()
 
