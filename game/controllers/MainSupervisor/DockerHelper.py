@@ -1,7 +1,9 @@
 
 from ConsoleLog import Console
 import subprocess
+import fcntl
 import socket
+import os
 
 EREBUS_IMAGE = "alfredroberts/erebus:latest"
 EREBUS_CONTROLLER_TAG = "erebus_internal"
@@ -100,3 +102,23 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
         return None
     
     return run_process
+
+
+def print_process_stdout(process: subprocess.Popen) -> None:
+    """Print a sub process's stdout to the erebus console
+    
+    Used for printing docker container outputs to the console
+
+    Args:
+        process (subprocess.Popen): Popen subprocess to print stdout
+    """
+    if process.stdout:
+        # https://gist.github.com/sebclaeys/1232088
+        # Print stdout without blocking
+        fd = process.stdout.fileno()
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+        try:
+            Console.log_controller(process.stdout.read().decode())
+        except:
+            pass

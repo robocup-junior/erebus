@@ -1,7 +1,6 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
-import fcntl
 import subprocess
 import AutoInstall
 
@@ -10,15 +9,12 @@ AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
 
 import mapAnswer
-import filecmp
-import glob
 import MapScorer
 import ControllerUploader
 from controller import Supervisor
 import os
 import shutil
 import struct
-import math
 import datetime
 import threading
 import shutil
@@ -29,6 +25,7 @@ from ProtoGenerator import generate_robot_proto
 from Tools import *
 from ConsoleLog import Console
 
+from Config import Config
 from Camera import Camera
 from Tile import *
 from Victim import *
@@ -37,10 +34,7 @@ from Recorder import Recorder
 from Test import TestRunner
 from RobotWindowSender import RWSender
 from ThumbnailWriter import export_map_to_img
-from DockerHelper import run_docker_container
-
-
-
+from DockerHelper import print_process_stdout, run_docker_container
 
 TIME_STEP = 16
 
@@ -53,31 +47,6 @@ MATCH_FINISHED = 'MATCH_FINISHED'
 MATCH_PAUSED = 'MATCH_PAUSED'
 
 ROBOT_NAME = "Erebus_Bot"
-
-
-class Config():
-    def __init__(self, configData, path):
-        
-        # configData
-        # [0]: Keep controller/robot files
-        # [1]: Disable auto LoP
-        # [2]: Recording
-        # [3]: Automatic camera
-        # [4]: Keep remote
-        # [5]: Docker path
-                
-        self.path = path
-        
-        self.keep_controller = bool(int(configData[0]))
-        self.disableLOP = bool(int(configData[1]))
-        self.recording = bool(int(configData[2]))
-        self.automatic_camera = bool(int(configData[3]))
-        self.keep_remote = False # Keep v23 compatibility
-        self.docker_path = ""
-        
-        if len(configData) >= 5:
-            self.keep_remote = bool(int(configData[4]))
-            self.docker_path = str(configData[5])
         
 class Game(Supervisor):
     def __init__(self):
@@ -516,6 +485,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.gameState = MATCH_RUNNING
                 self.rws.updateHistory("runPressed")
             if parts[0] == "runDocker":
+                Console.log_info("Running docker helper script (this may take a few minutes depending on project size)")
+                self.step(TIME_STEP)
                 self.docker_process = run_docker_container(parts[1])
                 if self.docker_process != None:
                     self.remoteEnabled = True
@@ -765,15 +736,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             step = self.step(TIME_STEP)
             # Print docker container output (if applicable)
             if self.docker_process:
-                # https://gist.github.com/sebclaeys/1232088
-                if self.docker_process.stdout:
-                    fd = self.docker_process.stdout.fileno()
-                    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-                    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-                    try:
-                        Console.log_controller(self.docker_process.stdout.read().decode())
-                    except:
-                        pass
+                print_process_stdout(self.docker_process)
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating
