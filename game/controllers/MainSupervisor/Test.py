@@ -233,10 +233,9 @@ class TestRunner:
     
     @staticmethod
     def robotToVictim(robot, victim, offset=0.06) -> None:
-        side = victim.getSide()
-        vOffset = TestRunner.sideToVector(side)
+        norm = victim.get_surface_normal()
             
-        robot.position = list(np.array([victim.position[0],robot.position[1],victim.position[2]]) + (vOffset * offset))
+        robot.position = list(np.array([victim.position[0],robot.position[1],victim.position[2]]) + (norm * offset))
     
     def runTest(self, supervisor) -> None:
         # self.stage == 0 and 
