@@ -145,7 +145,7 @@ class Erebus(Supervisor):
     def game_init(self):
         # If recording
         if self.config.recording:
-            Recorder.startRecording(self)
+            Recorder.start_recording(self)
 
         # Get the robot node by DEF name
         robot0 = self.getFromDef("ROBOT0")
@@ -169,7 +169,7 @@ class Erebus(Supervisor):
             self.camera.follow(self.robot0Obj, ROBOT_NAME)
 
         if self.config.recording:
-            Recorder.resetCountDown(self)
+            Recorder.reset_countdown(self)
 
         self.lastTime = self.getTime()
         self.firstFrame = False
@@ -617,7 +617,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.lastFrame = -1
             self.gameState = MATCH_FINISHED
             if self.config.recording:              
-                Recorder.stopRecording(self)
+                Recorder.stop_recording(self)
 
         # The first frame of the game running only
         if self.firstFrame and self.gameState == MATCH_RUNNING:
@@ -711,6 +711,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         # Get the message in from the robot window(if there is one)
         message = self.wwiReceiveText()
         while message not in ['', None]:
+            Console.log_debug(f"Received wwi message: {message}")
             self.receive(message)
             message = self.wwiReceiveText()
 
