@@ -8,7 +8,7 @@ AutoInstall._import("np", "numpy")
 AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
 
-import mapAnswer
+from MapAnswer import MapAnswer
 import MapScorer
 import ControllerUploader
 from controller import Supervisor
@@ -130,7 +130,7 @@ class Erebus(Supervisor):
         self.robot0Obj.resetProto(self)
 
         # Calculate the solution arrays for the map layout
-        self.MapAnswer = mapAnswer.MapAnswer(self)
+        self.MapAnswer = MapAnswer(self)
         self.mapSolution = self.MapAnswer.generateAnswer(False)
         
         export_map_to_img(self, self.mapSolution)
@@ -574,7 +574,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == 'runTest':
                 self.gameState = MATCH_RUNNING
                 self.runTests = True
-                self.config.disableLOP = True
+                self.config.disable_lop = True
             if parts[0] == 'rw_reload':
                 self.rws.sendAll()
                 configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
@@ -672,7 +672,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
                 if self.robot0Obj.timeStopped(self) >= 20:
-                    if not self.config.disableLOP:
+                    if not self.config.disable_lop:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
                 elif self.robot0Obj.timeStopped(self) >= 3 and self.robot0Obj.inSwamp:
@@ -681,7 +681,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
 
                 if self.robot0Obj.position[1] < -0.035 and self.gameState == MATCH_RUNNING:
-                    if not self.config.disableLOP:
+                    if not self.config.disable_lop:
                         self.relocate_robot()
                     self.robot0Obj.resetTimeStopped()
 

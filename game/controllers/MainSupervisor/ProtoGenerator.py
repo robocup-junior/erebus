@@ -1,7 +1,5 @@
 from Tools import *
 import AutoInstall
-import math
-import numpy as np
 from ConsoleLog import Console
 
 AutoInstall._import("cl", "termcolor")

@@ -23,7 +23,7 @@ class Controller():
             keep_control (bool, optional): Config option to keep controllers
             (not reset after world reload). Defaults to False.
         """
-        self.keep_controller = keep_control
+        self.keep_controller: bool = keep_control
 
     def update_keep_controller_config(self, config: Config) -> None:
         """Update keep controller configuration option
@@ -41,13 +41,13 @@ class Controller():
             manual (bool, optional): Whether manually reset via the UI. 
             Defaults to False.
         """
-        path = os.path.dirname(os.path.abspath(__file__))
+        path: str = os.path.dirname(os.path.abspath(__file__))
         if path[-4:] == "game":
             path = os.path.join(path, "controllers/robot0Controller")
         else:
             path = os.path.join(path, "../robot0Controller")
 
-        files = glob.glob(os.path.join(path, "*"))
+        files: list[str] = glob.glob(os.path.join(path, "*"))
         if self.keep_controller and not manual:
             if len(files) > 0:
                 supervisor.rws.send("loaded0")

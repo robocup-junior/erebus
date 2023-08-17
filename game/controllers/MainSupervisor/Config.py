@@ -17,16 +17,16 @@ class Config():
         # [4]: Keep remote
         # [5]: Docker path
 
-        self.path = path
+        self.path: str = path
 
-        self.keep_controller = bool(int(config_data[0]))
-        self.disableLOP = bool(int(config_data[1]))
-        self.recording = bool(int(config_data[2]))
-        self.automatic_camera = bool(int(config_data[3]))
+        self.keep_controller: bool = bool(int(config_data[0]))
+        self.disable_lop: bool = bool(int(config_data[1]))
+        self.recording: bool = bool(int(config_data[2]))
+        self.automatic_camera: bool = bool(int(config_data[3]))
         
         # Keep v23 compatibility
-        self.keep_remote = False  
-        self.docker_path = ""
+        self.keep_remote: bool = False  
+        self.docker_path: str = ""
 
         if len(config_data) >= 5:
             self.keep_remote = bool(int(config_data[4]))
