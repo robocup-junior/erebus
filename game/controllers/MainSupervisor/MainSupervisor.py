@@ -1,6 +1,7 @@
 """Supervisor Controller
    Written by Robbie Goldman and Alfred Roberts
 """
+import subprocess
 import AutoInstall
 
 AutoInstall._import("np", "numpy")
@@ -8,15 +9,12 @@ AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
 
 import mapAnswer
-import filecmp
-import glob
 import MapScorer
 import ControllerUploader
 from controller import Supervisor
 import os
 import shutil
 import struct
-import math
 import datetime
 import threading
 import shutil
@@ -27,6 +25,7 @@ from ProtoGenerator import generate_robot_proto
 from Tools import *
 from ConsoleLog import Console
 
+from Config import Config
 from Camera import Camera
 from Tile import *
 from Victim import *
@@ -35,9 +34,7 @@ from Recorder import Recorder
 from Test import TestRunner
 from RobotWindowSender import RWSender
 from ThumbnailWriter import export_map_to_img
-
-
-
+from DockerHelper import print_process_stdout, run_docker_container
 
 TIME_STEP = 16
 
@@ -50,27 +47,6 @@ MATCH_FINISHED = 'MATCH_FINISHED'
 MATCH_PAUSED = 'MATCH_PAUSED'
 
 ROBOT_NAME = "Erebus_Bot"
-
-
-class Config():
-    def __init__(self, configData, path):
-        
-        # configData
-        # [0]: Keep controller/robot files
-        # [1]: Disable auto LoP
-        # [2]: Recording
-        # [3]: Automatic camera
-        # [4]: Keep remote
-        self.configDataList = configData
-        self.path = path
-        
-        self.keep_controller = bool(configData[0])
-        self.disableLOP = bool(configData[1])
-        self.recording = bool(configData[2])
-        self.automatic_camera = bool(configData[3])   
-        self.keep_remote = False # Keep v23 compatibility
-        if len(configData) == 5:
-            self.keep_remote = bool(configData[4])   
         
 class Game(Supervisor):
     def __init__(self):
@@ -107,6 +83,7 @@ class Game(Supervisor):
         self.lastSentRealTime = 0
 
         self.robotInitialized = False
+        self.docker_process: subprocess.Popen | None = None
                 
         # Maximum time for a match
         self.maxTime = 8 * 60
@@ -509,6 +486,18 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Start running the match
                 self.gameState = MATCH_RUNNING
                 self.rws.updateHistory("runPressed")
+            if parts[0] == "runDocker":
+                Console.log_info("Running docker helper script (this may take a few minutes depending on project size)")
+                self.step(TIME_STEP)
+                self.docker_process = run_docker_container(parts[1])
+                if self.docker_process != None:
+                    self.remoteEnabled = True
+                    # Start running the match
+                    self.gameState = MATCH_RUNNING
+                    self.rws.updateHistory("runDockerPressed")
+                    self.rws.send("dockerSuccess")
+                else:
+                    self.step(TIME_STEP)
             if parts[0] == "pause":
                 # Pause the match
                 self.gameState = MATCH_PAUSED
@@ -570,7 +559,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     self.process_robot_json(data[1])
 
             if parts[0] == 'config':
-                configData = list(map((lambda x: int(x)), message.split(",")[1:]))
+                configData = message.split(",")[1:]
                 self.config = Config(configData, self.config.path)
                 self.robot0Obj.updateConfig(self.config)
                 
@@ -611,7 +600,6 @@ ROBOT_0: {str(self.robot0Obj.name)}
             configData = f.read().split(',')
             
         self.rws.send("config",  ','.join(configData))
-        configData = list(map((lambda x: int(x)), configData))
         
         return Config(configData, configFilePath)
 
@@ -748,6 +736,9 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.lastTime = self.getTime()
             # Step the simulation on
             step = self.step(TIME_STEP)
+            # Print docker container output (if applicable)
+            if self.docker_process:
+                print_process_stdout(self.docker_process)
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating
