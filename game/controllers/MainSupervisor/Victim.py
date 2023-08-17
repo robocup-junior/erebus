@@ -1,8 +1,8 @@
 from abc import abstractmethod
 import math
 import AutoInstall
+
 from Robot import Robot
-from ConsoleLog import Console
 from Camera import FollowSide
 
 AutoInstall._import("np", "numpy")

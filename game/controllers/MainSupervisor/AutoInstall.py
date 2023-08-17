@@ -1,6 +1,7 @@
-from pip._internal import main as _main
 import importlib
 import inspect
+
+from pip._internal import main as _main
 
 
 def _import(

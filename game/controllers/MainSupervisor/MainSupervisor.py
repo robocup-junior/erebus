@@ -48,7 +48,7 @@ MATCH_PAUSED = 'MATCH_PAUSED'
 
 ROBOT_NAME = "Erebus_Bot"
         
-class Game(Supervisor):
+class Erebus(Supervisor):
     def __init__(self):
         super().__init__()
         
@@ -126,7 +126,7 @@ class Game(Supervisor):
         # Init robot as object to hold their info
         self.robot0Obj = Robot()
         self.robot0Obj.updateConfig(self.config)
-        self.robot0Obj.controller.resetFile(self)
+        self.robot0Obj.controller.reset_file(self)
         self.robot0Obj.resetProto(self)
 
         # Calculate the solution arrays for the map layout
@@ -751,7 +751,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
 if __name__ == '__main__':
     
-    game = Game()
+    erebus: Erebus = Erebus()
        
     while True: # Main loop
-        game.update()
+        erebus.update()

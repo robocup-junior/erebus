@@ -265,7 +265,7 @@ class Robot:
         
     def updateConfig(self, config):
         self.history.displayToRecordingLabel = config.recording
-        self.controller.updateKeepControllerConfig(config)
+        self.controller.update_keep_controller_config(config)
         
     def resetProto(self, supervisor, manual=False) -> None:
         '''
@@ -285,7 +285,7 @@ class Robot:
 
         try:
             if os.path.isfile(robot_proto):
-                if self.controller.keepController and not manual:
+                if self.controller.keep_controller and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
                         supervisor.rws.send("loaded1")
                     return

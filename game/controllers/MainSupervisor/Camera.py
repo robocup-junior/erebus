@@ -1,4 +1,5 @@
 from enum import Enum
+
 from controller import Node
 from Robot import Robot
 
