@@ -1,23 +1,33 @@
 class Config():
-    def __init__(self, configData, path):
-        
-        # configData
+    """Holds data for the settings configuration of Erebus
+    """
+
+    def __init__(self, config_data: list[str], path: str):
+        """Initialises config settings data
+
+        Args:
+            config_data (list[str]): List of config settings
+            path (str): Path to config.txt file
+        """
+        # config_data format
         # [0]: Keep controller/robot files
         # [1]: Disable auto LoP
         # [2]: Recording
         # [3]: Automatic camera
         # [4]: Keep remote
         # [5]: Docker path
-                
+
         self.path = path
+
+        self.keep_controller = bool(int(config_data[0]))
+        self.disableLOP = bool(int(config_data[1]))
+        self.recording = bool(int(config_data[2]))
+        self.automatic_camera = bool(int(config_data[3]))
         
-        self.keep_controller = bool(int(configData[0]))
-        self.disableLOP = bool(int(configData[1]))
-        self.recording = bool(int(configData[2]))
-        self.automatic_camera = bool(int(configData[3]))
-        self.keep_remote = False # Keep v23 compatibility
+        # Keep v23 compatibility
+        self.keep_remote = False  
         self.docker_path = ""
-        
-        if len(configData) >= 5:
-            self.keep_remote = bool(int(configData[4]))
-            self.docker_path = str(configData[5])
+
+        if len(config_data) >= 5:
+            self.keep_remote = bool(int(config_data[4]))
+            self.docker_path = str(config_data[5])
