@@ -2,12 +2,13 @@ from pip._internal import main as _main
 import importlib
 import inspect
 
+
 def _import(
-        name: str,
-        importModule: str,
-        installModule: None | str = None,
-        ver: None | str = None
-    ) -> None:
+    name: str,
+    importModule: str,
+    installModule: None | str = None,
+    ver: None | str = None
+) -> None:
     """Import and install python modules automatically
 
     Args:
@@ -18,7 +19,8 @@ def _import(
         ver (None | str, optional): Specify module version. Defaults to None.
     """
     try:
-        inspect.stack()[1][0].f_globals[name] = importlib.import_module(importModule)
+        inspect.stack()[1][0].f_globals[name] = importlib.import_module(
+            importModule)
     except ImportError:
         try:
             if installModule is None:
@@ -27,6 +29,7 @@ def _import(
                 _main(['install', installModule])
             else:
                 _main(['install', '{}=={}'.format(installModule, ver)])
-            inspect.stack()[1][0].f_globals[name] = importlib.import_module(importModule)
+            inspect.stack()[1][0].f_globals[name] = importlib.import_module(
+                importModule)
         except:
             print("[EREBUS IMPORT ERROR] can't import: {}".format(importModule))

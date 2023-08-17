@@ -3,6 +3,7 @@ import math
 import AutoInstall
 from Robot import Robot
 from ConsoleLog import Console
+from Camera import FollowSide
 
 AutoInstall._import("np", "numpy")
 
@@ -147,19 +148,18 @@ class VictimObject():
         # Return if angle between two vectors is less than 90 degrees
         return angle < math.pi/2
 
-    def get_side(self) -> str:
-        #Get side the victim pointing at
-        rot = self.rotation[3]
-        rot = round(rot, 2)
+    def get_side(self) -> FollowSide:
+        # Get side the victim pointing at
+        rot: float = round(self.rotation[3], 2)
 
+        # TODO These aren't accurate with more complex victim rotations
         if rot == -1.57:
-            return "right"
+            return FollowSide.RIGHT
         elif rot == 1.57:
-            return "left"
+            return FollowSide.LEFT
         elif rot == 3.14:
-            return "bottom"
-        else:
-            return "top"
+            return FollowSide.BOTTOM
+        return FollowSide.TOP
 
 class Victim(VictimObject):
     '''Human object holding the boundaries'''

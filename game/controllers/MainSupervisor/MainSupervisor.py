@@ -26,7 +26,7 @@ from Tools import *
 from ConsoleLog import Console
 
 from Config import Config
-from Camera import Camera
+from Camera import *
 from Tile import *
 from Victim import *
 from Robot import *
@@ -112,9 +112,9 @@ class Game(Supervisor):
 
         # Get Viewppoint Node
         viewpoint_node = self.getFromDef("Viewpoint")
-        nowSide = "bottom"
+        nowSide: FollowSide = FollowSide.BOTTOM
         if len(customData) > 1:
-            nowSide = customData[1]
+            nowSide = FollowSide[customData[1].upper()]
             
         self.camera = Camera(viewpoint_node, nowSide)
 
@@ -196,7 +196,7 @@ class Game(Supervisor):
         self.robot0Obj.increaseScore("Lack of Progress", -5, self)
         
         if self.config.automatic_camera and self.camera.wb_viewpoint_node:
-            self.camera.setViewPoint(self.robot0Obj)
+            self.camera.set_view_point(self.robot0Obj)
 
 
     def robot_quit(self, num, timeup):
@@ -637,8 +637,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     if(len(nearVictims) > 1):
                         # Sort by closest
                         nearVictims.sort(key=lambda v: v.getDistance(self.robot0Obj.position))
-                    side = nearVictims[0].get_side()
-                    self.camera.updateView(side, self.robot0Obj)
+                    side: FollowSide = nearVictims[0].get_side()
+                    self.camera.update_view(side, self.robot0Obj)
 
             # Test if the robots are in checkpoints
             checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
