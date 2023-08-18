@@ -96,8 +96,8 @@ class RobotHistory(Queue):
             histories: list[tuple[str, str]] = list(
                 reversed(self.master_history))
             for h in range(min(len(histories), 5)):
-                history_label = ("[" + histories[h][0] + "] " +
-                                 histories[h][1] + "\n" + history_label)
+                history_label = (f"[{histories[h][0]}] {histories[h][1]}\n"+
+                                 f"{history_label}")
             erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2)
 
 
@@ -222,7 +222,7 @@ class Robot:
     def increase_score(
         self,
         message: str,
-        score: int,
+        score: float,
         supervisor: Erebus,
         multiplier: float = 1,
     ) -> None:
@@ -231,7 +231,7 @@ class Robot:
 
         Args:
             message (str): Message to display in the web UI
-            score (int): Score to add
+            score (float): Score to add
             supervisor (Erebus): Erebus game supervisor object
             multiplier (float, optional): Score multiplier (`new_score = 
             score * multiplier`), used for room score multipliers.

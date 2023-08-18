@@ -485,7 +485,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == "run":
                 # Start running the match
                 self.gameState = MATCH_RUNNING
-                self.rws.updateHistory("runPressed")
+                self.rws.update_history("runPressed")
             if parts[0] == "runDocker":
                 Console.log_info("Running docker helper script (this may take a few minutes depending on project size)")
                 self.step(TIME_STEP)
@@ -494,14 +494,14 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     self.remoteEnabled = True
                     # Start running the match
                     self.gameState = MATCH_RUNNING
-                    self.rws.updateHistory("runDockerPressed")
+                    self.rws.update_history("runDockerPressed")
                     self.rws.send("dockerSuccess")
                 else:
                     self.step(TIME_STEP)
             if parts[0] == "pause":
                 # Pause the match
                 self.gameState = MATCH_PAUSED
-                self.rws.updateHistory("pausedPressed")
+                self.rws.update_history("pausedPressed")
             if parts[0] == "reset":
                 self.robot_quit(0, False)
                 # Reset both controller files
@@ -576,21 +576,21 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.runTests = True
                 self.config.disable_lop = True
             if parts[0] == 'rw_reload':
-                self.rws.sendAll()
+                self.rws.send_all()
                 configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
                 self.config = self.getConfig(configFilePath)
                 
             if parts[0] == 'loadControllerPressed':
-                self.rws.updateHistory("loadControllerPressed,", parts[1])
+                self.rws.update_history("loadControllerPressed,", parts[1])
             if parts[0] == 'unloadControllerPressed':
-                self.rws.updateHistory("unloadControllerPressed,", parts[1])
+                self.rws.update_history("unloadControllerPressed,", parts[1])
                 
             if parts[0] == 'remoteEnable':
                 self.remoteEnabled = True
-                self.rws.updateHistory("remoteEnabled")
+                self.rws.update_history("remoteEnabled")
             if parts[0] == 'remoteDisable':
                 self.remoteEnabled = False
-                self.rws.updateHistory("remoteDisabled")
+                self.rws.update_history("remoteDisabled")
             if parts[0] == 'getWorlds':
                 self.rws.send('worlds', f'{str(self.get_worlds())}')
 
@@ -606,9 +606,9 @@ ROBOT_0: {str(self.robot0Obj.name)}
     def update_remote_enabled(self):
         self.remoteEnabled = self.config.keep_remote
         if self.remoteEnabled:
-            self.rws.updateHistory("remoteEnabled")
+            self.rws.update_history("remoteEnabled")
         else:
-            self.rws.updateHistory("remoteDisabled")
+            self.rws.update_history("remoteDisabled")
 
     def update(self):
         
