@@ -38,9 +38,6 @@ from DockerHelper import print_process_stdout, run_docker_container
 
 TIME_STEP = 16
 
-DEFAULT_MAX_VELOCITY = 6.28
-DEFAULT_MAX_MULT = 1.0
-
 MATCH_NOT_STARTED = 'MATCH_NOT_STARTED'
 MATCH_RUNNING = 'MATCH_RUNNING'
 MATCH_FINISHED = 'MATCH_FINISHED'
@@ -49,6 +46,9 @@ MATCH_PAUSED = 'MATCH_PAUSED'
 ROBOT_NAME = "Erebus_Bot"
         
 class Erebus(Supervisor):
+    
+    DEFAULT_MAX_MULT = 1.0
+
     def __init__(self):
         super().__init__()
         
@@ -103,8 +103,8 @@ class Erebus(Supervisor):
 
 
         self.tileManager = TileManager()
-        self.tileManager.getSwamps(self)
-        self.tileManager.getCheckpoints(self)
+        self.tileManager.get_swamps(self)
+        self.tileManager.get_checkpoints(self)
         
         self.victimManager = VictimManager()
         self.victimManager.getHumans(self)
@@ -141,7 +141,7 @@ class Erebus(Supervisor):
         # Toggle for enabling remote webots controllers
         self.remoteEnabled = False
         self.update_remote_enabled()
-    
+        
     def game_init(self):
         # If recording
         if self.config.recording:
@@ -159,7 +159,7 @@ class Erebus(Supervisor):
         # Set robots starting position in world
         self.set_robot_start_pos()
         self.robot0Obj.in_simulation = True
-        self.robot0Obj.set_max_velocity(DEFAULT_MAX_MULT)
+        self.robot0Obj.set_max_velocity(self.DEFAULT_MAX_MULT)
         
         # Reset physics
         self.robot0Obj.wb_node.resetPhysics()
@@ -179,6 +179,9 @@ class Erebus(Supervisor):
     
     def relocate_robot(self):
         '''Relocate robot to last visited checkpoint'''
+        if self.robot0Obj.last_visited_checkpoint_pos is None:
+            Console.log_err("Last visited checkpoint was None.")
+            return
         # Get last checkpoint visited
         relocatePosition = self.robot0Obj.last_visited_checkpoint_pos
 
@@ -286,11 +289,13 @@ ROBOT_0: {str(self.robot0Obj.name)}
         # Get the vector positons
         starting_minPos = starting_minPos.getSFVec3f()
         starting_maxPos = starting_maxPos.getSFVec3f()
-        starting_centerPos = [(starting_maxPos[0]+starting_minPos[0])/2,
-                            starting_maxPos[1], (starting_maxPos[2]+starting_minPos[2])/2]
+        starting_centerPos = ((starting_maxPos[0]+starting_minPos[0])/2,
+                                starting_maxPos[1], 
+                                (starting_maxPos[2]+starting_minPos[2])/2)
 
-        startingTileObj = StartTile([starting_minPos[0], starting_minPos[2]], [
-                                    starting_maxPos[0], starting_maxPos[2]], starting_tile_node, center=starting_centerPos,)
+        startingTileObj = StartTile((starting_minPos[0], starting_minPos[2]), 
+                                    (starting_maxPos[0], starting_maxPos[2]), 
+                                    starting_tile_node, center=starting_centerPos,)
 
         self.robot0Obj.start_tile = startingTileObj
         self.robot0Obj.last_visited_checkpoint_pos = startingTileObj.center
@@ -364,7 +369,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         # If exit message is correct
         if robotMessage[0] == 'E':
             # Check robot position is on starting tile
-            if self.robot0Obj.start_tile.checkPosition(self.robot0Obj.position):
+            if self.robot0Obj.start_tile.check_position(self.robot0Obj.position):
                 self.gameState = MATCH_FINISHED
                 self.rws.send("ended")
                 if self.robot0Obj.victim_identified:
@@ -640,15 +645,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     side: FollowSide = nearVictims[0].get_side()
                     self.camera.update_view(side, self.robot0Obj)
 
-            # Test if the robots are in checkpoints
-            checkpoint = [c for c in self.tileManager.checkpoints if c.checkPosition(self.robot0Obj.position)]
-            # If any checkpoints
-            if len(checkpoint) > 0:
-                self.tileManager.updateCheckpoints(self.robot0Obj, checkpoint[0], self)
-
-            # Check if the robots are in swamps
-            inSwamp = any([s.checkPosition(self.robot0Obj.position) for s in self.tileManager.swamps])
-            self.tileManager.updateInSwamp(self.robot0Obj, inSwamp, DEFAULT_MAX_MULT, self)
+            self.tileManager.check_checkpoints(self)
+            self.tileManager.check_swamps(self)
 
             # If receiver has got a message
             if self.receiver.getQueueLength() > 0:

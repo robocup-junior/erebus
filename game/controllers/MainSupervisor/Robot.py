@@ -16,7 +16,7 @@ from controller import Field
 
 from Controller import Controller
 from ConsoleLog import Console
-from Tile import StartTile
+from Tile import Checkpoint, StartTile, TileManager
 from Config import Config
 
 AutoInstall._import("cl", "termcolor")
@@ -96,7 +96,7 @@ class RobotHistory(Queue):
             histories: list[tuple[str, str]] = list(
                 reversed(self.master_history))
             for h in range(min(len(histories), 5)):
-                history_label = (f"[{histories[h][0]}] {histories[h][1]}\n"+
+                history_label = (f"[{histories[h][0]}] {histories[h][1]}\n"
                                  f"{history_label}")
             erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2)
 
@@ -130,12 +130,13 @@ class Robot:
         self.sent_maps: bool = False
         self.map_score_percent: float = 0
 
-        # If a victim has been identified, used to give an exit bonus iif one
+        # If a victim has been identified, used to give an exit bonus iff one
         # victim has been identified
         self.victim_identified: bool = False
 
         # TODO these should be tuples... something to do when changing Tile code
-        self.last_visited_checkpoint_pos: list = []
+        self.last_visited_checkpoint_pos: tuple[float,
+                                                float, float] | None = None
         self.visited_checkpoints: list = []
         self.start_tile: StartTile | None = None
 
@@ -407,3 +408,64 @@ class Robot:
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(str(e))
+
+    def update_checkpoints(
+        self,
+        supervisor: Erebus,
+        checkpoint: Checkpoint,
+    ) -> None:
+        """Updates the robots visited checkpoint history. If the specified
+        checkpoint has not been visited, points are awarded.
+
+        Args:
+            supervisor (Erebus): Erebus game supervisor object
+            checkpoint (Checkpoint): Checkpoint to check
+        """
+        self.last_visited_checkpoint_pos = checkpoint.center
+
+        # Dont update if checkpoint is already visited
+        if not any([c == checkpoint.center for c in self.visited_checkpoints]):
+            # Add the checkpoint to the list of visited checkpoints
+            self.visited_checkpoints.append(checkpoint.center)
+
+            # Update robot's points and history
+            grid: int = TileManager.coord2grid(checkpoint.center, supervisor)
+            room_num: int = (
+                supervisor.getFromDef("WALLTILES")
+                .getField("children")
+                .getMFNode(grid)
+                .getField("room").getSFInt32() - 1
+            )
+            self.increase_score("Found checkpoint", 10, supervisor,
+                                multiplier=TileManager.ROOM_MULT[room_num])
+
+    def update_in_swamp(
+        self,
+        erebus: Erebus,
+        in_swamp: bool,
+        max_velocity: float,
+    ) -> None:
+        """Updates the robot's velocity if within a swamp.
+
+        Args:
+            erebus (Erebus): Erebus game supervisor object
+            in_swamp (bool): Whether the robot has entered a swamp
+            max_velocity (float): Max velocity multiplier to slow the robot by
+        """
+        # Check if robot is in swamp
+        if self.in_swamp != in_swamp:
+            self.in_swamp = in_swamp
+            if self.in_swamp:
+                # Cap the robot's velocity to 2
+                self.set_max_velocity(TileManager.SWAMP_SLOW_MULT)
+                # Reset physics
+                self.wb_node.resetPhysics()
+                # Update history
+                self.history.enqueue("Entered swamp", erebus)
+            else:
+                # If not in swamp, reset max velocity to default
+                self.set_max_velocity(max_velocity)
+                # Reset physics
+                self.wb_node.resetPhysics()
+                # Update history
+                self.history.enqueue("Exited swamp,", erebus)

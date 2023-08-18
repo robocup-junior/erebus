@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 import struct
 import math
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 import AutoInstall
 AutoInstall._import("np", "numpy")
@@ -18,7 +18,7 @@ AutoInstall._import("np", "numpy")
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
 
-class Test:
+class Test(ABC):
     def __init__(self):
         self._report: str = ""
 
@@ -49,15 +49,12 @@ class Test:
         Args:
             supervisor (Erebus): Erebus game supervisor object
 
-        Raises:
-            NotImplementedError: Error if abstract method not implemented
-
         Returns:
             tuple[int, int, int, int, bytes]: Data sent to the robot test 
             controller in the form [identify human, wait length, wheel 1 vel, 
             wheel 2 vel, human type]
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def test(self, supervisor: Erebus) -> bool:
@@ -66,14 +63,11 @@ class Test:
         Args:
             supervisor (Erebus): Erebus game supervisor object
 
-        Raises:
-            NotImplementedError: Error if abstract method not implemented
-
         Returns:
             bool: Whether the test has passed or not. True if passed, False 
             otherwise
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def post_test(self, supervisor: Erebus) -> None:
@@ -83,11 +77,8 @@ class Test:
 
         Args:
             supervisor (Erebus): Erebus game supervisor object
-
-        Raises:
-            NotImplementedError: Error if abstract method not implemented
         """
-        raise NotImplementedError
+        ...
 
 
 class TestVictim(Test):
@@ -230,7 +221,7 @@ class TestCheckpoint(Test):
         self._start_score = supervisor.robot0Obj.get_score()
         checkpoints: list[Checkpoint] = supervisor.tileManager.checkpoints
         self._checkpoint = checkpoints[self._index]
-        supervisor.robot0Obj.position = self._checkpoint.center
+        supervisor.robot0Obj.position = list(self._checkpoint.center)
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
@@ -401,7 +392,7 @@ class TestSwamp(Test):
         swamps: list[Swamp] = supervisor.tileManager.swamps
         swamp: Swamp = swamps[self._index]
 
-        supervisor.robot0Obj.position = swamp.center
+        supervisor.robot0Obj.position = list(swamp.center)
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 6, 6, b'U')
 

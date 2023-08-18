@@ -1,23 +1,54 @@
 
 
 from __future__ import annotations
+
+from abc import ABC
+from abc import abstractmethod
+from controller import Supervisor
+from controller import Node
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Robot import Robot
+    from MainSupervisor import Erebus
 
 
-class Tile():
-    '''Tile object holding the boundaries'''
+class Tile(ABC):
+    """Abstract Tile object holding boundary data"""
 
-    def __init__(self, min: list, max: list, center: list):
-        '''Initialize the maximum and minimum corners for the tile'''
-        self.min = min
-        self.max = max
-        self.center = center
+    @abstractmethod
+    def __init__(
+        self,
+        min: tuple[float, float],
+        max: tuple[float, float],
+        center: tuple[float, float, float]
+    ) -> None:
+        """WARNING: This is an abstract class. Use `Checkpoint`, `Swamp` or
+        `StartTile`
 
-    def checkPosition(self, pos: list) -> bool:
-        '''Check if a position is in this checkpoint'''
+        Initialize min/max bounds of the tile, along with it's center 
+        position
+
+        Args:
+            min (tuple[float, float]): Minimum x,y position
+            max (tuple[float, float]): Maximum x,y position
+            center (tuple[float, float, float]): Center x,y,z position
+        """
+
+        self.min: tuple[float, float] = min
+        self.max: tuple[float, float] = max
+        self.center: tuple[float, float, float] = center
+
+    def check_position(self, pos: list[float]) -> bool:
+        """Check if a 3D position within the bounds of this tile
+
+        Args:
+            pos (list[float]): x,y,z position
+
+        Returns:
+            bool: True if within the tile bounds, False otherwise
+        """
         # If the x position is within the bounds
         if pos[0] >= self.min[0] and pos[0] <= self.max[0]:
             # if the z position is within the bounds
@@ -30,119 +61,193 @@ class Tile():
 
 
 class Checkpoint(Tile):
-    '''Checkpoint object holding the boundaries'''
+    """Checkpoint Tile object holding boundary data"""
 
-    def __init__(self, min: list, max: list, center=None):
+    def __init__(
+        self,
+        min: tuple[float, float],
+        max: tuple[float, float],
+        center: tuple[float, float, float]
+    ) -> None:
         super().__init__(min, max, center)
 
 
 class Swamp(Tile):
-    '''Swamp object holding the boundaries'''
+    """Swamp Tile object holding boundary data"""
 
-    def __init__(self, min: list, max: list, center=None):
+    def __init__(
+        self,
+        min: tuple[float, float],
+        max: tuple[float, float],
+        center: tuple[float, float, float]
+    ) -> None:
         super().__init__(min, max, center)
 
 
 class StartTile(Tile):
-    '''StartTile object holding the boundaries'''
+    """StartTile Tile object holding boundary data"""
 
-    def __init__(self, min: list, max: list, wb_node, center=None):
+    def __init__(
+        self,
+        min: tuple[float, float],
+        max: tuple[float, float],
+        wb_node: Node,
+        center: tuple[float, float, float]
+    ) -> None:
         super().__init__(min, max, center)
-        self.wb_node = wb_node
-        
-        
+        self.wb_node: Node = wb_node
+
+
 class TileManager():
+    """Manages swamp and checkpoint tiles for performing checks on entry
+    """
+    
     # Room multipliers
-    ROOM_MULT = [1, 1.25, 1.5, 2]
-    SWAMP_SLOW_MULT = 0.32
-    
+    ROOM_MULT: list[float] = [1, 1.25, 1.5, 2]
+    SWAMP_SLOW_MULT: float = 0.32
+
     def __init__(self):
-        self.numberOfSwamps = 0
-        self.numberOfCheckpoints = 0
-        
-        self.checkpoints = []
-        self.swamps = []
-    
-    def getSwamps(self, supervisor):
-        '''Get swamps in simulation'''
-        self.numberOfSwamps = supervisor.getFromDef('SWAMPBOUNDS').getField('children').getCount()
+        self.num_swamps: int = 0
+        self.num_checkpoints: int = 0
+
+        self.checkpoints: list[Checkpoint] = []
+        self.swamps: list[Swamp] = []
+
+    def get_swamps(self, supervisor: Supervisor):
+        """Get all swamps in simulation. Stores boundary information
+        within Swamp objects in `TileManager.checkpoints`
+
+        Args:
+            supervisor (Supervisor): Erebus supervisor object
+        """
+
+        self.num_swamps = (
+            supervisor.getFromDef('SWAMPBOUNDS')
+            .getField('children')
+            .getCount()
+        )
+
         # Iterate for each swamp
-        for i in range(self.numberOfSwamps):
-            # Get the swamp minimum node and translation
-            swampMin = supervisor.getFromDef("swamp" + str(i) + "min")
-            minPos = swampMin.getField("translation")
-            # Get maximum node and translation
-            swampMax = supervisor.getFromDef("swamp" + str(i) + "max")
-            maxPos = swampMax.getField("translation")
-            # Get the vector positions
-            minPos = minPos.getSFVec3f()
-            maxPos = maxPos.getSFVec3f()
+        for i in range(self.num_swamps):
+            # Get swamp min and max bounds positions
+            min_pos: list[float] = (
+                supervisor.getFromDef(f"swamp{i}min")
+                .getField("translation")
+                .getSFVec3f()
+            )
+            max_pos: list[float] = (
+                supervisor.getFromDef(f"swamp{i}max")
+                .getField("translation")
+                .getSFVec3f()
+            )
 
-            centerPos = [(maxPos[0]+minPos[0])/2, maxPos[1],
-                        (maxPos[2]+minPos[2])/2]
+            center_pos: tuple = ((max_pos[0]+min_pos[0])/2,
+                                 max_pos[1],
+                                 (max_pos[2]+min_pos[2])/2)
+
             # Create a swamp object using the min and max (x,z)
-            swampObj = Swamp([minPos[0], minPos[2]], [maxPos[0], maxPos[2]], centerPos)
-            self.swamps.append(swampObj)
-            
-    def getCheckpoints(self, supervisor):
-        '''Get checkpoints in simulation'''
-        self.numberOfCheckpoints = supervisor.getFromDef('CHECKPOINTBOUNDS').getField('children').getCount()
+            swamp: Swamp = Swamp((min_pos[0], min_pos[2]),
+                                 (max_pos[0], max_pos[2]),
+                                 center_pos)
+
+            self.swamps.append(swamp)
+
+    def get_checkpoints(self, supervisor: Supervisor):
+        """Get all checkpoints in simulation. Stores boundary information
+        within Checkpoint objects in `TileManager.checkpoints`
+
+        Args:
+            supervisor (Supervisor): Erebus supervisor object
+        """
+
+        self.num_checkpoints = (
+            supervisor.getFromDef('CHECKPOINTBOUNDS')
+            .getField('children')
+            .getCount()
+        )
+
         # Iterate for each checkpoint
-        for i in range(self.numberOfCheckpoints):
-            # Get the checkpoint minimum node and translation
-            checkpointMin = supervisor.getFromDef("checkpoint" + str(i) + "min")
-            minPos = checkpointMin.getField("translation")
-            # Get maximum node and translation
-            checkpointMax = supervisor.getFromDef("checkpoint" + str(i) + "max")
-            maxPos = checkpointMax.getField("translation")
-            # Get the vector positions
-            minPos = minPos.getSFVec3f()
-            maxPos = maxPos.getSFVec3f()
+        for i in range(self.num_checkpoints):
+            # Get the checkpoint min and max bounds positions
+            min_pos: list[float] = (
+                supervisor.getFromDef(f"checkpoint{i}min")
+                .getField("translation")
+                .getSFVec3f()
+            )
+            max_pos: list[float] = (
+                supervisor.getFromDef(f"checkpoint{i}max")
+                .getField("translation")
+                .getSFVec3f()
+            )
 
-            centerPos = [(maxPos[0]+minPos[0])/2, maxPos[1],
-                        (maxPos[2]+minPos[2])/2]
+            centerPos = ((max_pos[0]+min_pos[0])/2,
+                         max_pos[1],
+                         (max_pos[2]+min_pos[2])/2)
+
             # Create a checkpoint object using the min and max (x,z)
-            checkpointObj = Checkpoint([minPos[0], minPos[2]], [
-                                    maxPos[0], maxPos[2]], centerPos)
+            checkpointObj = Checkpoint((min_pos[0], min_pos[2]),
+                                       (max_pos[0], max_pos[2]),
+                                       centerPos)
+
             self.checkpoints.append(checkpointObj)
-            
-    def coord2grid(self, xzCoord, supervisor):
-        side = 0.3 * supervisor.getFromDef("START_TILE").getField("xScale").getSFFloat()
-        height = supervisor.getFromDef("START_TILE").getField("height").getSFFloat()
-        width = supervisor.getFromDef("START_TILE").getField("width").getSFFloat()
-        return int(round((xzCoord[0] + (width / 2 * side)) / side, 0) * height + round((xzCoord[2] + (height / 2 * side)) / side, 0))
 
+    @staticmethod
+    def coord2grid(
+        coord: list[float] | tuple[float, float, float],
+        supervisor: Supervisor
+    ) -> int:
+        """Converts a world coordinate to the corresponding world tile node 
+        index (only uses x,z components) 
+
+        Args:
+            coord (list[float] | tuple[float, float, float]): Webots world 
+            coordinate 
+            supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            int: Index of world tile within Webots node hierarchy
+        """
+        side: float = 0.3 * (supervisor.getFromDef("START_TILE")
+                             .getField("xScale")
+                             .getSFFloat())
+        height: float = (
+            supervisor.getFromDef("START_TILE")
+            .getField("height")
+            .getSFFloat()
+        )
+        width: float = (
+            supervisor.getFromDef("START_TILE")
+            .getField("width")
+            .getSFFloat()
+        )
+        return int(
+            round((coord[0] + (width / 2 * side)) / side, 0) * height +
+            round((coord[2] + (height / 2 * side)) / side, 0)
+        )
+        
+    def check_swamps(self, erebus: Erebus): 
+        """Check if the simulation robot is in any swamps. Slows down the robot
+        accordingly
+
+        Args:
+            erebus (Erebus): Erebus game supervisor object
+        """
+        # Check if the robot is in a swamps
+        in_swamp: bool = any([s.check_position(erebus.robot0Obj.position) 
+                              for s in self.swamps])
+        erebus.robot0Obj.update_in_swamp(erebus, in_swamp, 
+                                         erebus.DEFAULT_MAX_MULT)
     
-    def updateCheckpoints(self, robotObj: Robot, checkpoint, supervisor):
-        robotObj.last_visited_checkpoint_pos = checkpoint.center
-        alreadyVisited = False
+    def check_checkpoints(self, erebus: Erebus): 
+        """Check if the simulation robot is in any checkpoints. Awards points
+        accordingly
 
-        # Dont update if checkpoint is already visited
-        if not any([c == checkpoint.center for c in robotObj.visited_checkpoints]):
-            # Update robot's points and history
-            robotObj.visited_checkpoints.append(checkpoint.center)
-            grid = self.coord2grid(checkpoint.center, supervisor)
-            roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-            robotObj.increase_score("Found checkpoint", 10, supervisor, multiplier=TileManager.ROOM_MULT[roomNum])
-            
-    def updateInSwamp(self, robotObj: Robot, inSwamp, max_velocity, supervisor):
-        # Check if robot is in swamp
-        if robotObj.in_swamp != inSwamp:
-            robotObj.in_swamp = inSwamp
-            if robotObj.in_swamp:
-                # Cap the robot's velocity to 2
-                # robotObj.set_max_velocity(2)
-                robotObj.set_max_velocity(TileManager.SWAMP_SLOW_MULT)
-                # Reset physics
-                robotObj.wb_node.resetPhysics()
-                # Update history
-                robotObj.history.enqueue("Entered swamp", supervisor)
-            else:
-                # If not in swamp, reset max velocity to default
-                # robotObj.set_max_velocity(max_velocity)
-                robotObj.set_max_velocity(max_velocity)
-                # Reset physics
-                robotObj.wb_node.resetPhysics()
-                # Update history
-                robotObj.history.enqueue("Exited swamp,", supervisor)
-            
+        Args:
+            erebus (Erebus): Erebus game supervisor object
+        """
+        # Test if the robots are in checkpoints
+        checkpoint = [c for c in self.checkpoints 
+                      if c.check_position(erebus.robot0Obj.position)]
+        # If any checkpoints
+        if len(checkpoint) > 0:
+            erebus.robot0Obj.update_checkpoints(erebus, checkpoint[0])
