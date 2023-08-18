@@ -89,7 +89,7 @@ class VictimObject():
         self.wb_foundField.setSFBool(idfy)
 
     @abstractmethod
-    def get_simple_type(self):
+    def get_simple_type(self) -> str:
         # Will be overrided
         pass
 

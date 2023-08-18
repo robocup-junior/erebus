@@ -656,7 +656,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 receivedData = self.receiver.getBytes()
                 testMsg = False
                 if self.runTests:
-                    testMsg = self.testRunner.getStage(receivedData)
+                    testMsg = self.testRunner.get_stage(receivedData)
                     self.receiver.nextPacket()
                 if not testMsg:
                     self.robot0Obj.set_message(receivedData)
