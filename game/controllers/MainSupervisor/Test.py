@@ -403,7 +403,7 @@ class TestSwamp(Test):
 
         supervisor.robot0Obj.position = swamp.center
         # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 1, 1, b'U')
+        return (0, 1, 6, 6, b'U')
 
     def test(self, supervisor: Erebus) -> bool:
         """Tests whether robot movement is slowed by the swamp
