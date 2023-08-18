@@ -98,7 +98,7 @@ class Erebus(Supervisor):
         
         self.getSimulationVersion()
         
-        configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
+        configFilePath = get_file_path("controllers/MainSupervisor/config.txt", "config.txt")
         self.config = self.getConfig(configFilePath)
 
 
@@ -255,7 +255,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
         # Get log text
         log_str = self.create_log_str()
         # Get relative path to logs dir 
-        filePath = getFilePath("logs/", "../../logs/")
+        filePath = get_file_path("logs/", "../../logs/")
 
         # Create file name using date and time
         file_date = datetime.datetime.now()
@@ -326,21 +326,21 @@ ROBOT_0: {str(self.robot0Obj.name)}
         return
 
     def get_worlds(self):           
-        path = getFilePath("worlds", "../../worlds")    
+        path = get_file_path("worlds", "../../worlds")    
 
         files = [file for file in os.listdir(path) if file[-3:] == 'wbt']
         return ','.join(files)
 
 
     def load_world(self, world):
-        path = getFilePath("worlds", "../../worlds")
+        path = get_file_path("worlds", "../../worlds")
 
         path = os.path.join(path, world)
         self.worldLoad(path)
         
     def load_test_script(self):
-        path = getFilePath("controllers/MainSupervisor/tests.py", "tests.py")
-        dest = getFilePath("controllers/robot0Controller/robot0Controller.py", "../robot0Controller/robot0Controller.py")
+        path = get_file_path("controllers/MainSupervisor/tests.py", "tests.py")
+        dest = get_file_path("controllers/robot0Controller/robot0Controller.py", "../robot0Controller/robot0Controller.py")
         shutil.copyfile(path, dest)
 
     def getSimulationVersion(self):
@@ -434,7 +434,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             name: str = 'Victim'
             correctTypeBonus: int = 10
 
-            if est_vic_type.lower() in list(map(toLower, HazardMap.HAZARD_TYPES)):
+            if est_vic_type.lower() in list(map(to_lower, HazardMap.HAZARD_TYPES)):
                 iterator = self.victimManager.hazards
                 name = 'Hazard'
                 correctTypeBonus = 20
@@ -582,7 +582,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 self.config.disable_lop = True
             if parts[0] == 'rw_reload':
                 self.rws.send_all()
-                configFilePath = getFilePath("controllers/MainSupervisor/config.txt", "config.txt")
+                configFilePath = get_file_path("controllers/MainSupervisor/config.txt", "config.txt")
                 self.config = self.getConfig(configFilePath)
                 
             if parts[0] == 'loadControllerPressed':

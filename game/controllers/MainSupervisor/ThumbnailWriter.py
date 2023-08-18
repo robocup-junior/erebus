@@ -1,6 +1,6 @@
 import AutoInstall
 from controller import Supervisor
-from Tools import getFilePath
+from Tools import get_file_path
 import os
 
 AutoInstall._import("np", "numpy")
@@ -35,7 +35,7 @@ def export_map_to_img(
     img_np_array = np.reshape(img_np_array, (len(map), len(map[0])))
     im = Image.fromarray(img_np_array.astype(np.uint8))
     
-    path = getFilePath("plugins/robot_windows/MainSupervisorWindow/thumbnails", "../../plugins/robot_windows/MainSupervisorWindow/thumbnails")
+    path = get_file_path("plugins/robot_windows/MainSupervisorWindow/thumbnails", "../../plugins/robot_windows/MainSupervisorWindow/thumbnails")
     path = os.path.join(path, os.path.split(supervisor.getWorldPath())[1][:-4]+'.png')
     
     im.save(path, 'png')

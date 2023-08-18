@@ -42,7 +42,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
     cost: int = 0
     gen_err: bool = False
 
-    template_path: str = getFilePath(
+    template_path: str = get_file_path(
         "controllers/MainSupervisor/protoHeaderTemplateFLU.txt",
         "protoHeaderTemplateFLU.txt"
     )
@@ -492,7 +492,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
         Console.log_succ("Your custom robot has been successfully generated!")
         Console.log_succ(f"Budget: {budget}  Cost: {cost}")
 
-        path: str = getFilePath("protos", "../../protos")
+        path: str = get_file_path("protos", "../../protos")
         path = os.path.join(path, "custom_robot.proto")
 
         with open(path, 'w') as robot_file:

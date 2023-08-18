@@ -37,7 +37,7 @@ class Recorder:
         Args:
             erebus (Erebus): Erebus game supervisor object
         """
-        path: str = getFilePath("../recording.mp4", "../../../recording.mp4")
+        path: str = get_file_path("../recording.mp4", "../../../recording.mp4")
         
         platform_ver: str = f'Platform Version: {erebus.version}'
         max_clock: str = ("Clock: " + 
