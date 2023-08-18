@@ -1,7 +1,7 @@
 class Console:
     """Simple helper class to print formatted Erebus text to the console
     """
-    DEBUG_MODE: bool = False
+    DEBUG_MODE: bool = True
 
     PREFIX_DEBUG: str = "EREBUS DEBUG"
     PREFIX_PASS: str = "EREBUS PASS"

@@ -125,9 +125,9 @@ class Erebus(Supervisor):
 
         # Init robot as object to hold their info
         self.robot0Obj = Robot()
-        self.robot0Obj.updateConfig(self.config)
+        self.robot0Obj.update_config(self.config)
         self.robot0Obj.controller.reset_file(self)
-        self.robot0Obj.resetProto(self)
+        self.robot0Obj.reset_proto(self)
 
         # Calculate the solution arrays for the map layout
         self.MapAnswer = MapAnswer(self)
@@ -154,12 +154,12 @@ class Erebus(Supervisor):
             robot0 = self.add_robot()
         # Init robot as object to hold their info
         # self.robot0Obj = Robot(node=robot0)
-        self.robot0Obj.add_node(robot0)
+        self.robot0Obj.set_node(robot0)
         
         # Set robots starting position in world
         self.set_robot_start_pos()
-        self.robot0Obj.inSimulation = True
-        self.robot0Obj.setMaxVelocity(DEFAULT_MAX_MULT)
+        self.robot0Obj.in_simulation = True
+        self.robot0Obj.set_max_velocity(DEFAULT_MAX_MULT)
         
         # Reset physics
         self.robot0Obj.wb_node.resetPhysics()
@@ -180,7 +180,7 @@ class Erebus(Supervisor):
     def relocate_robot(self):
         '''Relocate robot to last visited checkpoint'''
         # Get last checkpoint visited
-        relocatePosition = self.robot0Obj.lastVisitedCheckPointPosition
+        relocatePosition = self.robot0Obj.last_visited_checkpoint_pos
 
         # Set position of robot
         self.robot0Obj.position = [relocatePosition[0], -0.03, relocatePosition[2]]
@@ -193,7 +193,7 @@ class Erebus(Supervisor):
         self.emitter.send(struct.pack("c", bytes("L", "utf-8")))
 
         # Update history with event
-        self.robot0Obj.increaseScore("Lack of Progress", -5, self)
+        self.robot0Obj.increase_score("Lack of Progress", -5, self)
         
         if self.config.automatic_camera and self.camera.wb_viewpoint_node:
             self.camera.set_view_point(self.robot0Obj)
@@ -202,10 +202,10 @@ class Erebus(Supervisor):
     def robot_quit(self, num, timeup):
         '''Quit robot from simulation'''
         # Quit robot if present
-        if self.robot0Obj.inSimulation:
+        if self.robot0Obj.in_simulation:
             # Remove webots node
             self.robot0Obj.wb_node.remove()
-            self.robot0Obj.inSimulation = False
+            self.robot0Obj.in_simulation = False
             # Send message to robot window to update quit button
             self.rws.send("robotNotInSimulation"+str(num))
             # Update history event whether its manual or via exit message
@@ -239,7 +239,7 @@ class Erebus(Supervisor):
         r0_str = self.robot0Obj.get_log_str()
 
         log_str = f"""MAX_GAME_DURATION: {str(int(self.maxTime/60))}:00
-ROBOT_0_SCORE: {str(self.robot0Obj.getScore())}
+ROBOT_0_SCORE: {str(self.robot0Obj.get_score())}
 
 ROBOT_0: {str(self.robot0Obj.name)}
 {r0_str}"""
@@ -292,10 +292,10 @@ ROBOT_0: {str(self.robot0Obj.name)}
         startingTileObj = StartTile([starting_minPos[0], starting_minPos[2]], [
                                     starting_maxPos[0], starting_maxPos[2]], starting_tile_node, center=starting_centerPos,)
 
-        self.robot0Obj.startingTile = startingTileObj
-        self.robot0Obj.lastVisitedCheckPointPosition = startingTileObj.center
-        self.robot0Obj.startingTile.wb_node.getField("start").setSFBool(False)
-        self.robot0Obj.visitedCheckpoints.append(startingTileObj.center)
+        self.robot0Obj.start_tile = startingTileObj
+        self.robot0Obj.last_visited_checkpoint_pos = startingTileObj.center
+        self.robot0Obj.start_tile.wb_node.getField("start").setSFBool(False)
+        self.robot0Obj.visited_checkpoints.append(startingTileObj.center)
 
         self.robot0Obj.position = [startingTileObj.center[0],
                             startingTileObj.center[1], startingTileObj.center[2]]
@@ -303,8 +303,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
 
     def add_map_multiplier(self):
-        score_change = self.robot0Obj.getScore() * self.robot0Obj.map_score_percent
-        self.robot0Obj.increaseScore("Map Bonus", score_change, self)
+        score_change = self.robot0Obj.get_score() * self.robot0Obj.map_score_percent
+        self.robot0Obj.increase_score("Map Bonus", score_change, self)
 
     def process_robot_json(self, json_data):
         '''Process json file to generate robot file'''
@@ -360,16 +360,16 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.rws.send("version", f"{self.version}")
 
     def processMessage(self, robotMessage):
-        Console.log_debug(f"Robot Stopped for {self.robot0Obj.timeStopped(self)}s")
+        Console.log_debug(f"Robot Stopped for {self.robot0Obj.time_stopped(self)}s")
         # If exit message is correct
         if robotMessage[0] == 'E':
             # Check robot position is on starting tile
-            if self.robot0Obj.startingTile.checkPosition(self.robot0Obj.position):
+            if self.robot0Obj.start_tile.checkPosition(self.robot0Obj.position):
                 self.gameState = MATCH_FINISHED
                 self.rws.send("ended")
-                if self.robot0Obj.victimIdentified:
-                    self.robot0Obj.increaseScore(
-                        "Exit Bonus", self.robot0Obj.getScore() * 0.1, self)
+                if self.robot0Obj.victim_identified:
+                    self.robot0Obj.increase_score(
+                        "Exit Bonus", self.robot0Obj.get_score() * 0.1, self)
                 else:
                     self.robot0Obj.history.enqueue("No Exit Bonus", self)
             self.add_map_multiplier()
@@ -404,7 +404,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
         elif robotMessage[0] == 'L':
             self.relocate_robot()
-            self.robot0Obj.resetTimeStopped()
+            self.robot0Obj.reset_time_stopped()
 
         elif robotMessage[0] == 'G':
             # Send game info in format: (G, score, game time left, real time left)
@@ -412,14 +412,14 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 struct.pack(
                     "c f i i", 
                     bytes("G", "utf-8"),
-                    round(self.robot0Obj.getScore(), 2),
+                    round(self.robot0Obj.get_score(), 2),
                     self.maxTime - int(self.timeElapsed),
                     self.maxRealWorldTime - int(self.realTimeElapsed)
                 )
             )
 
         # If robot stopped for 1 second
-        elif self.robot0Obj.timeStopped(self) >= 1.0:
+        elif self.robot0Obj.time_stopped(self) >= 1.0:
 
             # Get estimated values
             est_vic_pos = robotMessage[0]
@@ -464,17 +464,17 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
                 # Update score and history
                 if est_vic_type.lower() == nearby_issue.simple_victim_type.lower():
-                    self.robot0Obj.increaseScore(
+                    self.robot0Obj.increase_score(
                         f"Successful {name} Type Correct Bonus", correctTypeBonus, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                         
-                self.robot0Obj.increaseScore(
+                self.robot0Obj.increase_score(
                     f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
-                self.robot0Obj.victimIdentified = True
+                self.robot0Obj.victim_identified = True
 
                 nearby_issue.identified = True
 
             if misidentification:
-                self.robot0Obj.increaseScore(f"Misidentification of {name}", -5, self)
+                self.robot0Obj.increase_score(f"Misidentification of {name}", -5, self)
 
     def receive(self, message):
         
@@ -516,9 +516,9 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Restart this supervisor
                 self.mainSupervisor.restartController()
 
-                if self.robot0Obj.startingTile != None:
+                if self.robot0Obj.start_tile != None:
                     # Show start tile
-                    self.robot0Obj.startingTile.wb_node.getField("start").setSFBool(True)
+                    self.robot0Obj.start_tile.wb_node.getField("start").setSFBool(True)
 
                 # Must restart world - to reload to .wbo file for the robot which only seems to be read and interpreted
                 # once per game, so if we load a new robot file, the new changes won't come into place until the world
@@ -533,7 +533,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == "robot1Unload":
                 # Remove the robot proto
                 if self.gameState == MATCH_NOT_STARTED:
-                    self.robot0Obj.resetProto(self, True)
+                    self.robot0Obj.reset_proto(self, True)
 
             if parts[0] == 'relocate':
                 data = message.split(",", 1)
@@ -561,7 +561,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if parts[0] == 'config':
                 configData = message.split(",")[1:]
                 self.config = Config(configData, self.config.path)
-                self.robot0Obj.updateConfig(self.config)
+                self.robot0Obj.update_config(self.config)
                 
                 with open(self.config.path, 'w') as f:
                     f.write(','.join(message.split(",")[1:]))
@@ -627,8 +627,8 @@ ROBOT_0: {str(self.robot0Obj.name)}
             self.testRunner.run(self)
 
         # Main game loop
-        if self.robot0Obj.inSimulation:
-            self.robot0Obj.updateTimeElapsed(self.timeElapsed)
+        if self.robot0Obj.in_simulation:
+            self.robot0Obj.update_time_elapsed(self.timeElapsed)
 
             # Automatic camera movement
             if self.config.automatic_camera and self.camera.wb_viewpoint_node:
@@ -659,7 +659,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                     testMsg = self.testRunner.getStage(receivedData)
                     self.receiver.nextPacket()
                 if not testMsg:
-                    self.robot0Obj.setMessage(receivedData)
+                    self.robot0Obj.set_message(receivedData)
                     self.receiver.nextPacket()
 
                 # If data sent to receiver
@@ -671,11 +671,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             if self.gameState == MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
-                if self.robot0Obj.timeStopped(self) >= 20:
+                if self.robot0Obj.time_stopped(self) >= 20:
                     if not self.config.disable_lop:
                         self.relocate_robot()
-                    self.robot0Obj.resetTimeStopped()
-                elif self.robot0Obj.timeStopped(self) >= 3 and self.robot0Obj.inSwamp:
+                    self.robot0Obj.reset_time_stopped()
+                elif self.robot0Obj.time_stopped(self) >= 3 and self.robot0Obj.in_swamp:
                     if not self.sWarnCooldown:
                         self.sWarnCooldown = True
                         Console.log_warn("Detected the robot stopped moving in a swamp. This could be due to not setting the wheel motor velocities every time step.\nSee Erebus 22.0.0 changelog for more details.")
@@ -683,11 +683,11 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 if self.robot0Obj.position[1] < -0.035 and self.gameState == MATCH_RUNNING:
                     if not self.config.disable_lop:
                         self.relocate_robot()
-                    self.robot0Obj.resetTimeStopped()
+                    self.robot0Obj.reset_time_stopped()
 
         if self.robotInitialized:
             # Send the update information to the robot window
-            nowScore = self.robot0Obj.getScore()
+            nowScore = self.robot0Obj.get_score()
             self.timeElapsed = min(self.timeElapsed, self.maxTime)
             self.realTimeElapsed = min(self.realTimeElapsed, self.maxRealWorldTime)
             if self.lastSentScore != nowScore or self.lastSentTime != int(self.timeElapsed) or self.lastSentRealTime != int(self.realTimeElapsed):

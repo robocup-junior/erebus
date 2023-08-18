@@ -1,171 +1,243 @@
+from __future__ import annotations
+from typing import Any
+from typing import TYPE_CHECKING
+import numpy as np
+
 import AutoInstall
 import datetime
 import os
 import shutil
 import filecmp
-import glob
 import struct
+
+from controller import Supervisor
+from controller import Node
+from controller import Field
 
 from Controller import Controller
 from ConsoleLog import Console
+from Tile import StartTile
+from Config import Config
 
 AutoInstall._import("cl", "termcolor")
 AutoInstall._import("np", "numpy")
 
+
+if TYPE_CHECKING:
+    from MainSupervisor import Erebus
+
+
 class Queue:
-    #Simple queue data structure
+    """Simple queue data structure
+    """
+
     def __init__(self):
-        self.queue = []
+        self._queue: list[Any] = []
 
-    def enqueue(self, data):
-        return self.queue.append(data)
+    def enqueue(self, data: Any) -> None:
+        self._queue.append(data)
 
-    def dequeue(self):
-        return self.queue.pop(0)
+    def dequeue(self) -> Any:
+        return self._queue.pop(0)
 
-    def peek(self):
-        return self.queue[0]
+    def peek(self) -> Any:
+        return self._queue[0]
 
-    def is_empty(self):
-        return len(self.queue) == 0
+    def is_empty(self) -> bool:
+        return len(self._queue) == 0
+
 
 class RobotHistory(Queue):
-    #Robot history class inheriting a queue structure
+    """Robot history, a queue structure, to store game action history
+    """
+
     def __init__(self):
         super().__init__()
-        #master history to store all events without dequeues
-        self.master_history = []
-        self.timeElapsed = 0
-        self.displayToRecordingLabel = False
+        # Master history to store all events without dequeues
+        self.master_history: list[tuple[str, str]] = []
 
-    def enqueue(self, data, supervisor):
-        #update master history when an event happens
-        record = self.update_master_history(data)
-        supervisor.rws.send("historyUpdate", ",".join(record))
-        hisT = ""
-        histories = list(reversed(self.master_history))
-        for h in range(min(len(histories),5)):
-            hisT = "[" + histories[h][0] + "] " + histories[h][1] + "\n" + hisT
+        self.time_elapsed: int = 0
+        self.display_to_recording_label: bool = False
 
-        if self.displayToRecordingLabel:
-            supervisor.setLabel(2, hisT, 0.7, 0,0.05, 0xfbc531, 0.2)
+    def _update_master_history(self, data: str) -> tuple[str, str]:
+        """Update the master history, storing data as (game time, event data)
+        records.
 
-    def update_master_history(self, data):
-        #Get time
-        time = int(self.timeElapsed)
-        minute = str(datetime.timedelta(seconds=time))[2:]
-        #update list with data in format [game time, event data]
-        record = [minute, data]
+        Args:
+            data (str): Data to enqueue
+
+        Returns:
+            tuple[str, str]: Game event record in the form (game time, data)
+        """
+        time: int = int(self.time_elapsed)
+        # Convert elapsed time to minutes
+        minute: str = str(datetime.timedelta(seconds=time))[2:]
+        # Update list with data in format [game time, event data]
+        record: tuple[str, str] = (minute, data)
         self.master_history.append(record)
+
         return record
 
+    def enqueue(self, data: str, erebus: Erebus):
+        """Enqueue game data to the end of the robot's history queue, and update
+        any relevant UI components.
+
+        Args:
+            data (str): Data to enqueue
+            erebus (Erebus): Erebus game supervisor object
+        """
+        # Update master history when an event happens
+        record: tuple[str, str] = self._update_master_history(data)
+        # Send the event data to the robot window to update the ui
+        erebus.rws.send("historyUpdate", ",".join(record))
+
+        if self.display_to_recording_label:
+            history_label: str = ""
+            histories: list[tuple[str, str]] = list(
+                reversed(self.master_history))
+            for h in range(min(len(histories), 5)):
+                history_label = ("[" + histories[h][0] + "] " +
+                                 histories[h][1] + "\n" + history_label)
+            erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2)
+
+
 class Robot:
-    '''Robot object to hold values whether its in a base or holding a human'''
+    """Robot object used to store and process data about the competitor's
+    robot in the simulation
+    """
 
     def __init__(self):
-        '''Initialises the in a base, has a human loaded and score values'''
+        self.wb_node: Node
+        self.wb_translationField: Field
+        self.wb_rotationField: Field
 
-        #webots node
-        # self.wb_node = node
+        self.name: str = "NO_TEAM_NAME"
+        self.in_simulation: bool = False
 
-        # if self.wb_node != None:
-        #     self.wb_translationField = self.wb_node.getField('translation')
-        #     self.wb_rotationField = self.wb_node.getField('rotation')
+        self.history: RobotHistory = RobotHistory()
+        self.controller: Controller = Controller()
 
-        self.inCheckpoint = True
-        self.inSwamp = False
+        self.in_swamp: bool = False
 
-        self.history = RobotHistory()
+        self._score: float = 0
 
-        self._score = 0
+        self._stopped: bool = False
+        self._robot_time_stopped: float = 0
+        self._stopped_time: float | None = None
 
-        self.robot_timeStopped = 0
-        self.stopped = False
-        self.stoppedTime = None
-
-        self.message = []
+        self.message: list[Any] = []
         self.map_data = np.array([])
-        self.sent_maps = False
-        self.map_score_percent = 0
+        self.sent_maps: bool = False
+        self.map_score_percent: float = 0
 
-        self.victimIdentified = False
+        # If a victim has been identified, used to give an exit bonus iif one
+        # victim has been identified
+        self.victim_identified: bool = False
 
-        self.lastVisitedCheckPointPosition = []
-
-        self.visitedCheckpoints = []
-
-        self.startingTile = None
-
-        self.inSimulation = False
-
-        self.name = "NO_TEAM_NAME"
-
-        self.left_exit_tile = False
-        
-        self.timeElapsed = 0
-        
-        self.controller = Controller()
-
+        # TODO these should be tuples... something to do when changing Tile code
+        self.last_visited_checkpoint_pos: list = []
+        self.visited_checkpoints: list = []
+        self.start_tile: StartTile | None = None
 
     @property
-    def position(self) -> list:
+    def position(self) -> list[float]:
         return self.wb_translationField.getSFVec3f()
 
     @position.setter
-    def position(self, pos: list) -> None:
+    def position(self, pos: list[float]) -> None:
         self.wb_translationField.setSFVec3f(pos)
 
     @property
-    def rotation(self) -> list:
+    def rotation(self) -> list[float]:
         return self.wb_rotationField.getSFRotation()
 
     @rotation.setter
-    def rotation(self, pos: list) -> None:
+    def rotation(self, pos: list[float]) -> None:
         self.wb_rotationField.setSFRotation(pos)
-        
-    def add_node(self, node):
-        self.wb_node = node
-        self.wb_translationField = self.wb_node.getField('translation')
-        self.wb_rotationField = self.wb_node.getField('rotation')
 
-    def setMaxVelocity(self, vel: float) -> None:
-        # self.wb_node.getField('max_velocity').setSFFloat(vel)
-        # self.wb_node.getField('robot_mass').setSFFloat(vel)
+    def set_node(self, node: Node) -> None:
+        """Sets the robot's webots node object
+
+        Args:
+            node (Node): Webots node object associated with the robot
+        """
+        self.wb_node: Node = node
+        self.wb_translationField: Field = self.wb_node.getField('translation')
+        self.wb_rotationField: Field = self.wb_node.getField('rotation')
+
+    def set_max_velocity(self, vel: float) -> None:
+        """Set the max angular velocity the robot can move at.
+
+        Args:
+            vel (float): Maximum angular velocity
+        """
+        # TODO this doesn't actually work...
         self.wb_node.getField('wheel_mult').setSFFloat(vel)
-        # self.wb_node.getField('wheel_mass').setSFFloat(vel)
 
-    def _isStopped(self) -> bool:
-        vel = self.wb_node.getVelocity()
+    def _is_stopped(self) -> bool:
+        """Returns whether the robot has stopped moving
+
+        Returns:
+            bool: True if the robot is not moving (still)
+        """
+        vel: list[float] = self.wb_node.getVelocity()
         return all(abs(ve) < 0.001 for ve in vel)
 
-    def timeStopped(self, supervisor) -> float:
-        self.stopped = self._isStopped()
+    def time_stopped(self, supervisor: Supervisor) -> float:
+        """Gets the amount of time the robot has been stopped for in seconds.
+
+        Args:
+            supervisor (Supervisor): The Erebus supervisor object
+
+        Returns:
+            float: Time stopped, in seconds
+        """
+        self._stopped = self._is_stopped()
 
         # if it isn't stopped yet
-        if self.stoppedTime == None:
-            if self.stopped:
+        if self._stopped_time == None:
+            if self._stopped:
                 # get time the robot stopped
-                self.stoppedTime = supervisor.getTime()
+                self._stopped_time = supervisor.getTime()
         else:
             # if its stopped
-            if self.stopped:
+            if self._stopped:
                 # get current time
-                currentTime = supervisor.getTime()
+                current_time: float = supervisor.getTime()
                 # calculate the time the robot stopped
-                self.robot_timeStopped = currentTime - self.stoppedTime
+                self._robot_time_stopped = current_time - self._stopped_time
             else:
                 # if it's no longer stopped, reset variables
-                self.stoppedTime = None
-                self.robot_timeStopped = 0
-        return self.robot_timeStopped
-    
-    def resetTimeStopped(self):
-        self.robot_timeStopped = 0
-        self.stopped = False
-        self.stoppedTime = None
+                self._stopped_time = None
+                self._robot_time_stopped = 0.0
+        return self._robot_time_stopped
 
-    def increaseScore(self, message: str, score: int, supervisor, multiplier = 1) -> None:
-        point = round(score * multiplier, 2)
+    def reset_time_stopped(self) -> None:
+        """Resets the amount of time recorded for being stopped
+        """
+        self._robot_time_stopped = 0.0
+        self._stopped = False
+        self._stopped_time = None
+
+    def increase_score(
+        self,
+        message: str,
+        score: int,
+        supervisor: Erebus,
+        multiplier: float = 1,
+    ) -> None:
+        """Increases the robots score. The primary method used to increase the
+        robots competition score.
+
+        Args:
+            message (str): Message to display in the web UI
+            score (int): Score to add
+            supervisor (Erebus): Erebus game supervisor object
+            multiplier (float, optional): Score multiplier (`new_score = 
+            score * multiplier`), used for room score multipliers.
+            Defaults to 1.
+        """
+        point: float = round(score * multiplier, 2)
         if point > 0.0:
             self.history.enqueue(f"{message} +{point}", supervisor)
         elif point < 0.0:
@@ -174,33 +246,47 @@ class Robot:
         if self._score < 0:
             self._score = 0
 
-    def getScore(self) -> int:
+    def get_score(self) -> float:
+        """Gets the robot's current score
+
+        Returns:
+            float: Robot game score
+        """
         return self._score
 
-    def get_log_str(self):
-        #Create a string of all events that the robot has done
-        history = self.history.master_history
-        log_str = ""
+    def get_log_str(self) -> str:
+        """Gets a string of all events the robot has done during the simulation
+
+        Returns:
+            str: String of event records, separated by a new line. Each record
+            is in the form (minute, event message)
+        """
+        # Create a string of all events that the robot has done
+        history: list[tuple[str, str]] = self.history.master_history
+        log_str: str = ""
         for event in history:
             log_str += str(event[0]) + " " + event[1] + "\n"
 
         return log_str
 
-    def set_starting_orientation(self):
-        '''Gets starting orientation for robot using wall data from starting tile'''
+    def set_starting_orientation(self) -> None:
+        """Sets starting orientation for robot using wall data from starting 
+        tile
+        """
         # Get starting tile walls
-        top = self.startingTile.wb_node.getField("topWall").getSFInt32()
-        right = self.startingTile.wb_node.getField("rightWall").getSFInt32()
-        bottom = self.startingTile.wb_node.getField("bottomWall").getSFInt32()
-        left = self.startingTile.wb_node.getField("leftWall").getSFInt32()
+        top: int = self.start_tile.wb_node.getField("topWall").getSFInt32()
+        right: int = self.start_tile.wb_node.getField("rightWall").getSFInt32()
+        bottom: int = self.start_tile.wb_node.getField("bottomWall").getSFInt32()
+        left: int = self.start_tile.wb_node.getField("leftWall").getSFInt32()
 
         # top: 0
         # left: pi/2
         # right: -pi/2
         # bottom: pi
-        pi = 3.14
-        walls = [[top, 0],[right, -pi/2],[bottom, pi],[left, pi/2]]
-        direction = 0
+        pi: float = 3.14
+        direction: float = 0.0
+        walls: list[list[float]] = [[top, 0.0], [right, -pi/2],
+                                    [bottom, pi], [left, pi/2]]
 
         for i in range(len(walls)):
             # If there isn't a wall in the direction
@@ -208,26 +294,38 @@ class Robot:
                 direction = walls[i][1]
                 break
 
-        self.rotation = [0,1,0,direction]
-    
-    def setMessage(self, receivedData):
+        # Set robot rotation, rotating around y axis
+        self.rotation = [0., 1., 0., direction]
+
+    def set_message(self, received_data: bytes) -> None:
+        """Formats received emitter/receiver packet data to a format useful
+        for the different message types available for the competitors to use
+
+        Args:
+            received_data (bytes): Byte data received from the competitor's
+            robot's emitter
+        """
+
         # Get length of bytes
-        rDataLen = len(receivedData)
-        Console.log_debug(f"Data: {receivedData} with length {rDataLen}")
+        data_len: int = len(received_data)
+        Console.log_debug(f"Data: {received_data} with length {data_len}")
         try:
-            if rDataLen == 1:
-                tup = struct.unpack('c', receivedData)
+            if data_len == 1:
+                tup = struct.unpack('c', received_data)
                 self.message = [tup[0].decode("utf-8")]
             # Victim identification bytes data should be of length = 9
-            elif rDataLen == 9:
+            elif data_len == 9:
                 # Unpack data
-                tup = struct.unpack('i i c', receivedData)
+                tup: tuple[Any, ...] = struct.unpack('i i c', received_data)
 
-                # Get data in format (est. x position, est. z position, est. victim type)
+                # Get data in format:
+                # (est. x position, est. z position, est. victim type)
                 x = tup[0]
                 z = tup[1]
 
-                estimated_victim_position = (x / 100, 0, z / 100)
+                estimated_victim_position: tuple[float, ...] = (x / 100,
+                                                                0,
+                                                                z / 100)
 
                 victimType = tup[2].decode("utf-8")
 
@@ -242,13 +340,11 @@ class Robot:
                                     shape     map data
                 """
                 # Shape data should be two bytes (2 integers)
-                shape_bytes = receivedData[:8]  # Get shape of matrix
-                data_bytes = receivedData[8::]  # Get data of matrix
+                shape_bytes: bytes = received_data[:8]  # Get shape of matrix
+                data_bytes: bytes = received_data[8::]  # Get data of matrix
 
                 # Get shape data
-                shape = struct.unpack('2i', shape_bytes)
-                # Size of flattened 2d array
-                shape_size = shape[0] * shape[1]
+                shape: tuple[int, int] = struct.unpack('2i', shape_bytes)
                 # Get map data
                 map_data = data_bytes.decode('utf-8').split(',')
                 # Reshape data using the shape data given
@@ -259,21 +355,33 @@ class Robot:
             Console.log_err("Incorrect data format sent")
             Console.log_err(str(e))
 
-    def updateTimeElapsed(self, timeElapsed: int):
-        self.timeElapsed = timeElapsed
-        self.history.timeElapsed = timeElapsed
-        
-    def updateConfig(self, config):
-        self.history.displayToRecordingLabel = config.recording
+    def update_time_elapsed(self, time_elapsed: int) -> None:
+        """Updates the robot's history with the current time elapsed. Used to
+        keep the history's record timestamps up to date.
+
+        Args:
+            time_elapsed (int): Current time elapsed (in seconds)
+        """
+        self.history.time_elapsed = time_elapsed
+
+    def update_config(self, config: Config) -> None:
+        """Update the robot with new config data. Used to sure settings if
+        recording or keeping controller files.
+
+        Args:
+            config (Config): Config object
+        """
+        self.history.display_to_recording_label = config.recording
         self.controller.update_keep_controller_config(config)
-        
-    def resetProto(self, supervisor, manual=False) -> None:
-        '''
+
+    def reset_proto(self, erebus: Erebus, manual: bool = False) -> None:
+        """Resets the robot's custom proto file, back to the default.
         - Send message to robot window to say that robot has been reset
         - Reset robot proto file back to default
-        '''
-        path = os.path.dirname(os.path.abspath(__file__))
+        """
+        path: str = os.path.dirname(os.path.abspath(__file__))
 
+        # Get default proto file path
         if path[-4:] == "game":
             default_robot_proto = os.path.join(
                 path, 'proto_defaults/E-puck-custom-default-FLU.proto')
@@ -287,13 +395,15 @@ class Robot:
             if os.path.isfile(robot_proto):
                 if self.controller.keep_controller and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
-                        supervisor.rws.send("loaded1")
+                        erebus.rws.send("loaded1")
                     return
                 shutil.copyfile(default_robot_proto, robot_proto)
             else:
                 shutil.copyfile(default_robot_proto, robot_proto)
-                supervisor.worldReload()
-            supervisor.rws.send("unloaded1")
+                # Must reset world, since webots doesn't
+                # recognise new protos otherwise
+                erebus.worldReload()
+            erebus.rws.send("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(str(e))

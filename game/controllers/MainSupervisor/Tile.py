@@ -120,9 +120,9 @@ class TileManager():
             
     def updateInSwamp(self, robotObj, inSwamp, max_velocity, supervisor):
         # Check if robot is in swamp
-        if robotObj.inSwamp != inSwamp:
-            robotObj.inSwamp = inSwamp
-            if robotObj.inSwamp:
+        if robotObj.in_swamp != inSwamp:
+            robotObj.in_swamp = inSwamp
+            if robotObj.in_swamp:
                 # Cap the robot's velocity to 2
                 # robotObj.setMaxVelocity(2)
                 robotObj.setMaxVelocity(TileManager.SWAMP_SLOW_MULT)
