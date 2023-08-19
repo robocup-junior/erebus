@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from controller import Robot
 from controller import Emitter
 from controller import Receiver

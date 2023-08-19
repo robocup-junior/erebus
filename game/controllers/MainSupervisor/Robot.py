@@ -271,6 +271,11 @@ class Robot:
         """Sets starting orientation for robot using wall data from starting 
         tile
         """
+        if self.start_tile is None:
+            Console.log_err("No robot start tile initialised. Could not set "
+                            "starting orientation")
+            return
+        
         # Get starting tile walls
         top: int = self.start_tile.wb_node.getField("topWall").getSFInt32()
         right: int = self.start_tile.wb_node.getField("rightWall").getSFInt32()

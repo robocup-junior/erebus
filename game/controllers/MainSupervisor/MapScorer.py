@@ -4,8 +4,9 @@
 # matrix.
 
 import numpy as np
+import numpy.typing as npt
 
-def _get_start_instance(matrix: np.array) -> np.array:
+def _get_start_instance(matrix: npt.NDArray) -> npt.NDArray | None:
     """Gets the matrix coordinate of the first occurrence of the start
     tile char '5'.
 
@@ -25,11 +26,11 @@ def _get_start_instance(matrix: np.array) -> np.array:
 
 
 def _shift_matrix(
-    answer_matrix: np.array,
-    sub_matrix: np.array,
+    answer_matrix: npt.NDArray,
+    sub_matrix: npt.NDArray,
     dy: int,
     dx: int,
-) -> np.array:
+) -> npt.NDArray:
     """Shifts the submission matrix by a given x,y amount. The matrix size stays
     the same and empty space from the shift is filled with 0s.
 
@@ -54,9 +55,9 @@ def _shift_matrix(
 
 
 def _align(
-    answer_matrix: np.array,
-    sub_matrix: np.array,
-) -> np.array:
+    answer_matrix: npt.NDArray,
+    sub_matrix: npt.NDArray,
+) -> npt.NDArray:
     """Aligns the sub_matrix with the answer_matrix via the start tile
 
     Args:
@@ -77,14 +78,14 @@ def _align(
     if sub_con_pos is None:
         raise Exception("No starting tile('5') was found on the submitted map")
 
-    d_pos = ans_con_pos - sub_con_pos
+    d_pos: npt.NDArray = ans_con_pos - sub_con_pos
 
     return _shift_matrix(answer_matrix, sub_matrix, *d_pos)
 
 
 def _calculate_completeness(
-    answer_matrix: np.array,
-    sub_matrix: np.array,
+    answer_matrix: npt.NDArray,
+    sub_matrix: npt.NDArray,
 ) -> float:
     """
     Calculate the quantifiable completeness score of a matrix, compared to
@@ -97,8 +98,8 @@ def _calculate_completeness(
     Returns:
         float: completeness score
     """
-    correct = 0
-    incorrect = 0
+    correct: int = 0
+    incorrect: int = 0
 
     if answer_matrix.shape != sub_matrix.shape:
         return 0
@@ -126,8 +127,8 @@ def _calculate_completeness(
 
 
 def _calculate_map_completeness(
-    answer_matrix: np.array,
-    sub_matrix: np.array,
+    answer_matrix: npt.NDArray,
+    sub_matrix: npt.NDArray,
 ) -> float:
     """
     Calculate completeness of submitted map area matrix. 4x 90 degree rotations
@@ -141,13 +142,14 @@ def _calculate_map_completeness(
     Returns:
         float: completeness score
     """
-    completeness_list = []
+    completeness_list: list[float] = []
 
     for i in range(0, 4):
         answer_matrix = np.rot90(answer_matrix, k=i, axes=(1, 0))
-        aSubMatrix = _align(answer_matrix, sub_matrix)
+        aligned_sub_matrix = _align(answer_matrix, sub_matrix)
 
-        completeness = _calculate_completeness(answer_matrix, aSubMatrix)
+        completeness:float = _calculate_completeness(answer_matrix, 
+                                                     aligned_sub_matrix)
         completeness_list.append(completeness)
 
     # Return the highest score
@@ -166,6 +168,5 @@ def calculateScore(answer_matrices: list, sub_matrix: list) -> float:
     Returns:
         float: completeness score
     """
-    score = _calculate_map_completeness(
-        np.array(answer_matrices), np.array(sub_matrix))
-    return score
+    return _calculate_map_completeness(np.array(answer_matrices), 
+                                       np.array(sub_matrix))

@@ -6,6 +6,7 @@ from Victim import Victim
 from Robot import Robot
 from Tile import Checkpoint, Swamp
 from typing import TYPE_CHECKING
+from typing import Sequence
 
 import struct
 import math
@@ -95,14 +96,14 @@ class TestVictim(Test):
         self,
         index: int,
         offset: float,
-        victim_list: list[VictimObject]
+        victim_list: Sequence[VictimObject]
     ) -> None:
         """Initialises a new victim test
 
         Args:
             index (int): victim index of `victim_list` to test
             offset (float): position offset from victim to test (in meters)
-            victim_list (list[VictimObject]): list of all victims (e.g. all
+            victim_list (Sequence[VictimObject]): list of all victims (e.g. all
             hazards or victims) 
         """
         super().__init__()

@@ -5,8 +5,9 @@ import os
 import numpy as np
 from PIL import Image
 
+
 def export_map_to_img(
-    supervisor: Supervisor, 
+    supervisor: Supervisor,
     map: list[list[str]]
 ) -> None:
     """Export map answer to world thumbnail
@@ -16,7 +17,7 @@ def export_map_to_img(
         map (list[list[str]]): Erebus map answer matrix
     """
     img_array: list[int] = []
-    
+
     for row in map:
         for element in row:
             if element == '20':
@@ -27,12 +28,15 @@ def export_map_to_img(
                 img_array.append(255)
             else:
                 img_array.append(0)
-                
+
     img_np_array = np.array(img_array)
     img_np_array = np.reshape(img_np_array, (len(map), len(map[0])))
     im = Image.fromarray(img_np_array.astype(np.uint8))
-    
-    path = get_file_path("plugins/robot_windows/MainSupervisorWindow/thumbnails", "../../plugins/robot_windows/MainSupervisorWindow/thumbnails")
-    path = os.path.join(path, os.path.split(supervisor.getWorldPath())[1][:-4]+'.png')
-    
+
+    path = get_file_path(
+        "plugins/robot_windows/MainSupervisorWindow/thumbnails",
+        "../../plugins/robot_windows/MainSupervisorWindow/thumbnails")
+    path = os.path.join(path, 
+                        os.path.split(supervisor.getWorldPath())[1][:-4]+'.png')
+
     im.save(path, 'png')
