@@ -29,8 +29,8 @@ def _import(
             if ver is None:
                 _main(['install', installModule])
             else:
-                _main(['install', '{}=={}'.format(installModule, ver)])
+                _main(['install', f'{installModule}=={ver}'])
             inspect.stack()[1][0].f_globals[name] = importlib.import_module(
                 importModule)
         except:
-            print("[EREBUS IMPORT ERROR] can't import: {}".format(importModule))
+            print(f"[EREBUS IMPORT ERROR] can't import: {importModule}")

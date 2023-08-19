@@ -107,8 +107,8 @@ class Erebus(Supervisor):
         self.tileManager.get_checkpoints(self)
         
         self.victimManager = VictimManager()
-        self.victimManager.getHumans(self)
-        self.victimManager.getHazards(self)
+        self.victimManager.get_humans(self)
+        self.victimManager.get_hazards(self)
 
         # Get Viewppoint Node
         viewpoint_node = self.getFromDef("Viewpoint")
@@ -441,12 +441,12 @@ ROBOT_0: {str(self.robot0Obj.name)}
 
             misidentification = True
             
-            nearby_map_issues = [h for h in iterator if h.checkPosition(self.robot0Obj.position) and h.checkPosition(est_vic_pos) and h.on_same_side(self.robot0Obj) and not h.identified]
+            nearby_map_issues = [h for h in iterator if h.check_position(self.robot0Obj.position) and h.check_position(est_vic_pos) and h.on_same_side(self.robot0Obj) and not h.identified]
             
             Console.log_debug(f"--- Victim Data ---")
             for h in iterator:
-                Console.log_debug(f"Distance {h.getDistance(self.robot0Obj.position)}/0.09 in range ({h.checkPosition(self.robot0Obj.position)})")
-                Console.log_debug(f"Est distance in range: {h.checkPosition(est_vic_pos)}")
+                Console.log_debug(f"Distance {h.get_distance(self.robot0Obj.position)}/0.09 in range ({h.check_position(self.robot0Obj.position)})")
+                Console.log_debug(f"Est distance in range: {h.check_position(est_vic_pos)}")
                 Console.log_debug(f"On same side: {h.on_same_side(self.robot0Obj)}")
                 Console.log_debug(f"Identified: {h.identified}")
             Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
@@ -455,14 +455,14 @@ ROBOT_0: {str(self.robot0Obj.name)}
             if len(nearby_map_issues) > 0:
                 # TODO should it take the nearest, or perhaps also account for which victim type was trying to be identified?
                 # Take the nearest map issue by distance to the estimated coordinate
-                distances = [h.getDistance(est_vic_pos) for h in nearby_map_issues]
+                distances = [h.get_distance(est_vic_pos) for h in nearby_map_issues]
                 nearby_issue = nearby_map_issues[np.argmin(distances)]
                 
                 misidentification = False
                 # Get points scored depending on the type of victim
                 #pointsScored = nearby_issue.scoreWorth
 
-                grid = self.tileManager.coord2grid(nearby_issue.wb_translationField.getSFVec3f(), self)
+                grid = self.tileManager.coord2grid(nearby_issue.wb_translation_field.getSFVec3f(), self)
                 roomNum = self.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
 
                 Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs {nearby_issue.simple_victim_type.lower()}")
@@ -473,7 +473,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                         f"Successful {name} Type Correct Bonus", correctTypeBonus, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                         
                 self.robot0Obj.increase_score(
-                    f"Successful {name} Identification", nearby_issue.scoreWorth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
+                    f"Successful {name} Identification", nearby_issue.score_worth, self, multiplier=self.tileManager.ROOM_MULT[roomNum])
                 self.robot0Obj.victim_identified = True
 
                 nearby_issue.identified = True
@@ -512,7 +512,7 @@ ROBOT_0: {str(self.robot0Obj.name)}
                 # Reset both controller files
                 #self.robot0Obj.controller.resetFile(self)
                 #self.robot0Obj.resetProto(self)
-                self.victimManager.resetVictimsTextures()
+                self.victimManager.reset_victim_textures()
 
                 # Reset the simulation
                 self.simulationReset()

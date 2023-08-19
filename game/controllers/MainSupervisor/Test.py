@@ -14,6 +14,9 @@ from abc import ABC, abstractmethod
 import AutoInstall
 AutoInstall._import("np", "numpy")
 
+AutoInstall._import("overrides", "overrides")
+from overrides import override
+
 
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
@@ -38,6 +41,7 @@ class Test(ABC):
         """
         self._report = s
 
+    
     @abstractmethod
     def pre_test(
         self,
@@ -56,6 +60,7 @@ class Test(ABC):
         """
         ...
 
+        
     @abstractmethod
     def test(self, supervisor: Erebus) -> bool:
         """Abstract method to return the result of the test to be run.
@@ -69,6 +74,7 @@ class Test(ABC):
         """
         ...
 
+    
     @abstractmethod
     def post_test(self, supervisor: Erebus) -> None:
         """Abstract method run after the test is computed. Anything that needs
@@ -111,6 +117,7 @@ class TestVictim(Test):
         self._victim: None | VictimObject = None
         self._victim_list: list[VictimObject] = victim_list
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -137,6 +144,7 @@ class TestVictim(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (1, 3, 0, 0, victim_type)
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Test whether the test controller correctly detected the victim, and
         the correct number of points were awarded, accounting for correct
@@ -153,7 +161,7 @@ class TestVictim(Test):
             return False
 
         grid: int = supervisor.tileManager.coord2grid(
-            self._victim.wb_translationField.getSFVec3f(),
+            self._victim.wb_translation_field.getSFVec3f(),
             supervisor
         )
         room_num: int = (
@@ -178,8 +186,9 @@ class TestVictim(Test):
 
         return (supervisor.robot0Obj.get_score() - self._start_score ==
                 (correct_type_bonus * multiplier) +
-                (self._victim.scoreWorth * multiplier))
+                (self._victim.score_worth * multiplier))
 
+    @override
     def post_test(self, supervisor: Erebus) -> None:
         """Resets the victim textures, so the next test has victim textures
         as unidentified
@@ -187,7 +196,7 @@ class TestVictim(Test):
         Args:
             supervisor (Erebus): Erebus game supervisor object
         """
-        supervisor.victimManager.resetVictimsTextures()
+        supervisor.victimManager.reset_victim_textures()
 
 
 class TestCheckpoint(Test):
@@ -206,6 +215,7 @@ class TestCheckpoint(Test):
         self._start_score: float = 0.0
         self._checkpoint: None | Checkpoint = None
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -225,6 +235,7 @@ class TestCheckpoint(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Test whether the correct amount of points (10 * room multiplier) are
         awarded to the robot on checkpoint entry
@@ -254,6 +265,7 @@ class TestCheckpoint(Test):
         return (supervisor.robot0Obj.get_score() ==
                 self._start_score + (10 * multiplier))
 
+    @override
     def post_test(self, supervisor: Erebus) -> None: pass
 
 
@@ -272,6 +284,7 @@ class TestRelocate(Test):
         self._index: int = index
         self._start_score: float = 0.0
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -295,6 +308,7 @@ class TestRelocate(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Tests a -5 point penalty is given to the robot
 
@@ -306,6 +320,7 @@ class TestRelocate(Test):
         """
         return supervisor.robot0Obj.get_score() == self._start_score - 5
 
+    @override
     def post_test(self, supervisor: Erebus) -> None: pass
 
 
@@ -317,6 +332,7 @@ class TestBlackHole(Test):
         super().__init__()
         self._start_score: float = 0.0
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -342,6 +358,7 @@ class TestBlackHole(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Tests a -5 point penalty is given to the robot.
 
@@ -353,6 +370,7 @@ class TestBlackHole(Test):
         """
         return supervisor.robot0Obj.get_score() == self._start_score - 5
 
+    @override
     def post_test(self, supervisor: Erebus) -> None:
         """Disables lack of progress, since most other tests need this off
 
@@ -376,6 +394,7 @@ class TestSwamp(Test):
         self._index: int = index
         self._start_score: float = 0.0
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -396,6 +415,7 @@ class TestSwamp(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 6, 6, b'U')
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Tests whether robot movement is slowed by the swamp
 
@@ -410,6 +430,7 @@ class TestSwamp(Test):
         # 0.02 * 0.32 multiplier = 0.006
         return any(math.isclose(abs(v), 0.006, abs_tol=0.0005) for v in vel)
 
+    @override
     def post_test(self, supervisor: Erebus) -> None:
         """Disables lack of progress, since most other tests need this off
 
@@ -430,6 +451,7 @@ class TestLOP(Test):
         super().__init__()
         self._start_score: float = 0.0
 
+    @override
     def pre_test(
         self,
         supervisor: Erebus,
@@ -452,6 +474,7 @@ class TestLOP(Test):
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 25, 0, 0, b'U')
 
+    @override
     def test(self, supervisor: Erebus) -> bool:
         """Tests a -5 point penalty is given to the robot.
 
@@ -463,6 +486,7 @@ class TestLOP(Test):
         """
         return supervisor.robot0Obj.get_score() == self._start_score - 5
 
+    @override
     def post_test(self, supervisor: Erebus) -> None:
         """Disables lack of progress, since most other tests need this off
 
