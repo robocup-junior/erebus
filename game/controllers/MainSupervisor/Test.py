@@ -11,10 +11,7 @@ import struct
 import math
 from abc import ABC, abstractmethod
 
-import AutoInstall
-AutoInstall._import("np", "numpy")
-
-AutoInstall._import("overrides", "overrides")
+import numpy as np
 from overrides import override
 
 

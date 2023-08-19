@@ -1,11 +1,8 @@
-import AutoInstall
 from controller import Supervisor
 from Tools import get_file_path
 import os
 
-AutoInstall._import("np", "numpy")
-AutoInstall._import("PIL", "PIL", "pillow")
-
+import numpy as np
 from PIL import Image
 
 def export_map_to_img(

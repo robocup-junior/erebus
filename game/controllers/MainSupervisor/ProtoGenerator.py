@@ -2,9 +2,6 @@ from Tools import *
 import AutoInstall
 from ConsoleLog import Console
 
-AutoInstall._import("cl", "termcolor")
-
-
 def generate_robot_proto(robot_json: dict) -> bool:
     """Generates a custom webots proto file for loading custom robots
 

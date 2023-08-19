@@ -3,9 +3,7 @@
 # to teams for the outputted map
 # matrix.
 
-import AutoInstall
-AutoInstall._import("np", "numpy")
-
+import numpy as np
 
 def _get_start_instance(matrix: np.array) -> np.array:
     """Gets the matrix coordinate of the first occurrence of the start

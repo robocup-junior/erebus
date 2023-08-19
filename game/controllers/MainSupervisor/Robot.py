@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import Any
 from typing import TYPE_CHECKING
-import numpy as np
 
-import AutoInstall
 import datetime
 import os
 import shutil
 import filecmp
 import struct
+import numpy as np
 
 from controller import Supervisor
 from controller import Node
@@ -19,8 +18,6 @@ from ConsoleLog import Console
 from Tile import Checkpoint, StartTile, TileManager
 from Config import Config
 
-AutoInstall._import("cl", "termcolor")
-AutoInstall._import("np", "numpy")
 
 
 if TYPE_CHECKING:

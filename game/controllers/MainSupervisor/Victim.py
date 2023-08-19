@@ -1,9 +1,8 @@
+import math
+from abc import ABC, abstractmethod
 from overrides import override
 import numpy.typing as npt
 import numpy as np
-from abc import ABC, abstractmethod
-import math
-import AutoInstall
 
 from controller import Node
 from controller import Field
@@ -11,10 +10,6 @@ from controller import Supervisor
 
 from Robot import Robot
 from Camera import FollowSide
-
-AutoInstall._import("np", "numpy")
-
-AutoInstall._import("overrides", "overrides")
 
 
 def rotate_2d_vector(v: npt.NDArray, theta: float) -> npt.NDArray:

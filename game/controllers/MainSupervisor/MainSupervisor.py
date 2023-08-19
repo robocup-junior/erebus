@@ -1,12 +1,11 @@
-"""Supervisor Controller
-   Written by Robbie Goldman and Alfred Roberts
-"""
-import subprocess
-import AutoInstall
 
+# Auto install any pip modules used throughout the code base
+import AutoInstall
 AutoInstall._import("np", "numpy")
 AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
+AutoInstall._import("overrides", "overrides")
+AutoInstall._import("PIL", "PIL", "pillow")
 
 from MapAnswer import MapAnswer
 import MapScorer
@@ -20,6 +19,7 @@ import threading
 import shutil
 import json
 import time
+import subprocess
 
 from ProtoGenerator import generate_robot_proto
 from Tools import *

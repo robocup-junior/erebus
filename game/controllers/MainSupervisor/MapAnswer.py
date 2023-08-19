@@ -1,7 +1,4 @@
-import AutoInstall
-AutoInstall._import("np", "numpy")
-AutoInstall._import("cl", "termcolor")
-
+import numpy as np
 from ConsoleLog import Console
 
 class MapAnswer:
