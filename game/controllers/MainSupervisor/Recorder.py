@@ -41,8 +41,8 @@ class Recorder:
         
         platform_ver: str = f'Platform Version: {erebus.version}'
         max_clock: str = ("Clock: " + 
-                          str(int(int(erebus.maxTime)/60)).zfill(2) + ":" + 
-                          str(int(int(erebus.maxTime) % 60)).zfill(2))
+                          str(int(int(erebus.max_time)/60)).zfill(2) + ":" + 
+                          str(int(int(erebus.max_time) % 60)).zfill(2))
 
         erebus.movieStartRecording(
             path, width=1280, height=720, quality=70,
@@ -76,8 +76,8 @@ class Recorder:
         Args:
             erebus (Erebus): Erebus game supervisor object
         """
-        timeRemaining: int = erebus.maxTime - int(erebus.timeElapsed)
-        score: str = "Score: " + str(round(erebus.robot0Obj.get_score(), 2))
+        timeRemaining: int = erebus.max_time - int(erebus.time_elapsed)
+        score: str = "Score: " + str(round(erebus.robot_obj.get_score(), 2))
         clock: str = ("Clock: " + 
                       str(int(int(timeRemaining)/60)).zfill(2) + ":" + 
                       str(int(int(timeRemaining) % 60)).zfill(2))
@@ -94,10 +94,10 @@ class Recorder:
         Args:
             erebus (Erebus): Erebus game supervisor object
         """
-        score: str = "Score: " + str(round(erebus.robot0Obj.get_score(), 2))
+        score: str = "Score: " + str(round(erebus.robot_obj.get_score(), 2))
         game_time: str = ("Game time: " + 
-                          str(int(int(erebus.timeElapsed)/60)).zfill(2) + ":" + 
-                          str(int(int(erebus.timeElapsed) % 60)).zfill(2))
+                          str(int(int(erebus.time_elapsed)/60)).zfill(2) + ":" + 
+                          str(int(int(erebus.time_elapsed) % 60)).zfill(2))
         
         
         erebus.setLabel(Recorder.ID_SCORE, score, 

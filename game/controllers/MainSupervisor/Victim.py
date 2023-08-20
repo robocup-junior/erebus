@@ -241,24 +241,35 @@ class VictimManager():
     simulation
     """
     
-    def __init__(self):
+    def __init__(self, supervisor: Supervisor):
         """Initialises a new VictimManager object to manage both Hazards and 
-        Victims
-        """
-        self._num_humans: int = 0
-        self._num_hazards: int = 0
-
-        self.humans: list[Victim] = []
-        self.hazards: list[HazardMap] = []
-
-    def get_humans(self, supervisor: Supervisor):
-        """Gets and initialises all Victim objects from the simulation world
+        Victims, initialising HazardMap and Victim object lists from the Webots
+        world
 
         Args:
-            supervisor (Supervisor): Supervisor object
+            supervisor (Supervisor): Erebus supervisor object
         """
+        
+        self._num_victims: int = 0
+        self._num_hazards: int = 0
 
-        self._num_humans = (
+        self.victims: list[Victim] = self._get_victims(supervisor)
+        self.hazards: list[HazardMap] = self._get_hazards(supervisor)
+
+    def _get_victims(self, supervisor: Supervisor) -> list[Victim]:
+        """Gets and initialises all Victims as Victim objects from nodes in the
+        simulation world
+
+        Args:
+            supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            list[Victim]: List of Victim Objects
+        """
+        
+        victims: list[Victim] = []
+
+        self._num_victims = (
             supervisor.getFromDef('HUMANGROUP')
             .getField("children")
             .getCount()
@@ -269,24 +280,32 @@ class VictimManager():
             .getField("children")
         )
         # Iterate for each human
-        for i in range(self._num_humans):
+        for i in range(self._num_victims):
             # Get each human from children field in the human root
             # node HUMANGROUP
-            human: Node = victim_nodes.getMFNode(i) # type: ignore
+            victim_node: Node = victim_nodes.getMFNode(i) # type: ignore
 
-            victim_type: str = human.getField('type').getSFString()
-            score_worth: int = human.getField('scoreWorth').getSFInt32()
+            victim_type: str = victim_node.getField('type').getSFString()
+            score_worth: int = victim_node.getField('scoreWorth').getSFInt32()
 
             # Create victim Object from node info
-            victim: Victim = Victim(human, victim_type, score_worth)
-            self.humans.append(victim)
+            victim: Victim = Victim(victim_node, victim_type, score_worth)
+            victims.append(victim)
+        
+        return victims
 
-    def get_hazards(self, supervisor: Supervisor):
-        """Gets and initialises all Hazard objects from the simulation world
+    def _get_hazards(self, supervisor: Supervisor) -> list[HazardMap]:
+        """Gets and initialises all Hazards as HazardMap objects from nodes in 
+        the simulation world
 
         Args:
-            supervisor (Supervisor): Supervisor object
+            supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            list[HazardMap]: List of HazardMap Objects
         """
+        
+        hazards: list[HazardMap] = []
 
         self._num_hazards = (
             supervisor.getFromDef('HAZARDGROUP')
@@ -303,20 +322,22 @@ class VictimManager():
         for i in range(self._num_hazards):
             # Get each hazard from children field in the hazard root node 
             # HAZARDGROUP
-            human: Node = hazard_nodes.getMFNode(i) # type: ignore
+            hazard_node: Node = hazard_nodes.getMFNode(i) # type: ignore
 
-            hazard_type: str = human.getField('type').getSFString()
-            score_worth: int = human.getField('scoreWorth').getSFInt32()
+            hazard_type: str = hazard_node.getField('type').getSFString()
+            score_worth: int = hazard_node.getField('scoreWorth').getSFInt32()
 
             # Create hazard Object from node info
-            hazard: HazardMap = HazardMap(human, hazard_type, score_worth)
-            self.hazards.append(hazard)
+            hazard: HazardMap = HazardMap(hazard_node, hazard_type, score_worth)
+            hazards.append(hazard)
+
+        return hazards
 
     def reset_victim_textures(self):
         """Resets all Victim and Hazard textures to unidentified
         """
         # Iterate for each victim
-        for i in range(self._num_humans):
-            self.humans[i].identified = False
+        for i in range(self._num_victims):
+            self.victims[i].identified = False
         for i in range(self._num_hazards):
             self.hazards[i].identified = False

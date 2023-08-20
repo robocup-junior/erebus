@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 from abc import ABC
@@ -8,6 +6,8 @@ from controller import Supervisor
 from controller import Node
 
 from typing import TYPE_CHECKING
+
+from ConsoleLog import Console
 
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
@@ -94,7 +94,32 @@ class StartTile(Tile):
         center: tuple[float, float, float]
     ) -> None:
         super().__init__(min, max, center)
-        self.wb_node: Node = wb_node
+        self._wb_node: Node = wb_node
+        
+    def set_visible(self, visible: bool) -> None:
+        """Sets the visibility of the start tile
+
+        Args:
+            visible (bool): True to show green start tile color, False to
+            disable
+        """
+        self._wb_node.getField("start").setSFBool(visible)
+        
+    def is_wall_present(self, wall_name: str) -> bool:
+        """Returns whether a wall on a specified side is present on the start 
+        tile
+
+        Args:
+            wall_name (str): Wall name to check. The valid strings for this are:
+            `topWall`, `rightWall`, `bottomWall`, `leftWall`
+        Returns:
+            bool: True if a wall is present on the specified side, False 
+            otherwise
+        """
+        if wall_name not in ["topWall", "rightWall", "bottomWall", "leftWall"]:
+            Console.log_err(f"Invalid is_wall_present parameter: {wall_name}")
+            return False
+        return self._wb_node.getField(wall_name).getSFInt32() != 0
 
 
 class TileManager():
@@ -105,20 +130,32 @@ class TileManager():
     ROOM_MULT: list[float] = [1, 1.25, 1.5, 2]
     SWAMP_SLOW_MULT: float = 0.32
 
-    def __init__(self):
-        self.num_swamps: int = 0
-        self.num_checkpoints: int = 0
-
-        self.checkpoints: list[Checkpoint] = []
-        self.swamps: list[Swamp] = []
-
-    def get_swamps(self, supervisor: Supervisor):
-        """Get all swamps in simulation. Stores boundary information
-        within Swamp objects in `TileManager.checkpoints`
+    def __init__(self, supervisor: Supervisor):
+        """Creates a new TileManager object. Initialises start tile, checkpoint
+        and swamp objects from the Webots world.
 
         Args:
             supervisor (Supervisor): Erebus supervisor object
         """
+        self.num_swamps: int = 0
+        self.num_checkpoints: int = 0
+
+        self.start_tile: StartTile = self._get_start_tile(supervisor)
+        self.checkpoints: list[Checkpoint] = self._get_checkpoints(supervisor)
+        self.swamps: list[Swamp] = self._get_swamps(supervisor)
+
+    def _get_swamps(self, supervisor: Supervisor) -> list[Swamp]:
+        """Get all swamps in simulation. Stores boundary information
+        within a list of Swamp objects
+
+        Args:
+            supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            list[Swamp]: List of swamp objects
+        """
+        
+        swamps: list[Swamp] = []
 
         self.num_swamps = (
             supervisor.getFromDef('SWAMPBOUNDS')
@@ -149,15 +186,22 @@ class TileManager():
                                  (max_pos[0], max_pos[2]),
                                  center_pos)
 
-            self.swamps.append(swamp)
+            swamps.append(swamp)
+            
+        return swamps
 
-    def get_checkpoints(self, supervisor: Supervisor):
+    def _get_checkpoints(self, supervisor: Supervisor) -> list[Checkpoint]:
         """Get all checkpoints in simulation. Stores boundary information
-        within Checkpoint objects in `TileManager.checkpoints`
+        within a list of Checkpoint objects
 
         Args:
             supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            list[Checkpoint]: List of checkpoint objects
         """
+
+        checkpoints: list[Checkpoint] = []
 
         self.num_checkpoints = (
             supervisor.getFromDef('CHECKPOINTBOUNDS')
@@ -184,11 +228,46 @@ class TileManager():
                          (max_pos[2]+min_pos[2])/2)
 
             # Create a checkpoint object using the min and max (x,z)
-            checkpointObj = Checkpoint((min_pos[0], min_pos[2]),
+            checkpoint = Checkpoint((min_pos[0], min_pos[2]),
                                        (max_pos[0], max_pos[2]),
                                        centerPos)
 
-            self.checkpoints.append(checkpointObj)
+            checkpoints.append(checkpoint)
+            
+        return checkpoints
+            
+    def _get_start_tile(self, supervisor: Supervisor) -> StartTile:
+        """Gets the world's start tile as a StartTile object, holding boundary
+        information
+
+        Args:
+            supervisor (Supervisor): Erebus supervisor object
+
+        Returns:
+            StartTile: StartTile object
+        """
+        start_tile_node = supervisor.getFromDef("START_TILE")
+
+        # Get the vector positions
+        start_min_pos: list[float] = (
+            supervisor.getFromDef("start0min")
+            .getField("translation")
+            .getSFVec3f()
+        )
+        start_max_pos: list[float] = (
+            supervisor.getFromDef("start0max")
+            .getField("translation")
+            .getSFVec3f()
+        )
+        
+        start_center_pos: tuple = ((start_max_pos[0]+start_min_pos[0])/2,
+                                   start_max_pos[1],
+                                   (start_max_pos[2]+start_min_pos[2])/2)
+
+        return StartTile((start_min_pos[0], start_min_pos[2]),
+                         (start_max_pos[0], start_max_pos[2]),
+                         start_tile_node, 
+                         center=start_center_pos,)
 
     @staticmethod
     def coord2grid(
@@ -232,9 +311,9 @@ class TileManager():
             erebus (Erebus): Erebus game supervisor object
         """
         # Check if the robot is in a swamps
-        in_swamp: bool = any([s.check_position(erebus.robot0Obj.position) 
+        in_swamp: bool = any([s.check_position(erebus.robot_obj.position) 
                               for s in self.swamps])
-        erebus.robot0Obj.update_in_swamp(erebus, in_swamp, 
+        erebus.robot_obj.update_in_swamp(erebus, in_swamp, 
                                          erebus.DEFAULT_MAX_MULT)
     
     def check_checkpoints(self, erebus: Erebus): 
@@ -246,7 +325,7 @@ class TileManager():
         """
         # Test if the robots are in checkpoints
         checkpoint = [c for c in self.checkpoints 
-                      if c.check_position(erebus.robot0Obj.position)]
+                      if c.check_position(erebus.robot_obj.position)]
         # If any checkpoints
         if len(checkpoint) > 0:
-            erebus.robot0Obj.update_checkpoints(erebus, checkpoint[0])
+            erebus.robot_obj.update_checkpoints(erebus, checkpoint[0])

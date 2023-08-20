@@ -131,11 +131,11 @@ class TestVictim(Test):
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
         Console.log_info(f"Testing Offset {self._offset}")
-        self._start_score = supervisor.robot0Obj.get_score()
-        supervisor.robot0Obj.reset_time_stopped()
+        self._start_score = supervisor.robot_obj.get_score()
+        supervisor.robot_obj.reset_time_stopped()
 
         self._victim = self._victim_list[self._index]
-        TestRunner.robotToVictim(supervisor.robot0Obj,
+        TestRunner.robotToVictim(supervisor.robot_obj,
                                  self._victim, self._offset)
         # The victim type being sent is the letter 'H' for harmed victim
         victim_type: bytes = bytes(self._victim.get_simple_type(), "utf-8")
@@ -158,7 +158,7 @@ class TestVictim(Test):
             self.set_test_report("Could not find victim")
             return False
 
-        grid: int = supervisor.tileManager.coord2grid(
+        grid: int = supervisor.tile_manager.coord2grid(
             self._victim.wb_translation_field.getSFVec3f(),
             supervisor
         )
@@ -169,20 +169,20 @@ class TestVictim(Test):
             .getField("room")
             .getSFInt32() - 1
         )
-        multiplier: float = supervisor.tileManager.ROOM_MULT[room_num]
+        multiplier: float = supervisor.tile_manager.ROOM_MULT[room_num]
 
         if self._offset > 0.09:
             self.set_test_report((
                 f"Expected score: {self._start_score - 5}, "
-                f"but was: {supervisor.robot0Obj.get_score()}"
+                f"but was: {supervisor.robot_obj.get_score()}"
             ))
-            return supervisor.robot0Obj.get_score() == self._start_score - 5
+            return supervisor.robot_obj.get_score() == self._start_score - 5
 
         correct_type_bonus: float = 10.0
         if type(self._victim) == HazardMap:
             correct_type_bonus = 20.0
 
-        return (supervisor.robot0Obj.get_score() - self._start_score ==
+        return (supervisor.robot_obj.get_score() - self._start_score ==
                 (correct_type_bonus * multiplier) +
                 (self._victim.score_worth * multiplier))
 
@@ -194,7 +194,7 @@ class TestVictim(Test):
         Args:
             supervisor (Erebus): Erebus game supervisor object
         """
-        supervisor.victimManager.reset_victim_textures()
+        supervisor.victim_manager.reset_victim_textures()
 
 
 class TestCheckpoint(Test):
@@ -226,10 +226,10 @@ class TestCheckpoint(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        self._start_score = supervisor.robot0Obj.get_score()
-        checkpoints: list[Checkpoint] = supervisor.tileManager.checkpoints
+        self._start_score = supervisor.robot_obj.get_score()
+        checkpoints: list[Checkpoint] = supervisor.tile_manager.checkpoints
         self._checkpoint = checkpoints[self._index]
-        supervisor.robot0Obj.position = list(self._checkpoint.center)
+        supervisor.robot_obj.position = list(self._checkpoint.center)
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
@@ -248,7 +248,7 @@ class TestCheckpoint(Test):
             self.set_test_report("Could not find checkpoint")
             return False
 
-        grid: int = supervisor.tileManager.coord2grid(
+        grid: int = supervisor.tile_manager.coord2grid(
             self._checkpoint.center, supervisor)
         room_num: int = (
             supervisor
@@ -259,8 +259,8 @@ class TestCheckpoint(Test):
             .getSFInt32() - 1
         )
 
-        multiplier = supervisor.tileManager.ROOM_MULT[room_num]
-        return (supervisor.robot0Obj.get_score() ==
+        multiplier = supervisor.tile_manager.ROOM_MULT[room_num]
+        return (supervisor.robot_obj.get_score() ==
                 self._start_score + (10 * multiplier))
 
     @override
@@ -296,13 +296,13 @@ class TestRelocate(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        self._start_score = supervisor.robot0Obj.get_score()
-        humans: list[Victim] = supervisor.victimManager.humans
+        self._start_score = supervisor.robot_obj.get_score()
+        humans: list[Victim] = supervisor.victim_manager.victims
         victim: Victim = humans[self._index]
 
-        TestRunner.robotToVictim(supervisor.robot0Obj, victim)
+        TestRunner.robotToVictim(supervisor.robot_obj, victim)
         supervisor.relocate_robot()
-        supervisor.robot0Obj.reset_time_stopped()
+        supervisor.robot_obj.reset_time_stopped()
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
@@ -316,7 +316,7 @@ class TestRelocate(Test):
         Returns:
             bool: If the correct penalty was given
         """
-        return supervisor.robot0Obj.get_score() == self._start_score - 5
+        return supervisor.robot_obj.get_score() == self._start_score - 5
 
     @override
     def post_test(self, supervisor: Erebus) -> None: pass
@@ -345,13 +345,13 @@ class TestBlackHole(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        supervisor.robot0Obj.increase_score("TestBlackHole starting test score",
+        supervisor.robot_obj.increase_score("TestBlackHole starting test score",
                                             100, supervisor)
-        self._start_score = supervisor.robot0Obj.get_score()
+        self._start_score = supervisor.robot_obj.get_score()
 
         supervisor.config.disable_lop = False
-        supervisor.robot0Obj.reset_time_stopped()
-        supervisor.robot0Obj.position = [-10., -1., -10.]
+        supervisor.robot_obj.reset_time_stopped()
+        supervisor.robot_obj.position = [-10., -1., -10.]
 
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
@@ -366,7 +366,7 @@ class TestBlackHole(Test):
         Returns:
             bool: If the correct penalty was given
         """
-        return supervisor.robot0Obj.get_score() == self._start_score - 5
+        return supervisor.robot_obj.get_score() == self._start_score - 5
 
     @override
     def post_test(self, supervisor: Erebus) -> None:
@@ -405,11 +405,11 @@ class TestSwamp(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        self._start_score = supervisor.robot0Obj.get_score()
-        swamps: list[Swamp] = supervisor.tileManager.swamps
+        self._start_score = supervisor.robot_obj.get_score()
+        swamps: list[Swamp] = supervisor.tile_manager.swamps
         swamp: Swamp = swamps[self._index]
 
-        supervisor.robot0Obj.position = list(swamp.center)
+        supervisor.robot_obj.position = list(swamp.center)
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 6, 6, b'U')
 
@@ -423,7 +423,7 @@ class TestSwamp(Test):
         Returns:
             bool: Whether the robot is slowed by the correct multiplier amount
         """
-        vel: list[float] = supervisor.robot0Obj.wb_node.getVelocity()
+        vel: list[float] = supervisor.robot_obj.velocity
         # 0.02 for wheel velocity of 1
         # 0.02 * 0.32 multiplier = 0.006
         return any(math.isclose(abs(v), 0.006, abs_tol=0.0005) for v in vel)
@@ -463,11 +463,11 @@ class TestLOP(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        supervisor.robot0Obj.increase_score("TestLOP starting test score",
+        supervisor.robot_obj.increase_score("TestLOP starting test score",
                                             100, supervisor)
         supervisor.config.disable_lop = False
-        supervisor.robot0Obj.reset_time_stopped()
-        self._start_score = supervisor.robot0Obj.get_score()
+        supervisor.robot_obj.reset_time_stopped()
+        self._start_score = supervisor.robot_obj.get_score()
 
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 25, 0, 0, b'U')
@@ -482,7 +482,7 @@ class TestLOP(Test):
         Returns:
             bool: If the correct penalty was given
         """
-        return supervisor.robot0Obj.get_score() == self._start_score - 5
+        return supervisor.robot_obj.get_score() == self._start_score - 5
 
     @override
     def post_test(self, supervisor: Erebus) -> None:
@@ -491,7 +491,7 @@ class TestLOP(Test):
         Args:
             supervisor (Erebus): Erebus game supervisor object
         """
-        supervisor.robot0Obj.reset_time_stopped()
+        supervisor.robot_obj.reset_time_stopped()
         supervisor.config.disable_lop = True
 
 
@@ -524,18 +524,18 @@ class TestRunner:
 
         init += [TestBlackHole()]
         init += [TestSwamp(i)
-                 for i in range(len(supervisor.tileManager.swamps))]
+                 for i in range(len(supervisor.tile_manager.swamps))]
         init += [TestLOP()]
         init += [TestCheckpoint(i)
-                 for i in range(len(supervisor.tileManager.checkpoints))]
-        init += [TestVictim(i, offset, supervisor.victimManager.hazards)
+                 for i in range(len(supervisor.tile_manager.checkpoints))]
+        init += [TestVictim(i, offset, supervisor.victim_manager.hazards)
                  for offset in np.linspace(0.03, 0.13, 5)
-                 for i in range(len(supervisor.victimManager.hazards))]
-        init += [TestVictim(i, offset, supervisor.victimManager.humans)
+                 for i in range(len(supervisor.victim_manager.hazards))]
+        init += [TestVictim(i, offset, supervisor.victim_manager.victims)
                  for offset in np.linspace(0.03, 0.13, 5)
-                 for i in range(len(supervisor.victimManager.humans))]
+                 for i in range(len(supervisor.victim_manager.victims))]
         init += [TestRelocate(i)
-                 for i in range(len(supervisor.victimManager.humans))]
+                 for i in range(len(supervisor.victim_manager.victims))]
         return init
 
     def get_stage(self, received_data: bytes) -> bool:

@@ -1,7 +1,15 @@
+from __future__ import annotations
+
 from enum import Enum
 
 from controller import Node
 from Robot import Robot
+
+from typing import Sequence
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Victim import VictimObject
 
 
 class FollowSide(Enum):
@@ -77,14 +85,42 @@ class Camera():
         self.wb_viewpoint_node.getField('follow').setSFString(name)
         self.set_view_point(follow_point)
 
-    def update_view(self, side: FollowSide, follow_point: Robot) -> None:
+    def _update_view(self, side: FollowSide, follow_point: Robot) -> None:
         """Update the camera's viewpoint angle to point towards the
         side specified
 
         Args:
             side (FollowSide): Side to face
-            follow_point (Robot): Simulation robot to rotate camera around
+            follow_point (Robot): Simulation robot to rotate the camera around
         """
         if side != self.side:
             self.side = side
             self.set_view_point(follow_point)
+
+    def rotate_to_victim(
+        self,
+        follow_point: Robot,
+        victim_list: Sequence[VictimObject]
+    ) -> None:
+        """Orients the camera to face the closest victim to the follow point
+
+        Args:
+            follow_point (Robot): Simulation robot to rotate the camera around
+            victim_list (Sequence[VictimObject]): Sequence of VictimObjects
+            to be candidates to face towards
+        """
+
+        near_victims: Sequence[VictimObject] = [
+            h for h in victim_list
+            if h.check_position(follow_point.position, 0.20) and
+            h.on_same_side(follow_point)
+        ]
+
+        if len(near_victims) > 0:
+            if (len(near_victims) > 1):
+                # Sort by closest
+                near_victims.sort(
+                    key=lambda v: v.get_distance(follow_point.position)
+                )
+            side: FollowSide = near_victims[0].get_side()
+            self._update_view(side, follow_point)

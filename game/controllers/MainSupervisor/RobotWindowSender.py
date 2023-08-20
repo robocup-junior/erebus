@@ -1,5 +1,6 @@
 from controller import Supervisor
 
+from ConsoleLog import Console
 
 class RWSender:
     """Object for sending message to the robot window. Records history of 
@@ -29,7 +30,9 @@ class RWSender:
             args (str, optional): Optional args associated with the robot window
             command. Defaults to ''.
         """
-        self.supervisor.wwiSendText(f"{command},{args}")
+        wwi_msg: str = f"{command},{args}"
+        Console.log_debug(f"Sent wwi message: {wwi_msg}")
+        self.supervisor.wwiSendText(wwi_msg)
         self.update_history(command, args)
 
     def send_all(self):

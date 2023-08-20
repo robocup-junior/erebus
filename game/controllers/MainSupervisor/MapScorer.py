@@ -156,14 +156,17 @@ def _calculate_map_completeness(
     return max(completeness_list)
 
 
-def calculateScore(answer_matrices: list, sub_matrix: list) -> float:
+def calculateScore(
+    answer_matrices: list | npt.NDArray,
+    sub_matrix: list | npt.NDArray
+) -> float:
     """
     Calculate the quantifiable completeness score of a matrix, compared to
     another
 
     Args:
-        answer_matrix (list): answer matrix to check against
-        subMatrix (list): matrix to compare
+        answer_matrix (list | npt.NDArray): answer matrix to check against
+        subMatrix (list | npt.NDArray): matrix to compare
 
     Returns:
         float: completeness score

@@ -53,7 +53,7 @@ class RobotHistory(Queue):
         # Master history to store all events without dequeues
         self.master_history: list[tuple[str, str]] = []
 
-        self.time_elapsed: int = 0
+        self.time_elapsed: float = 0.0
         self.display_to_recording_label: bool = False
 
     def _update_master_history(self, data: str) -> tuple[str, str]:
@@ -95,7 +95,7 @@ class RobotHistory(Queue):
             for h in range(min(len(histories), 5)):
                 history_label = (f"[{histories[h][0]}] {histories[h][1]}\n"
                                  f"{history_label}")
-            erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2)
+            erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2) # type: ignore
 
 
 class Robot:
@@ -104,7 +104,7 @@ class Robot:
     """
 
     def __init__(self):
-        self.wb_node: Node
+        self._wb_node: Node
         self.wb_translationField: Field
         self.wb_rotationField: Field
 
@@ -135,7 +135,6 @@ class Robot:
         self.last_visited_checkpoint_pos: tuple[float,
                                                 float, float] | None = None
         self.visited_checkpoints: list = []
-        self.start_tile: StartTile | None = None
 
     @property
     def position(self) -> list[float]:
@@ -152,6 +151,20 @@ class Robot:
     @rotation.setter
     def rotation(self, pos: list[float]) -> None:
         self.wb_rotationField.setSFRotation(pos)
+        
+    @property
+    def velocity(self) -> list[float]:
+        return self._wb_node.getVelocity()
+        
+    def reset_physics(self):
+        """Stops the inertia of the robot and its descendants.
+        """
+        self._wb_node.resetPhysics()
+        
+    def remove_node(self):
+        """Removes the robot from the Webots scene tree
+        """
+        self._wb_node.remove()
 
     def set_node(self, node: Node) -> None:
         """Sets the robot's webots node object
@@ -159,9 +172,9 @@ class Robot:
         Args:
             node (Node): Webots node object associated with the robot
         """
-        self.wb_node: Node = node
-        self.wb_translationField: Field = self.wb_node.getField('translation')
-        self.wb_rotationField: Field = self.wb_node.getField('rotation')
+        self._wb_node: Node = node
+        self.wb_translationField: Field = self._wb_node.getField('translation')
+        self.wb_rotationField: Field = self._wb_node.getField('rotation')
 
     def set_max_velocity(self, vel: float) -> None:
         """Set the max angular velocity the robot can move at.
@@ -170,7 +183,7 @@ class Robot:
             vel (float): Maximum angular velocity
         """
         # TODO this doesn't actually work...
-        self.wb_node.getField('wheel_mult').setSFFloat(vel)
+        self._wb_node.getField('wheel_mult').setSFFloat(vel)
 
     def _is_stopped(self) -> bool:
         """Returns whether the robot has stopped moving
@@ -178,7 +191,7 @@ class Robot:
         Returns:
             bool: True if the robot is not moving (still)
         """
-        vel: list[float] = self.wb_node.getVelocity()
+        vel: list[float] = self._wb_node.getVelocity()
         return all(abs(ve) < 0.001 for ve in vel)
 
     def time_stopped(self, supervisor: Supervisor) -> float:
@@ -266,21 +279,29 @@ class Robot:
             log_str += str(event[0]) + " " + event[1] + "\n"
 
         return log_str
+    
+    def set_start_pos(self, start_tile: StartTile):
+        '''Set robot starting position'''
 
-    def set_starting_orientation(self) -> None:
+        start_tile.set_visible(False)
+        
+        self.last_visited_checkpoint_pos = start_tile.center
+        self.visited_checkpoints.append(start_tile.center)
+
+        self.position = [start_tile.center[0], start_tile.center[1], 
+                         start_tile.center[2]]
+        self._set_starting_orientation(start_tile)
+
+    def _set_starting_orientation(self, start_tile: StartTile) -> None:
         """Sets starting orientation for robot using wall data from starting 
         tile
         """
-        if self.start_tile is None:
-            Console.log_err("No robot start tile initialised. Could not set "
-                            "starting orientation")
-            return
         
         # Get starting tile walls
-        top: int = self.start_tile.wb_node.getField("topWall").getSFInt32()
-        right: int = self.start_tile.wb_node.getField("rightWall").getSFInt32()
-        bottom: int = self.start_tile.wb_node.getField("bottomWall").getSFInt32()
-        left: int = self.start_tile.wb_node.getField("leftWall").getSFInt32()
+        top: bool = start_tile.is_wall_present("topWall")
+        right: bool = start_tile.is_wall_present("rightWall")
+        bottom: bool = start_tile.is_wall_present("bottomWall")
+        left: bool = start_tile.is_wall_present("leftWall")
 
         # top: 0
         # left: pi/2
@@ -288,8 +309,8 @@ class Robot:
         # bottom: pi
         pi: float = 3.14
         direction: float = 0.0
-        walls: list[list[float]] = [[top, 0.0], [right, -pi/2],
-                                    [bottom, pi], [left, pi/2]]
+        walls: list[tuple[bool, float]] = [(top, 0.0), (right, -pi/2),
+                                           (bottom, pi), (left, pi/2)]
 
         for i in range(len(walls)):
             # If there isn't a wall in the direction
@@ -358,12 +379,12 @@ class Robot:
             Console.log_err("Incorrect data format sent")
             Console.log_err(str(e))
 
-    def update_time_elapsed(self, time_elapsed: int) -> None:
+    def update_time_elapsed(self, time_elapsed: float) -> None:
         """Updates the robot's history with the current time elapsed. Used to
         keep the history's record timestamps up to date.
 
         Args:
-            time_elapsed (int): Current time elapsed (in seconds)
+            time_elapsed (float): Current time elapsed (in seconds)
         """
         self.history.time_elapsed = time_elapsed
 
@@ -435,7 +456,7 @@ class Robot:
             room_num: int = (
                 supervisor.getFromDef("WALLTILES")
                 .getField("children")
-                .getMFNode(grid)
+                .getMFNode(grid) # type: ignore
                 .getField("room").getSFInt32() - 1
             )
             self.increase_score("Found checkpoint", 10, supervisor,
@@ -461,13 +482,13 @@ class Robot:
                 # Cap the robot's velocity to 2
                 self.set_max_velocity(TileManager.SWAMP_SLOW_MULT)
                 # Reset physics
-                self.wb_node.resetPhysics()
+                self._wb_node.resetPhysics()
                 # Update history
                 self.history.enqueue("Entered swamp", erebus)
             else:
                 # If not in swamp, reset max velocity to default
                 self.set_max_velocity(max_velocity)
                 # Reset physics
-                self.wb_node.resetPhysics()
+                self._wb_node.resetPhysics()
                 # Update history
                 self.history.enqueue("Exited swamp,", erebus)
