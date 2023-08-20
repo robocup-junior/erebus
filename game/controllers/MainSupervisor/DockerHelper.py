@@ -61,7 +61,9 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
     """
     Console.log_info(f"Checking if erebus image exists (tag={EREBUS_IMAGE})")
     if not _erebus_image_exists():
-        Console.log_err(f"Could not find docker image {EREBUS_IMAGE}. To fix this: \n\t1. Make sure the docker daemon is running. \n\t2. Run: `docker pull {EREBUS_IMAGE}` to download the latest version.")
+        Console.log_err(f"Could not find docker image {EREBUS_IMAGE}. To fix this: \n"
+                        f"\t1. Make sure the docker daemon is running. \n"
+                        f"\t2. Run: `docker pull {EREBUS_IMAGE}` to download the latest version.")
         return None
     
     try:
@@ -73,7 +75,8 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
     
     # Build container
     try:
-        command: list[str] = ["docker", "build", "--tag" ,EREBUS_CONTROLLER_TAG, project_dir]
+        command: list[str] = ["docker", "build", 
+                              "--tag" ,EREBUS_CONTROLLER_TAG, project_dir]
         Console.log_info(f"Building project image ($ {' '.join(command)})")
         build_process: subprocess.CompletedProcess = subprocess.run(
             command,
@@ -90,12 +93,15 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
     
     # Run container
     try:
-        command: list[str] = ["docker", "run", "--env", f"EREBUS_SERVER={ip_address}", "--rm", EREBUS_CONTROLLER_TAG]
+        command: list[str] = ["docker", "run", 
+                              "--env", f"EREBUS_SERVER={ip_address}", 
+                              "--rm",
+                              EREBUS_CONTROLLER_TAG]
         Console.log_info(f"Running container ($ {' '.join(command)})")
         run_process: subprocess.Popen = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            stderr=subprocess.STDOUT,
         )
     except Exception as e:
         Console.log_err(f"Error running project image - {e}")

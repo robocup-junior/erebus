@@ -851,9 +851,6 @@ class Erebus(Supervisor):
             self._last_time = self.getTime()
             # Step the simulation on
             step = self.step(TIME_STEP)
-            # Print docker container output (if applicable)
-            if self._docker_process:
-                print_process_stdout(self._docker_process)
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating

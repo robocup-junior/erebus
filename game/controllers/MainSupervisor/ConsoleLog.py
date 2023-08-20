@@ -49,7 +49,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_ERROR, msg, Console._COLOR_ERROR, sep)
 
@@ -62,7 +62,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_FAIL, msg, Console._COLOR_ERROR, sep)
 
@@ -75,7 +75,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_PASS, msg, Console._COLOR_SUCC, sep)
 
@@ -88,7 +88,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_SUCC, msg, Console._COLOR_SUCC, sep)
 
@@ -101,7 +101,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_WARN, msg, Console._COLOR_WARN, sep)
 
@@ -114,7 +114,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_INFO, msg, Console._COLOR_INFO, sep)
 
@@ -129,7 +129,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         Console._log(Console._PREFIX_CONTROLLER,
                      msg.strip(), Console._COLOR_CONTROLLER, sep)
@@ -145,7 +145,7 @@ class Console:
         Args:
             msg (str): Message to display
             sep (str, optional): Separator used to split the message. 
-            Defaults to "\n".
+            Defaults to "\\n".
         """
         if Console.DEBUG_MODE:
             Console._log(Console._PREFIX_DEBUG, msg, Console._COLOR_DEBUG, sep)
