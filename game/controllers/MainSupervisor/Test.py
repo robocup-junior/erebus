@@ -1,278 +1,589 @@
+from __future__ import annotations
+from re import S
 from ConsoleLog import Console
-import struct
-import AutoInstall
-from abc import abstractmethod
-import math
+from Victim import VictimObject
 from Victim import HazardMap
+from Victim import Victim
+from Robot import Robot
+from Tile import Checkpoint, Swamp
+from typing import TYPE_CHECKING
+from typing import Sequence
 
-AutoInstall._import("np", "numpy")
+import struct
+import math
+from abc import ABC, abstractmethod
 
-class Test:
-    def __init__(self):
-        self._report = ""
-        
-    def getTestReport(self) -> str:
+from ErebusObject import ErebusObject
+
+import numpy as np
+from overrides import override
+
+if TYPE_CHECKING:
+    from MainSupervisor import Erebus
+
+class Test(ErebusObject, ABC):
+    def __init__(self, erebus: Erebus):
+        """Initialises a new Erebus (unit) test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
+        self._report: str = ""
+
+    def get_test_report(self) -> str:
+        """Get test report string, a string detailing the result of the test 
+
+        Returns:
+            str: Test report message
+        """
         return self._report
-    
-    def setTestReport(self, s: str):
+
+    def set_test_report(self, s: str):
+        """Set test report string, a string detailing the result of the test
+
+        Args:
+            s (str): Test report message
+        """
         self._report = s
-    
-    @abstractmethod
-    def preTest(self, supervisor) -> tuple : raise NotImplementedError
 
-    @abstractmethod
-    def test(self, supervisor) : raise NotImplementedError
     
     @abstractmethod
-    def postTest(self, supervisor) : raise NotImplementedError
-    
-class TestVictim(Test):
-    
-    def __init__(self, index, offset, victimList):
-        super().__init__()
-        self.victim = None
-        self.startScore = 0
-        self.index = index
-        self.offset = offset
-        self.victimList = victimList
-    
-    def preTest(self, supervisor):
-        Console.log_info(f"Testing Offset {self.offset}")
-        self.startScore = supervisor.robot0Obj.getScore()  
-        supervisor.robot0Obj.resetTimeStopped()
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Abstract method run before the test is computed. Used to initialise
+        what the robot will do during the test.
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data sent to the robot test 
+            controller in the form [identify human, wait length, wheel 1 vel, 
+            wheel 2 vel, human type]
+        """
+        ...
+
         
-        self.victim = self.victimList[self.index]
-        TestRunner.robotToVictim(supervisor.robot0Obj, self.victim, self.offset)
-        victimType = bytes(self.victim.get_simple_type(), "utf-8") # The victim type being sent is the letter 'H' for harmed victim
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (1, 3, 0, 0, victimType)
+    @abstractmethod
+    def test(self) -> bool:
+        """Abstract method to return the result of the test to be run.
 
-    def test(self, supervisor):
-        grid = supervisor.tileManager.coord2grid(self.victim.wb_translationField.getSFVec3f(), supervisor)
-        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-        multiplier = supervisor.tileManager.ROOM_MULT[roomNum]
-        if self.offset > 0.09:
-            self.setTestReport(f"Expected score: {self.startScore - 5}, but was: {supervisor.robot0Obj.getScore()}")
-            return supervisor.robot0Obj.getScore() == self.startScore - 5
-        correctTypeBonus = 10
-        if type(self.victim) == HazardMap:
-            correctTypeBonus = 20
-        return supervisor.robot0Obj.getScore() - self.startScore == (correctTypeBonus * multiplier) + ( self.victim.scoreWorth * multiplier)
+        Returns:
+            bool: Whether the test has passed or not. True if passed, False 
+            otherwise
+        """
+        ...
+
     
-    def postTest(self, supervisor):
-        supervisor.victimManager.resetVictimsTextures()
+    @abstractmethod
+    def post_test(self) -> None:
+        """Abstract method run after the test is computed. Anything that needs
+        to be cleaned up or done after a test (e.g. reset victim textures)
+        should be done here
+        """
+        ...
+
+
+class TestVictim(Test):
+    """Test victim detection at various different ranges away from both
+    victim and hazards
+    """
+    # TODO position offset is not very reliable (gets stuck in walls)
+    # TODO there are no negative tests (e.g. incorrect victim type)
+
+    def __init__(
+        self, 
+        erebus: Erebus,
+        index: int,
+        offset: float,
+        victim_list: Sequence[VictimObject],
+    ) -> None:
+        """Initialises a new victim test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+            index (int): victim index of `victim_list` to test
+            offset (float): position offset from victim to test (in meters)
+            victim_list (Sequence[VictimObject]): list of all victims (e.g. all
+            hazards or victims) 
+        """
+        super().__init__(erebus)
+        self._index: int = index
+        self._offset: float = offset
+
+        self._start_score: float = 0
+
+        self._victim: None | VictimObject = None
+        self._victim_list: Sequence[VictimObject] = victim_list
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Moves the robot to it's respective offset from the victim. Sends
+        info to the robot controller to stop and identify the correct victim 
+        type
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        Console.log_info(f"Testing Offset {self._offset}")
+        self._start_score = self._erebus.robot_obj.get_score()
+        self._erebus.robot_obj.reset_time_stopped()
+
+        self._victim = self._victim_list[self._index]
+        TestRunner.robotToVictim(self._erebus.robot_obj,
+                                 self._victim, self._offset)
+        # The victim type being sent is the letter 'H' for harmed victim
+        victim_type: bytes = bytes(self._victim.get_simple_type(), "utf-8")
+        # identify human, wait , wheel 1, wheel 2, human type
+        return (1, 3, 0, 0, victim_type)
+
+    @override
+    def test(self) -> bool:
+        """Test whether the test controller correctly detected the victim, and
+        the correct number of points were awarded, accounting for correct
+        victim identification and room multiplier
+
+        Returns:
+            bool: Whether or not the correct score was awarded to the robot.
+        """
+        if self._victim is None:
+            self.set_test_report("Could not find victim")
+            return False
+
+        grid: int = self._erebus.tile_manager.coord2grid(
+            self._victim.wb_translation_field.getSFVec3f(),
+            self._erebus
+        )
+        room_num: int = (
+            self._erebus.getFromDef("WALLTILES")
+            .getField("children")
+            .getMFNode(grid) # type: ignore
+            .getField("room")
+            .getSFInt32() - 1
+        )
+        multiplier: float = self._erebus.tile_manager.ROOM_MULT[room_num]
+
+        if self._offset > 0.09:
+            self.set_test_report((
+                f"Expected score: {self._start_score - 5}, "
+                f"but was: {self._erebus.robot_obj.get_score()}"
+            ))
+            return self._erebus.robot_obj.get_score() == self._start_score - 5
+
+        correct_type_bonus: float = 10.0
+        if type(self._victim) == HazardMap:
+            correct_type_bonus = 20.0
+
+        return (self._erebus.robot_obj.get_score() - self._start_score ==
+                (correct_type_bonus * multiplier) +
+                (self._victim.score_worth * multiplier))
+
+    @override
+    def post_test(self) -> None:
+        """Resets the victim textures, so the next test has victim textures
+        as unidentified
+        """
+        self._erebus.victim_manager.reset_victim_textures()
+
 
 class TestCheckpoint(Test):
-    def __init__(self,index):
-        super().__init__()
-        self.startScore = 0
-        self.checkpoint = None
-        self.index = index
-        
-    def preTest(self, supervisor):
-        self.startScore = supervisor.robot0Obj.getScore()  
-        checkpoints = supervisor.tileManager.checkpoints
-        self.checkpoint = checkpoints[self.index]
-        supervisor.robot0Obj.position = self.checkpoint.center
+    """Test checkpoints give points on entry
+    """
+    # TODO no tests that they dont give points on re-entry
+    
+    def __init__(self, erebus: Erebus, index: int):
+        """Initialises a new checkpoint test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+            index (int): Index of checkpoint to test (from list in tile manager)
+        """
+        super().__init__(erebus)
+        self._index: int = index
+        self._start_score: float = 0.0
+        self._checkpoint: None | Checkpoint = None
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Moves the robot to the corresponding checkpoint to test
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        self._start_score = self._erebus.robot_obj.get_score()
+        checkpoints: list[Checkpoint] = self._erebus.tile_manager.checkpoints
+        self._checkpoint = checkpoints[self._index]
+        self._erebus.robot_obj.position = list(self._checkpoint.center)
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
-    
-    def test(self, supervisor):
-        grid = supervisor.tileManager.coord2grid(self.checkpoint.center, supervisor)
-        roomNum = supervisor.getFromDef("WALLTILES").getField("children").getMFNode(grid).getField("room").getSFInt32() - 1
-        multiplier = supervisor.tileManager.ROOM_MULT[roomNum]
-        return supervisor.robot0Obj.getScore() == self.startScore + (10 * multiplier)
-    
-    def postTest(self, supervisor):
-        pass
+
+    @override
+    def test(self) -> bool:
+        """Test whether the correct amount of points (10 * room multiplier) are
+        awarded to the robot on checkpoint entry
+
+        Returns:
+            bool: If the correct amount of points were awarded
+        """
+        if self._checkpoint is None:
+            self.set_test_report("Could not find checkpoint")
+            return False
+
+        grid: int = self._erebus.tile_manager.coord2grid(
+            self._checkpoint.center, self._erebus)
+        room_num: int = (
+            self._erebus
+            .getFromDef("WALLTILES")
+            .getField("children")
+            .getMFNode(grid) # type: ignore
+            .getField("room")
+            .getSFInt32() - 1
+        )
+
+        multiplier = self._erebus.tile_manager.ROOM_MULT[room_num]
+        return (self._erebus.robot_obj.get_score() ==
+                self._start_score + (10 * multiplier))
+
+    @override
+    def post_test(self) -> None: pass
+
 
 class TestRelocate(Test):
-    def __init__(self,index):
-        super().__init__()
-        self.startScore = 0
-        self.index = index
-        
-    def preTest(self, supervisor):
-        self.startScore = supervisor.robot0Obj.getScore()  
-        humans = supervisor.victimManager.humans
-        self.victim = humans[self.index]
-        TestRunner.robotToVictim(supervisor.robot0Obj, self.victim)
-        supervisor.relocate_robot()
-        supervisor.robot0Obj.resetTimeStopped()
+    """Test if relocates give a -5 penalty
+    """
+    # TODO doesn't check if the robot was actually moved
+    
+    def __init__(self, erebus: Erebus, index: int):
+        """Initialises a new relocate test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+            index (int): Index of human victim to move to before relocate
+        """
+        super().__init__(erebus)
+        self._index: int = index
+        self._start_score: float = 0.0
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Moves the robot to a specified victim before relocating.
+        Increases the robot's score, to ensure the penalty will be applied.
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        self._start_score = self._erebus.robot_obj.get_score()
+        humans: list[Victim] = self._erebus.victim_manager.victims
+        victim: Victim = humans[self._index]
+
+        TestRunner.robotToVictim(self._erebus.robot_obj, victim)
+        self._erebus.relocate_robot()
+        self._erebus.robot_obj.reset_time_stopped()
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
-    
-    def test(self, supervisor):
-        return supervisor.robot0Obj.getScore() == self.startScore - 5
-    
-    def postTest(self, supervisor):
-        pass
+
+    @override
+    def test(self) -> bool:
+        """Tests a -5 point penalty is given to the robot
+
+        Returns:
+            bool: If the correct penalty was given
+        """
+        return self._erebus.robot_obj.get_score() == self._start_score - 5
+
+    @override
+    def post_test(self) -> None: pass
+
 
 class TestBlackHole(Test):
-    def __init__(self):
-        super().__init__()
-        self.startScore = 0
-        
-    def preTest(self, supervisor):
-        supervisor.robot0Obj.increaseScore("TestBlackHole staring test score", 100, supervisor)
-        self.startScore = supervisor.robot0Obj.getScore()  
-        supervisor.config.disableLOP = False
-        supervisor.robot0Obj.resetTimeStopped()
-        supervisor.robot0Obj.position = [-10,-1,-10]
+    """Test blackholes correctly relocate and give a point penalty (similar to
+    relocates)
+    """
+    def __init__(self, erebus: Erebus):
+        """Intialises a new black hole test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """        
+        super().__init__(erebus)
+        self._start_score: float = 0.0
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Moves the robot below the world, to simulate falling into a 
+        black-hole. 
+        Increases the robot's score, to ensure the penalty will be applied.
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        self._erebus.robot_obj.increase_score("TestBlackHole starting test score",
+                                              100)
+        self._start_score = self._erebus.robot_obj.get_score()
+
+        self._erebus.config.disable_lop = False
+        self._erebus.robot_obj.reset_time_stopped()
+        self._erebus.robot_obj.position = [-10., -1., -10.]
+
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
-    
-    def test(self, supervisor):
-        return supervisor.robot0Obj.getScore() == self.startScore - 5
-    
-    def postTest(self, supervisor):
-        supervisor.config.disableLOP = True
-        
+
+    @override
+    def test(self) -> bool:
+        """Tests a -5 point penalty is given to the robot.
+
+        Returns:
+            bool: If the correct penalty was given
+        """
+        return self._erebus.robot_obj.get_score() == self._start_score - 5
+
+    @override
+    def post_test(self) -> None:
+        """Disables lack of progress, since most other tests need this off
+        """
+        self._erebus.config.disable_lop = True
+
+
 class TestSwamp(Test):
-    def __init__(self, index):
-        super().__init__()
-        self.startScore = 0
-        self.index = index
-        
-    def preTest(self, supervisor):
-        self.startScore = supervisor.robot0Obj.getScore()  
-        swamps = supervisor.tileManager.swamps
-        swamp = swamps[self.index]
-        supervisor.robot0Obj.position = swamp.center
+    """Tests swamps give a slow penalty when entering
+    """
+    def __init__(self, erebus: Erebus, index: int):
+        """Initialises a new swamp test
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+            index (int): Index of swamp to test slow on (from 
+            `TileManager.swamps`)
+        """
+        super().__init__(erebus)
+        self._index: int = index
+        self._start_score: float = 0.0
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Moves the robot to the specified swamp, and enables wheel movement
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        self._start_score = self._erebus.robot_obj.get_score()
+        swamps: list[Swamp] = self._erebus.tile_manager.swamps
+        swamp: Swamp = swamps[self._index]
+
+        self._erebus.robot_obj.position = list(swamp.center)
         # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 1, 1, b'U')
-    
-    def test(self, supervisor):
-        vel = supervisor.robot0Obj.wb_node.getVelocity()
+        return (0, 1, 6, 6, b'U')
+
+    @override
+    def test(self) -> bool:
+        """Tests whether robot movement is slowed by the swamp
+
+        Returns:
+            bool: Whether the robot is slowed by the correct multiplier amount
+        """
+        vel: list[float] = self._erebus.robot_obj.velocity
         # 0.02 for wheel velocity of 1
         # 0.02 * 0.32 multiplier = 0.006
-        ans = any(math.isclose(abs(v),0.006, abs_tol=0.0005) for v in vel)
-        return ans
-    
-    def postTest(self, supervisor):
-        supervisor.config.disableLOP = True
+        return any(math.isclose(abs(v), 0.006, abs_tol=0.0005) for v in vel)
+
+    @override
+    def post_test(self) -> None:
+        """Disables lack of progress, since most other tests need this off
+        """
+        self._erebus.config.disable_lop = True
+
 
 class TestLOP(Test):
-    """Test auto LOP after 20 seconds
-    Make sure this isn't run first, since auto LOPs dont happen from the starting tile 
+    """Test auto LOP after 20 seconds.
+    
+    Note: Make sure this isn't run first, since auto LOPs dont happen from the
+    starting tile 
     """
-    def __init__(self):
-        super().__init__()
-        self.startScore = 0
-        
-    def preTest(self, supervisor):
-        supervisor.robot0Obj.increaseScore("TestLOP staring test score", 100, supervisor)
-        supervisor.config.disableLOP = False
-        supervisor.robot0Obj.resetTimeStopped()
-        self.startScore = supervisor.robot0Obj.getScore() 
+
+    def __init__(self, erebus: Erebus):
+        """Initialises new automated lack of progress test 
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
+        self._start_score: float = 0.0
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+        """Waits for 20s until an automatic relocation is applied.
+        Increases the robot's score, to ensure the penalty will be applied.
+
+        Returns:
+            tuple[int, int, int, int, bytes]: Data to send to test controller
+        """
+        self._erebus.robot_obj.increase_score("TestLOP starting test score",
+                                              100)
+        self._erebus.config.disable_lop = False
+        self._erebus.robot_obj.reset_time_stopped()
+        self._start_score = self._erebus.robot_obj.get_score()
+
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 25, 0, 0, b'U')
-    
-    def test(self, supervisor):
-        return supervisor.robot0Obj.getScore() == self.startScore - 5
-    
-    def postTest(self, supervisor):
-        supervisor.robot0Obj.resetTimeStopped()
-        supervisor.config.disableLOP = True
 
-class TestRunner:
-    
-    
-    def __init__(self, supervisor):
-        self.tests = []
-        
-        self.stage = 0
-        self.startTest = False
-        self.preTest = False
-        self.finishedTest = False
-            
-        self.fails = 0
-        self.passes = 0
-        self.finished = False
-        
-        init = self.tests
-        init += [TestBlackHole()]
-        init += [TestSwamp(i) for i in range(len(supervisor.tileManager.swamps))]
-        init += [TestLOP()]
-        init += [TestCheckpoint(i) for i in range(len(supervisor.tileManager.checkpoints))]
-        init += [TestVictim(i, ofst, supervisor.victimManager.hazards) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.hazards))]
-        init += [TestVictim(i, ofst, supervisor.victimManager.humans) for ofst in np.linspace(0.03,0.13,5) for i in range(len(supervisor.victimManager.humans))]
-        init += [TestRelocate(i) for i in range(len(supervisor.victimManager.humans))]
-        self.tests = init
-    
-    def getStage(self, receivedData) -> bool:
-        if len(receivedData) == 8:
-            try: 
-                tup = struct.unpack('c i', receivedData)
+    @override
+    def test(self) -> bool:
+        """Tests a -5 point penalty is given to the robot.
+
+        Returns:
+            bool: If the correct penalty was given
+        """
+        return self._erebus.robot_obj.get_score() == self._start_score - 5
+
+    @override
+    def post_test(self) -> None:
+        """Disables lack of progress, since most other tests need this off
+        """
+        self._erebus.robot_obj.reset_time_stopped()
+        self._erebus.config.disable_lop = True
+
+
+class TestRunner(ErebusObject):
+    """Erebus test runner manager, used to run all Erebus (unit) tests. Records
+    test successes and failures for each test run
+    """
+
+    def __init__(self, erebus: Erebus):
+        """Initialises new test runner
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
+        self._tests: list[Test] = []
+
+        self._stage: int = 0
+        self._start_test: bool = False
+        self._pre_test: bool = False
+        self._finished_test: bool = False
+
+        self._fails: int = 0
+        self._passes: int = 0
+        self._finished: bool = False
+
+        self._tests = self.add_tests()
+
+    def add_tests(self) -> list[Test]:
+        """Adds all tests to be run by the test runner
+
+        Returns:
+            list[Test]: List of tests to run
+        """
+        init: list[Test] = self._tests
+
+        init += [TestBlackHole(self._erebus)]
+        init += [TestSwamp(self._erebus, i)
+                 for i in range(len(self._erebus.tile_manager.swamps))]
+        init += [TestLOP(self._erebus)]
+        init += [TestCheckpoint(self._erebus, i)
+                 for i in range(len(self._erebus.tile_manager.checkpoints))]
+        init += [TestVictim(self._erebus, i, offset, 
+                            self._erebus.victim_manager.hazards)
+                 for offset in np.linspace(0.03, 0.13, 5)
+                 for i in range(len(self._erebus.victim_manager.hazards))]
+        init += [TestVictim(self._erebus, i, offset, 
+                            self._erebus.victim_manager.victims)
+                 for offset in np.linspace(0.03, 0.13, 5)
+                 for i in range(len(self._erebus.victim_manager.victims))]
+        init += [TestRelocate(self._erebus, i)
+                 for i in range(len(self._erebus.victim_manager.victims))]
+        return init
+
+    def get_stage(self, received_data: bytes) -> bool:
+        """Gets the current stage of the test runner via the received data
+        from the test controller.
+
+        Args:
+            received_data (bytes): Emitter data from test controller to process
+
+        Returns:
+            bool: Whether valid stage data was received from the emitter bytes.
+            True if a test or end test message was received. False otherwise.
+        """
+        if len(received_data) == 8:
+            try:
+                tup = struct.unpack('c i', received_data)
                 message = [tup[0].decode("utf-8"), tup[1]]
-                                        
-                if message[0] == 'T' and message[1] == self.stage:
-                    self.startTest = True    
-                if message[0] == 'F' and message[1] == self.stage:
-                    self.finishedTest = True
+
+                if message[0] == 'T' and message[1] == self._stage:
+                    self._start_test = True
+                if message[0] == 'F' and message[1] == self._stage:
+                    self._finished_test = True
                 return True
             except:
                 pass
         return False
-    
 
     @staticmethod
-    def sideToVector(side: str) -> np.array:
-        # [0,0,1] = bot
-        # [0,0,-1] = top
-        # [1,0,0] = right
-        # [-1,0,0] = left
-        if side == 'bottom':
-            return np.array([0,0,1])
-        if side == 'top':
-            return np.array([0,0,-1])
-        if side == 'right':
-            return np.array([1,0,0])
-        if side == 'left':
-            return np.array([-1,0,0])
-    
-    @staticmethod
-    def robotToVictim(robot, victim, offset=0.06) -> None:
+    def robotToVictim(
+        robot: Robot,
+        victim: VictimObject,
+        offset: float = 0.06
+    ) -> None:
+        """Moves the robot to a specified victim, with an offset directly 
+        perpendicular away from it
+
+        Args:
+            robot (Robot): Robot game object
+            victim (VictimObject): Victim object to move to
+            offset (float, optional): Offset away from victim in meters.
+            Defaults to 0.06.
+        """
         norm = victim.get_surface_normal()
-            
-        robot.position = list(np.array([victim.position[0],robot.position[1],victim.position[2]]) + (norm * offset))
-    
-    def runTest(self, supervisor) -> None:
-        # self.stage == 0 and 
-        if self.startTest and not self.preTest:
-            Console.log_warn(f"Starting test {str(self.stage)} ({self.tests[self.stage].__class__.__name__}) ")
 
-            params = self.tests[self.stage].preTest(supervisor)
+        robot.position = list(np.array([
+            victim.position[0],
+            robot.position[1],
+            victim.position[2]
+        ]) + (norm * offset))
+
+    def _run_test(self) -> None:
+        """Runs the current test, and handles moving to the next test when
+        the previous has ended
+        """
+        if self._start_test and not self._pre_test:
+            Console.log_warn((
+                f"Starting test {str(self._stage)} "
+                f"({self._tests[self._stage].__class__.__name__})"
+            ))
+
+            params: tuple = self._tests[self._stage].pre_test()
             # G, stage, identify human, wait , wheel 1, wheel 2, human type
-            message = struct.pack("c i i i i i c", b'G', self.stage, *params)
-            supervisor.emitter.send(message)
+            message = struct.pack("c i i i i i c", b'G', self._stage, *params)
+            self._erebus.emitter.send(message)
 
-            self.preTest = True
+            self._pre_test = True
 
-        if self.startTest and self.finishedTest:
-            if self.tests[self.stage].test(supervisor):
-                Console.log_pass(f"Test {str(self.stage)}/{len(self.tests)} Passed")
-                self.passes += 1
+        if self._start_test and self._finished_test:
+            if self._tests[self._stage].test():
+                Console.log_pass((f"Test {str(self._stage)}/"
+                                  f"{len(self._tests)} Passed"))
+                self._passes += 1
             else:
-                Console.log_fail(f"Test {str(self.stage)}/{len(self.tests)-1} Failed")
-                if self.tests[self.stage].getTestReport() != "":
-                    Console.log_fail(f"Report: {self.tests[self.stage].getTestReport()}")
-                self.fails += 1
-                
-            self.tests[self.stage].postTest(supervisor)
-                
-            self.tests[self.stage].setTestReport("")
-            self.startTest = False
-            self.finishedTest = False
-            self.preTest = False
-            self.stage += 1
-            
-    
-    def run(self, supervisor) -> None:
-        if self.stage >= len(self.tests) and not self.finished:
-            Console.log_info(f"Tests Finished\n{self.passes} / {len(self.tests)} Passed. ({self.fails} Fails)")
-            self.finished = True
-        if not self.finished:
-            self.runTest(supervisor)
-            
-            
+                Console.log_fail((f"Test {str(self._stage)}/"
+                                  f"{len(self._tests)-1} Failed"))
+                test_report: str = self._tests[self._stage].get_test_report()
+                if test_report != "":
+                    Console.log_fail(f"Report: {test_report}")
+                self._fails += 1
+
+            self._tests[self._stage].post_test()
+
+            self._tests[self._stage].set_test_report("")
+            self._start_test = False
+            self._finished_test = False
+            self._pre_test = False
+            self._stage += 1
+
+    def run(self) -> None:
+        """Run all Erebus tests
+        """
+        if self._stage >= len(self._tests) and not self._finished:
+            Console.log_info("Tests Finished")
+            Console.log_info((f"{self._passes} / {len(self._tests)} Passed. "
+                              f"({self._fails} Fails)"))
+            self._finished = True
+        if not self._finished:
+            self._run_test()
