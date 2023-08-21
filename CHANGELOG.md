@@ -37,6 +37,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ![Detection example](/docs/images/2024_detection_example.png)
 
 - Robots can now exit the world regardless of world position, to align with the official rules
+- Updated `MapScorerExample.py` example controller to work with all example worlds
+- Improved debug logging
+- Documented a majority of the code base
 
 ### Fixed
 
