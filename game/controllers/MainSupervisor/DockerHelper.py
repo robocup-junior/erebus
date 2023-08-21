@@ -94,7 +94,7 @@ def run_docker_container(
             if build_process.stdout:
                 for line in build_process.stdout:
                     Console.log_info(line, sep=None, end='')
-                    erebus.step(16)
+                    erebus.step(erebus.TIME_STEP)
                     
     except Exception as e:
         Console.log_err(f"Error building project image - {e}")

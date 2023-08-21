@@ -16,9 +16,9 @@ class Logger:
         events: str = robot.get_log_str()
 
         log_str = (
-            f"MAX_GAME_DURATION: {str(int(max_time/60))}:00\n"
-            f"ROBOT_0_SCORE: {str(robot.get_score())}\n\n"
-            f"ROBOT_0: {str(robot.name)}\n"
+            f"MAX_GAME_DURATION: {int(max_time/60)}:00\n"
+            f"ROBOT_0_SCORE: {round(robot.get_score(), 2)}\n\n"
+            f"ROBOT_0: {robot.name}\n"
             f"{events}"
         )
 

@@ -43,10 +43,6 @@ from DockerHelper import run_docker_container
 from typing import Sequence, cast
 
 
-ROBOT_NAME = "Erebus_Bot"
-TIME_STEP = 16
-
-
 class GameState(Enum):
     MATCH_NOT_STARTED = 1
     MATCH_RUNNING = 2
@@ -56,6 +52,8 @@ class GameState(Enum):
 
 class Erebus(Supervisor):
 
+    ROBOT_NAME = "Erebus_Bot"
+    TIME_STEP = 16
     DEFAULT_MAX_MULT = 1.0
 
     def __init__(self):
@@ -127,7 +125,7 @@ class Erebus(Supervisor):
         # returns Devices from `getDevice`, but e.g. an Emitter or Receiver
         # dont inherit from Device...
         self._receiver: Receiver = cast(Receiver, self.getDevice('receiver'))
-        self._receiver.enable(TIME_STEP)
+        self._receiver.enable(Erebus.TIME_STEP)
 
         self.emitter: Emitter = cast(Emitter, self.getDevice('emitter'))
 
@@ -182,7 +180,7 @@ class Erebus(Supervisor):
 
         # If automatic camera
         if self.config.automatic_camera and self._camera.wb_viewpoint_node:
-            self._camera.follow(self.robot_obj, ROBOT_NAME)
+            self._camera.follow(self.robot_obj, Erebus.ROBOT_NAME)
 
         if self.config.recording:
             Recorder.reset_countdown(self)
@@ -261,7 +259,7 @@ class Erebus(Supervisor):
         node_string: str = f"""DEF ROBOT0 custom_robot {{ 
                                     translation 1000 1000 1000 
                                     rotation 0 1 0 0 
-                                    name "{ROBOT_NAME}"
+                                    name "{Erebus.ROBOT_NAME}"
                                     controller "{controller}"
                                     camera_fieldOfView 1 
                                     camera_width 64 
@@ -301,7 +299,7 @@ class Erebus(Supervisor):
         """
         first: float = self.getTime()
         while True:
-            self.step(TIME_STEP)
+            self.step(Erebus.TIME_STEP)
             if self.getTime() - first > sec:
                 break
 
@@ -570,7 +568,7 @@ class Erebus(Supervisor):
             if command == "runDocker":
                 Console.log_info("Running docker helper script (this may take "
                                  "a few minutes depending on project size)")
-                self.step(TIME_STEP)
+                self.step(Erebus.TIME_STEP)
                 self._docker_process = run_docker_container(self, parts[1])
                 if self._docker_process != None:
                     self._remote_enabled = True
@@ -579,7 +577,7 @@ class Erebus(Supervisor):
                     self.rws.update_history("runDockerPressed")
                     self.rws.send("dockerSuccess")
                 else:
-                    self.step(TIME_STEP)
+                    self.step(Erebus.TIME_STEP)
 
             # Pause the match
             if command == "pause":
@@ -855,7 +853,7 @@ class Erebus(Supervisor):
             # Get the current time
             self._last_time = self.getTime()
             # Step the simulation on
-            step = self.step(TIME_STEP)
+            step = self.step(Erebus.TIME_STEP)
             # If the simulation is terminated or the time is up
             if step == -1:
                 # Stop simulating
@@ -865,7 +863,7 @@ class Erebus(Supervisor):
               self._last_frame == True or
               self._game_state == GameState.MATCH_FINISHED):
             # Step simulation
-            self.step(TIME_STEP)
+            self.step(Erebus.TIME_STEP)
 
 
 if __name__ == '__main__':

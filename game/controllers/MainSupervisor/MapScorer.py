@@ -25,8 +25,10 @@ def pretty_print_correct_matrix(
     for i in range(len(map)):
         for j in range(len(map[0])):
             bg: str = Color.BG_RED
-            if correct_map[i][j]:
+            if correct_map[i][j] == 1:
                 bg = Color.BG_GREEN
+            elif correct_map[i][j] == 2:
+                bg = Color.BG_DEFAULT
             print(f"{bg}{map[i][j]}{Color.RESET}", end='')
         print('')
 
@@ -152,7 +154,7 @@ def _calculate_completeness(
                 else:
                     incorrect += 1
             else:
-                correct_matrix[i][j] = 1
+                correct_matrix[i][j] = 2
 
     # Calculate completeness as a ratio of the correct count over the sum of
     # the correct count and incorrect count
@@ -187,7 +189,7 @@ def _calculate_map_completeness(
         
         if Console.DEBUG_MODE and len(correct_matrix) > 0:
             Console.log_debug(f"Printing aligned correct matrix for rotation "
-                              f"{i * 90} degrees")
+                              f"{i * 90} degrees with score {completeness}")
             pretty_print_correct_matrix(aligned_sub_matrix, correct_matrix)
             
 
