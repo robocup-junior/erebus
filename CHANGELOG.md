@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - The received data is now in the form `char float int int` - "G", game score, remaining time, remaining real world time (e.g. `G 15 100 50`)
 - Added support to run controllers within docker containers (**Note: This may become the official way to run controllers for international competitions, so please familiarise yourself with this**)
   - An input field in the web UI is used to input the local directory of your docker project containing a `Dockerfile`.
-  - Pressing the run docker button next to the play button will build and run your controller within a docker container. **Please note any GUI components (e.g. `cv2.imshow` will not work)**
+  - Pressing the run docker button next to the play button will build and run your controller within a docker container. **Please note any GUI components (e.g. `cv2.imshow`) will not work**
   - For more information about running controllers in docker containers, see this the [dockerfiles](https://gitlab.com/rcj-rescue-tc/erebus/erebus-dockerfiles) repository
 - Added preview thumbnails to the world selection UI
 - Added a settings option to keep the remote controller toggled
@@ -31,8 +31,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 <img alt="Detection example" src="/docs/images/2024_detection_example.png" width=50%/>
 
 - Robots can now exit the world regardless of world position, to align with the official rules
+- Game log scores are rounded to two decimal places
 - Updated `MapScorerExample.py` example controller to work with all example worlds
-- Improved debug logging
+- Improved debug console logging
 - Documented a majority of the code base
 
 ### Fixed
