@@ -41,85 +41,103 @@ class Console:
     _RESET: str = "\033[0m"
 
     @staticmethod
-    def log_err(msg: str, sep: str = "\n") -> None:
+    def log_err(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log error messages, displayed in red.
 
         Example output: [EREBUS ERROR] An error occurred!
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_ERROR, msg, Console._COLOR_ERROR, sep)
+        Console._log(Console._PREFIX_ERROR, msg, Console._COLOR_ERROR, sep, end)
 
     @staticmethod
-    def log_fail(msg: str, sep: str = "\n") -> None:
+    def log_fail(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log failure messages, displayed in red.
 
         Example output: [EREBUS FAIL] Something failed!
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_FAIL, msg, Console._COLOR_ERROR, sep)
+        Console._log(Console._PREFIX_FAIL, msg, Console._COLOR_ERROR, sep, end)
 
     @staticmethod
-    def log_pass(msg: str, sep: str = "\n") -> None:
+    def log_pass(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log pass messages, displayed in green.
 
         Example output: [EREBUS PASS] Something went well!
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_PASS, msg, Console._COLOR_SUCC, sep)
+        Console._log(Console._PREFIX_PASS, msg, Console._COLOR_SUCC, sep, end)
 
     @staticmethod
-    def log_succ(msg: str, sep: str = "\n") -> None:
+    def log_succ(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log success messages, displayed in green.
 
         Example output: [EREBUS] Something went well!
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_SUCC, msg, Console._COLOR_SUCC, sep)
+        Console._log(Console._PREFIX_SUCC, msg, Console._COLOR_SUCC, sep, end)
 
     @staticmethod
-    def log_warn(msg: str, sep: str = "\n") -> None:
+    def log_warn(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log warning messages, displayed in purple.
 
         Example output: [EREBUS WARNING] We're warning you!
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_WARN, msg, Console._COLOR_WARN, sep)
+        Console._log(Console._PREFIX_WARN, msg, Console._COLOR_WARN, sep, end)
 
     @staticmethod
-    def log_info(msg: str, sep: str = "\n") -> None:
+    def log_info(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log info messages, displayed in blue.
 
         Example output: [EREBUS INFO] Heres some helpful info :)
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_INFO, msg, Console._COLOR_INFO, sep)
+        Console._log(Console._PREFIX_INFO, msg, Console._COLOR_INFO, sep, end)
 
     @staticmethod
-    def log_controller(msg: str, sep: str = "\n") -> None:
+    def log_controller(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log controller messages, displayed in blue.
 
         This is reserved for displaying stdout from controller docker containers
@@ -128,14 +146,17 @@ class Console:
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
-        Console._log(Console._PREFIX_CONTROLLER,
-                     msg.strip(), Console._COLOR_CONTROLLER, sep)
+        Console._log(Console._PREFIX_CONTROLLER, msg.strip(), 
+                     Console._COLOR_CONTROLLER, sep, end)
 
     @staticmethod
-    def log_debug(msg: str, sep: str = "\n") -> None:
+    def log_debug(msg: str, sep: str | None = "\n", end = "\n") -> None:
         """Log debug messages, displayed in yellow. 
 
         These are only displayed if debug logging is enabled.
@@ -144,14 +165,24 @@ class Console:
 
         Args:
             msg (str): Message to display
-            sep (str, optional): Separator used to split the message. 
+            sep (str | None, optional): Separator used to split the message. If
+            the value is None, separations are ignored.
+            Defaults to "\\n".
+            end (str, optional): String appended to the last value. 
             Defaults to "\\n".
         """
         if Console.DEBUG_MODE:
-            Console._log(Console._PREFIX_DEBUG, msg, Console._COLOR_DEBUG, sep)
+            Console._log(Console._PREFIX_DEBUG, msg, Console._COLOR_DEBUG, 
+                         sep, end)
 
     @staticmethod
-    def _log(prefix: str, msg: str, color: str, sep: str) -> None:
+    def _log(
+        prefix: str, 
+        msg: str, 
+        color: str,
+        sep: str | None,
+        end: str
+    ) -> None:
         """Log messages, with a specified prefix and color. Lines are separated
         into individual prints via the separator
 
@@ -159,13 +190,19 @@ class Console:
 
         Args:
             msg (str): Message to display
-            sep (str): Separator used to split the message
+            sep (str | None): Separator used to split the message. If
+            the value is None, separations are ignored.
+            end (str): String appended to the last value.
         """
-        lines = msg.split(sep)
+        if sep is None:
+            lines: list[str] = [msg]
+        else:
+            lines: list[str] = msg.split(sep)
         for line in lines:
             # TODO remove colour prefix for stdout isn't a terminal...
             print(
-                f"{Console._COLOR_CODE_PREFIX}[{Console._COLORS[color]}m[{prefix}] {line}{Console._RESET}")
+                f"{Console._COLOR_CODE_PREFIX}[{Console._COLORS[color]}m[{prefix}] {line}{Console._RESET}",
+                end=end)
 
 
 if Console.DEBUG_MODE:

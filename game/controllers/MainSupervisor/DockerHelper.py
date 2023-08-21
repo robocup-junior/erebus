@@ -1,9 +1,14 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from ConsoleLog import Console
 import subprocess
 import fcntl
 import socket
 import os
+
+if TYPE_CHECKING:
+    from MainSupervisor import Erebus
 
 EREBUS_IMAGE = "alfredroberts/erebus:latest"
 EREBUS_CONTROLLER_TAG = "erebus_internal"
@@ -17,8 +22,7 @@ def _erebus_image_exists() -> bool:
     try:
         process: subprocess.CompletedProcess = subprocess.run(
             ["docker", "inspect", EREBUS_IMAGE],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False
         )
     except Exception as e:
         Console.log_err(f"Error inspecting erebus image - {e}")
@@ -50,7 +54,10 @@ def _get_local_ip() -> str:
         sock.close()
     return ip_addr
 
-def run_docker_container(project_dir: str) -> subprocess.Popen | None:
+def run_docker_container(
+    erebus: Erebus, 
+    project_dir: str
+) -> subprocess.Popen | None:
     """Run a controller via a docker container
 
     Args:
@@ -78,17 +85,23 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
         command: list[str] = ["docker", "build", 
                               "--tag" ,EREBUS_CONTROLLER_TAG, project_dir]
         Console.log_info(f"Building project image ($ {' '.join(command)})")
-        build_process: subprocess.CompletedProcess = subprocess.run(
+        with subprocess.Popen(
             command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+            bufsize=1, universal_newlines=True, shell=False
+        ) as build_process:
+            # Print output from build process
+            if build_process.stdout:
+                for line in build_process.stdout:
+                    Console.log_info(line, sep=None, end='')
+                    erebus.step(16)
+                    
     except Exception as e:
         Console.log_err(f"Error building project image - {e}")
         return None
     
     if build_process.returncode != 0:
-        Console.log_err(f"Unable to build project image - {build_process.stdout.decode().strip()}")
+        Console.log_err(f"Unable to build project image")
         return None
     
     # Run container
@@ -102,6 +115,7 @@ def run_docker_container(project_dir: str) -> subprocess.Popen | None:
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            shell=False
         )
     except Exception as e:
         Console.log_err(f"Error running project image - {e}")

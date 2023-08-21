@@ -566,7 +566,7 @@ class Erebus(Supervisor):
                 Console.log_info("Running docker helper script (this may take "
                                  "a few minutes depending on project size)")
                 self.step(TIME_STEP)
-                self._docker_process = run_docker_container(parts[1])
+                self._docker_process = run_docker_container(self, parts[1])
                 if self._docker_process != None:
                     self._remote_enabled = True
                     # Start running the match
