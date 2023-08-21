@@ -5,24 +5,28 @@ import shutil
 import glob
 import stat
 
+from ErebusObject import ErebusObject
+
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:    
+if TYPE_CHECKING:
     from MainSupervisor import Erebus
 from Config import Config
 
 
-class Controller():
+class Controller(ErebusObject):
     """Handles resetting of controller files
     """
 
-    def __init__(self, keep_control: bool = False) -> None:
+    def __init__(self, erebus: Erebus, keep_control: bool = False) -> None:
         """Initialises a controller object
 
         Args:
+            erebus (Erebus): Erebus game supervisor object
             keep_control (bool, optional): Config option to keep controllers
             (not reset after world reload). Defaults to False.
         """
+        super().__init__(erebus)
         self.keep_controller: bool = keep_control
 
     def update_keep_controller_config(self, config: Config) -> None:
@@ -33,11 +37,10 @@ class Controller():
         """
         self.keep_controller = config.keep_controller
 
-    def reset_file(self, supervisor: Erebus, manual: bool = False) -> None:
+    def reset_file(self, manual: bool = False) -> None:
         """Reset the robot controller 
 
         Args:
-            supervisor (Erebus): Erebus supervisor
             manual (bool, optional): Whether manually reset via the UI. 
             Defaults to False.
         """
@@ -50,7 +53,7 @@ class Controller():
         files: list[str] = glob.glob(os.path.join(path, "*"))
         if self.keep_controller and not manual:
             if len(files) > 0:
-                supervisor.rws.send("loaded0")
+                self._erebus.rws.send("loaded0")
             return
 
         for file_path in files:
@@ -67,14 +70,11 @@ class Controller():
         with open(os.path.join(path, "robot0Controller.py"), "w") as f:
             pass
 
-    def reset(self, supervisor: Erebus) -> None:
+    def reset(self) -> None:
         """Force reset the robot controller, ignoring any keep controller 
         setting
 
         Sends a message to robot window saying the controller has been unloaded
-
-        Args:
-            supervisor (Erebus): _description_
         """
-        self.reset_file(supervisor, True)
-        supervisor.rws.send("unloaded0")
+        self.reset_file(True)
+        self._erebus.rws.send("unloaded0")

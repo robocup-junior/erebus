@@ -17,6 +17,7 @@ from Controller import Controller
 from ConsoleLog import Console
 from Tile import Checkpoint, StartTile, TileManager
 from Config import Config
+from ErebusObject import ErebusObject
 
 
 
@@ -44,12 +45,17 @@ class Queue:
         return len(self._queue) == 0
 
 
-class RobotHistory(Queue):
+class RobotHistory(ErebusObject, Queue):
     """Robot history, a queue structure, to store game action history
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, erebus: Erebus):
+        """Initialises new Robot history queue object to store game events
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
         # Master history to store all events without dequeues
         self.master_history: list[tuple[str, str]] = []
 
@@ -75,18 +81,17 @@ class RobotHistory(Queue):
 
         return record
 
-    def enqueue(self, data: str, erebus: Erebus):
+    def enqueue(self, data: str):
         """Enqueue game data to the end of the robot's history queue, and update
         any relevant UI components.
 
         Args:
             data (str): Data to enqueue
-            erebus (Erebus): Erebus game supervisor object
         """
         # Update master history when an event happens
         record: tuple[str, str] = self._update_master_history(data)
         # Send the event data to the robot window to update the ui
-        erebus.rws.send("historyUpdate", ",".join(record))
+        self._erebus.rws.send("historyUpdate", ",".join(record))
 
         if self.display_to_recording_label:
             history_label: str = ""
@@ -95,15 +100,22 @@ class RobotHistory(Queue):
             for h in range(min(len(histories), 5)):
                 history_label = (f"[{histories[h][0]}] {histories[h][1]}\n"
                                  f"{history_label}")
-            erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2) # type: ignore
+            self._erebus.setLabel(2, history_label, 0.7, 0, 0.05, 0xfbc531, 0.2) # type: ignore
 
 
-class Robot:
+class Robot(ErebusObject):
     """Robot object used to store and process data about the competitor's
     robot in the simulation
     """
 
-    def __init__(self):
+    def __init__(self, erebus: Erebus):
+        """Initialises new competition Robot object
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
+        
         self._wb_node: Node
         self.wb_translationField: Field
         self.wb_rotationField: Field
@@ -111,8 +123,8 @@ class Robot:
         self.name: str = "NO_TEAM_NAME"
         self.in_simulation: bool = False
 
-        self.history: RobotHistory = RobotHistory()
-        self.controller: Controller = Controller()
+        self.history: RobotHistory = RobotHistory(self._erebus)
+        self.controller: Controller = Controller(self._erebus)
 
         self.in_swamp: bool = False
 
@@ -156,12 +168,12 @@ class Robot:
     def velocity(self) -> list[float]:
         return self._wb_node.getVelocity()
         
-    def reset_physics(self):
+    def reset_physics(self) -> None:
         """Stops the inertia of the robot and its descendants.
         """
         self._wb_node.resetPhysics()
         
-    def remove_node(self):
+    def remove_node(self) -> None:
         """Removes the robot from the Webots scene tree
         """
         self._wb_node.remove()
@@ -194,11 +206,8 @@ class Robot:
         vel: list[float] = self._wb_node.getVelocity()
         return all(abs(ve) < 0.001 for ve in vel)
 
-    def time_stopped(self, supervisor: Supervisor) -> float:
+    def time_stopped(self) -> float:
         """Gets the amount of time the robot has been stopped for in seconds.
-
-        Args:
-            supervisor (Supervisor): The Erebus supervisor object
 
         Returns:
             float: Time stopped, in seconds
@@ -209,12 +218,12 @@ class Robot:
         if self._stopped_time == None:
             if self._stopped:
                 # get time the robot stopped
-                self._stopped_time = supervisor.getTime()
+                self._stopped_time = self._erebus.getTime()
         else:
             # if its stopped
             if self._stopped:
                 # get current time
-                current_time: float = supervisor.getTime()
+                current_time: float = self._erebus.getTime()
                 # calculate the time the robot stopped
                 self._robot_time_stopped = current_time - self._stopped_time
             else:
@@ -234,7 +243,6 @@ class Robot:
         self,
         message: str,
         score: float,
-        supervisor: Erebus,
         multiplier: float = 1,
     ) -> None:
         """Increases the robots score. The primary method used to increase the
@@ -243,16 +251,15 @@ class Robot:
         Args:
             message (str): Message to display in the web UI
             score (float): Score to add
-            supervisor (Erebus): Erebus game supervisor object
             multiplier (float, optional): Score multiplier (`new_score = 
             score * multiplier`), used for room score multipliers.
             Defaults to 1.
         """
         point: float = round(score * multiplier, 2)
         if point > 0.0:
-            self.history.enqueue(f"{message} +{point}", supervisor)
+            self.history.enqueue(f"{message} +{point}")
         elif point < 0.0:
-            self.history.enqueue(f"{message} {point}", supervisor)
+            self.history.enqueue(f"{message} {point}")
         self._score += point
         if self._score < 0:
             self._score = 0
@@ -280,7 +287,7 @@ class Robot:
 
         return log_str
     
-    def set_start_pos(self, start_tile: StartTile):
+    def set_start_pos(self, start_tile: StartTile) -> None:
         '''Set robot starting position'''
 
         start_tile.set_visible(False)
@@ -398,7 +405,7 @@ class Robot:
         self.history.display_to_recording_label = config.recording
         self.controller.update_keep_controller_config(config)
 
-    def reset_proto(self, erebus: Erebus, manual: bool = False) -> None:
+    def reset_proto(self, manual: bool = False) -> None:
         """Resets the robot's custom proto file, back to the default.
         - Send message to robot window to say that robot has been reset
         - Reset robot proto file back to default
@@ -419,29 +426,24 @@ class Robot:
             if os.path.isfile(robot_proto):
                 if self.controller.keep_controller and not manual:
                     if not filecmp.cmp(default_robot_proto, robot_proto):
-                        erebus.rws.send("loaded1")
+                        self._erebus.rws.send("loaded1")
                     return
                 shutil.copyfile(default_robot_proto, robot_proto)
             else:
                 shutil.copyfile(default_robot_proto, robot_proto)
                 # Must reset world, since webots doesn't
                 # recognise new protos otherwise
-                erebus.worldReload()
-            erebus.rws.send("unloaded1")
+                self._erebus.worldReload()
+            self._erebus.rws.send("unloaded1")
         except Exception as e:
             Console.log_err(f"Error resetting robot proto")
             Console.log_err(str(e))
 
-    def update_checkpoints(
-        self,
-        supervisor: Erebus,
-        checkpoint: Checkpoint,
-    ) -> None:
+    def update_checkpoints(self, checkpoint: Checkpoint) -> None:
         """Updates the robots visited checkpoint history. If the specified
         checkpoint has not been visited, points are awarded.
 
         Args:
-            supervisor (Erebus): Erebus game supervisor object
             checkpoint (Checkpoint): Checkpoint to check
         """
         self.last_visited_checkpoint_pos = checkpoint.center
@@ -452,26 +454,20 @@ class Robot:
             self.visited_checkpoints.append(checkpoint.center)
 
             # Update robot's points and history
-            grid: int = TileManager.coord2grid(checkpoint.center, supervisor)
+            grid: int = TileManager.coord2grid(checkpoint.center, self._erebus)
             room_num: int = (
-                supervisor.getFromDef("WALLTILES")
+                self._erebus.getFromDef("WALLTILES")
                 .getField("children")
                 .getMFNode(grid) # type: ignore
                 .getField("room").getSFInt32() - 1
             )
-            self.increase_score("Found checkpoint", 10, supervisor,
+            self.increase_score("Found checkpoint", 10, 
                                 multiplier=TileManager.ROOM_MULT[room_num])
 
-    def update_in_swamp(
-        self,
-        erebus: Erebus,
-        in_swamp: bool,
-        max_velocity: float,
-    ) -> None:
+    def update_in_swamp(self, in_swamp: bool, max_velocity: float) -> None:
         """Updates the robot's velocity if within a swamp.
 
         Args:
-            erebus (Erebus): Erebus game supervisor object
             in_swamp (bool): Whether the robot has entered a swamp
             max_velocity (float): Max velocity multiplier to slow the robot by
         """
@@ -484,11 +480,11 @@ class Robot:
                 # Reset physics
                 self._wb_node.resetPhysics()
                 # Update history
-                self.history.enqueue("Entered swamp", erebus)
+                self.history.enqueue("Entered swamp")
             else:
                 # If not in swamp, reset max velocity to default
                 self.set_max_velocity(max_velocity)
                 # Reset physics
                 self._wb_node.resetPhysics()
                 # Update history
-                self.history.enqueue("Exited swamp,", erebus)
+                self.history.enqueue("Exited swamp,")

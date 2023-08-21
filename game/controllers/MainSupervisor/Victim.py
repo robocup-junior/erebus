@@ -1,16 +1,21 @@
+from __future__ import annotations
+
 import math
 from abc import ABC, abstractmethod
 from overrides import override
 import numpy.typing as npt
 import numpy as np
+from typing import TYPE_CHECKING
 
 from controller import Node
 from controller import Field
-from controller import Supervisor
 
 from Robot import Robot
 from Camera import FollowSide
+from ErebusObject import ErebusObject
 
+if TYPE_CHECKING:
+    from MainSupervisor import Erebus
 
 def rotate_2d_vector(v: npt.NDArray, theta: float) -> npt.NDArray:
     """Rotate 2D vector by angle (in radians)
@@ -236,32 +241,30 @@ class HazardMap(VictimObject):
         return self._victim_type
 
 
-class VictimManager():
+class VictimManager(ErebusObject):
     """VictimManager Object for managing Hazards and Victims actions within the
     simulation
     """
     
-    def __init__(self, supervisor: Supervisor):
+    def __init__(self, erebus: Erebus):
         """Initialises a new VictimManager object to manage both Hazards and 
         Victims, initialising HazardMap and Victim object lists from the Webots
         world
 
         Args:
-            supervisor (Supervisor): Erebus supervisor object
+            erebus (Erebus): Erebus supervisor game object
         """
+        super().__init__(erebus)
         
         self._num_victims: int = 0
         self._num_hazards: int = 0
 
-        self.victims: list[Victim] = self._get_victims(supervisor)
-        self.hazards: list[HazardMap] = self._get_hazards(supervisor)
+        self.victims: list[Victim] = self._get_victims()
+        self.hazards: list[HazardMap] = self._get_hazards()
 
-    def _get_victims(self, supervisor: Supervisor) -> list[Victim]:
+    def _get_victims(self) -> list[Victim]:
         """Gets and initialises all Victims as Victim objects from nodes in the
         simulation world
-
-        Args:
-            supervisor (Supervisor): Erebus supervisor object
 
         Returns:
             list[Victim]: List of Victim Objects
@@ -270,13 +273,13 @@ class VictimManager():
         victims: list[Victim] = []
 
         self._num_victims = (
-            supervisor.getFromDef('HUMANGROUP')
+            self._erebus.getFromDef('HUMANGROUP')
             .getField("children")
             .getCount()
         )
 
         victim_nodes: Field = (
-            supervisor.getFromDef('HUMANGROUP')
+            self._erebus.getFromDef('HUMANGROUP')
             .getField("children")
         )
         # Iterate for each human
@@ -294,12 +297,9 @@ class VictimManager():
         
         return victims
 
-    def _get_hazards(self, supervisor: Supervisor) -> list[HazardMap]:
+    def _get_hazards(self) -> list[HazardMap]:
         """Gets and initialises all Hazards as HazardMap objects from nodes in 
         the simulation world
-
-        Args:
-            supervisor (Supervisor): Erebus supervisor object
 
         Returns:
             list[HazardMap]: List of HazardMap Objects
@@ -308,13 +308,13 @@ class VictimManager():
         hazards: list[HazardMap] = []
 
         self._num_hazards = (
-            supervisor.getFromDef('HAZARDGROUP')
+            self._erebus.getFromDef('HAZARDGROUP')
             .getField("children")
             .getCount()
         )
 
         hazard_nodes: Field = (
-            supervisor.getFromDef('HAZARDGROUP')
+            self._erebus.getFromDef('HAZARDGROUP')
             .getField("children")
         )
 
@@ -333,7 +333,7 @@ class VictimManager():
 
         return hazards
 
-    def reset_victim_textures(self):
+    def reset_victim_textures(self) -> None:
         """Resets all Victim and Hazard textures to unidentified
         """
         # Iterate for each victim

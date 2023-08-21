@@ -1,18 +1,30 @@
-from controller import Supervisor
+from __future__ import annotations
 
 from ConsoleLog import Console
+from ErebusObject import ErebusObject
 
-class RWSender:
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from MainSupervisor import Erebus
+
+
+class RWSender(ErebusObject):
     """Object for sending message to the robot window. Records history of 
     messages sent, in the case that they must be all re-sent (e.g. if the
     robot window is reloaded)  
     """
 
-    def __init__(self, supervisor: Supervisor):
-        self.history: list[list[str]] = []
-        self.supervisor: Supervisor = supervisor
+    def __init__(self, erebus: Erebus):
+        """Initialises a new robot window message sensor object
 
-    def update_history(self, command: str, args: str = ''):
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+        """
+        super().__init__(erebus)
+        self.history: list[list[str]] = []
+
+    def update_history(self, command: str, args: str = '') -> None:
         """Updates the robot window message history
 
         Args:
@@ -22,7 +34,7 @@ class RWSender:
         """
         self.history.append([command, args])
 
-    def send(self, command: str, args: str = ''):
+    def send(self, command: str, args: str = '') -> None:
         """Sends a command to the robot window
 
         Args:
@@ -32,13 +44,13 @@ class RWSender:
         """
         wwi_msg: str = f"{command},{args}"
         Console.log_debug(f"Sent wwi message: {wwi_msg}")
-        self.supervisor.wwiSendText(wwi_msg)
+        self._erebus.wwiSendText(wwi_msg)
         self.update_history(command, args)
 
-    def send_all(self):
+    def send_all(self) -> None:
         """Sends the entire command history to the robot window. Used in the 
         case the browser window is reloaded, and thus the previous state
         must be recreated.
         """
         for command, args in self.history:
-            self.supervisor.wwiSendText(f"{command},{args}")
+            self._erebus.wwiSendText(f"{command},{args}")

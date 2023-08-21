@@ -38,7 +38,7 @@ from Recorder import Recorder
 from Test import TestRunner
 from RobotWindowSender import RWSender
 from ThumbnailWriter import export_map_to_img
-from DockerHelper import print_process_stdout, run_docker_container
+from DockerHelper import run_docker_container
 
 from typing import Sequence, cast
 
@@ -132,10 +132,10 @@ class Erebus(Supervisor):
         self.emitter: Emitter = cast(Emitter, self.getDevice('emitter'))
 
         # Init robot as object to hold game data
-        self.robot_obj: Robot = Robot()
+        self.robot_obj: Robot = Robot(self)
         self.robot_obj.update_config(self.config)
-        self.robot_obj.controller.reset_file(self)
-        self.robot_obj.reset_proto(self)
+        self.robot_obj.controller.reset_file()
+        self.robot_obj.reset_proto()
 
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer(self)
@@ -210,7 +210,7 @@ class Erebus(Supervisor):
         # Notify robot
         self.emitter.send(struct.pack("c", bytes("L", "utf-8")))
         # Update history with event
-        self.robot_obj.increase_score("Lack of Progress", -5, self)
+        self.robot_obj.increase_score("Lack of Progress", -5)
 
         # Update the camera position since the robot has now suddenly moved
         if self.config.automatic_camera and self._camera.wb_viewpoint_node:
@@ -232,7 +232,7 @@ class Erebus(Supervisor):
             self.rws.send("robotNotInSimulation0")
             # Update history event whether its manual or via exit message
             if not time_up:
-                self.robot_obj.history.enqueue("Successful Exit", self)
+                self.robot_obj.history.enqueue("Successful Exit")
             # Write to a log file to write game events to file
             Logger.write_log(self.robot_obj, self.max_time)
 
@@ -277,7 +277,7 @@ class Erebus(Supervisor):
         """Apply the map multiplier from the robot's map score to the score
         """
         score_change: float = self.robot_obj.get_score() * self.robot_obj.map_score_percent
-        self.robot_obj.increase_score("Map Bonus", score_change, self)
+        self.robot_obj.increase_score("Map Bonus", score_change)
 
     def _process_robot_json(self, json_data: str) -> None:
         """Process custom robot json data to generate a new robot proto file.
@@ -442,14 +442,12 @@ class Erebus(Supervisor):
                 self.robot_obj.increase_score(
                     f"Successful {name} Type Correct Bonus",
                     correct_type_bonus,
-                    self,
                     multiplier=self.tile_manager.ROOM_MULT[room_num]
                 )
 
             self.robot_obj.increase_score(
                 f"Successful {name} Identification",
                 nearby_issue.score_worth,
-                self,
                 multiplier=self.tile_manager.ROOM_MULT[room_num]
             )
 
@@ -458,7 +456,7 @@ class Erebus(Supervisor):
 
         if misidentification:
             self.robot_obj.increase_score(f"Misidentification of {name}",
-                                          -5, self)
+                                          -5)
 
     def _process_message(self, robot_message: list[Any]) -> None:
         """Processes the messages recieved from the competitor's robot's emitter
@@ -468,7 +466,7 @@ class Erebus(Supervisor):
             robot_message (list[Any]): The competitor's robot message data 
         """
         Console.log_debug(
-            f"Robot Stopped for {self.robot_obj.time_stopped(self)}s")
+            f"Robot Stopped for {self.robot_obj.time_stopped()}s")
         
         # Process exit commands
         if robot_message[0] == 'E':
@@ -478,10 +476,9 @@ class Erebus(Supervisor):
                 self.rws.send("ended")
                 if self.robot_obj.victim_identified:
                     self.robot_obj.increase_score("Exit Bonus",
-                                                  self.robot_obj.get_score() * 0.1,
-                                                  self)
+                                                  self.robot_obj.get_score() * 0.1)
                 else:
-                    self.robot_obj.history.enqueue("No Exit Bonus", self)
+                    self.robot_obj.history.enqueue("No Exit Bonus")
             self._add_map_multiplier()
             # Update score and history
             self._robot_quit(False)
@@ -503,8 +500,7 @@ class Erebus(Supervisor):
                 )
 
                 self.robot_obj.history.enqueue(
-                    f"Map Correctness {str(round(map_score * 100,2))}%",
-                    self
+                    f"Map Correctness {str(round(map_score * 100,2))}%"
                 )
 
                 # Add percent
@@ -534,7 +530,7 @@ class Erebus(Supervisor):
             )
 
         # If robot stopped for 1 second, run victim detection 
-        elif self.robot_obj.time_stopped(self) >= 1.0:
+        elif self.robot_obj.time_stopped() >= 1.0:
             self._detect_victim(robot_message)
 
     def _process_rw_message(self, message: str) -> None:
@@ -601,13 +597,13 @@ class Erebus(Supervisor):
             # Unload the robot controller
             if command == "robot0Unload":
                 if self._game_state == GameState.MATCH_NOT_STARTED:
-                    self.robot_obj.controller.reset(self)
+                    self.robot_obj.controller.reset()
 
             # Unload the custom robot json
             if command == "robot1Unload":
                 # Remove the robot proto
                 if self._game_state == GameState.MATCH_NOT_STARTED:
-                    self.robot_obj.reset_proto(self, True)
+                    self.robot_obj.reset_proto(True)
 
             # Relocate the robot
             if command == 'relocate':
@@ -623,7 +619,7 @@ class Erebus(Supervisor):
                     if int(data[1]) == 0:
                         if self._game_state == GameState.MATCH_RUNNING:
                             self._add_map_multiplier()
-                            self.robot_obj.history.enqueue("Give up!", self)
+                            self.robot_obj.history.enqueue("Give up!")
                             self._robot_quit(True)
                             self._game_state = GameState.MATCH_FINISHED
                             self._last_frame = True
@@ -732,7 +728,7 @@ class Erebus(Supervisor):
             self._game_init()
 
         if self._run_tests:
-            self._test_runner.run(self)
+            self._test_runner.run()
 
         # Main game loop
         if self.robot_obj.in_simulation:
@@ -745,8 +741,8 @@ class Erebus(Supervisor):
                 )
                 self._camera.rotate_to_victim(self.robot_obj, all_hazards)
 
-            self.tile_manager.check_checkpoints(self)
-            self.tile_manager.check_swamps(self)
+            self.tile_manager.check_checkpoints()
+            self.tile_manager.check_swamps()
 
             # If receiver has got a message
             if self._receiver.getQueueLength() > 0:
@@ -771,7 +767,7 @@ class Erebus(Supervisor):
 
             if self._game_state == GameState.MATCH_RUNNING:
                 # Relocate robot if stationary for 20 sec
-                if self.robot_obj.time_stopped(self) >= 20:
+                if self.robot_obj.time_stopped() >= 20:
                     if not self.config.disable_lop:
                         self.relocate_robot()
                     self.robot_obj.reset_time_stopped()
