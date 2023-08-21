@@ -6,6 +6,30 @@
 import numpy as np
 import numpy.typing as npt
 
+from MapAnswer import Color
+from ConsoleLog import Console
+
+
+def pretty_print_correct_matrix(
+    map: list | npt.NDArray, 
+    correct_map: list | npt.NDArray
+) -> None:
+    """Print a formatted view of an Erebus map matrix, with correct/incorrect
+    map features highlighted
+
+    Args:
+        map (list): Erebus map matrix to print
+        correct_map (list | npt.NDArray): Binary matrix representing which
+        map features are correct (1 for correct, 0 for incorrect)
+    """
+    for i in range(len(map)):
+        for j in range(len(map[0])):
+            bg: str = Color.BG_RED
+            if correct_map[i][j]:
+                bg = Color.BG_GREEN
+            print(f"{bg}{map[i][j]}{Color.RESET}", end='')
+        print('')
+
 def _get_start_instance(matrix: npt.NDArray) -> npt.NDArray | None:
     """Gets the matrix coordinate of the first occurrence of the start
     tile char '5'.
@@ -86,7 +110,7 @@ def _align(
 def _calculate_completeness(
     answer_matrix: npt.NDArray,
     sub_matrix: npt.NDArray,
-) -> float:
+) -> tuple[float, npt.NDArray]:
     """
     Calculate the quantifiable completeness score of a matrix, compared to
     another
@@ -96,13 +120,18 @@ def _calculate_completeness(
         subMatrix (np.array): matrix to compare
 
     Returns:
-        float: completeness score
+        tuple[float, npt.NDArray]: tuple of completeness score and matrix of 
+        correct/incorrect map feature positions 
     """
     correct: int = 0
     incorrect: int = 0
 
     if answer_matrix.shape != sub_matrix.shape:
-        return 0
+        return 0, np.array([])
+    
+    # Correct matrix used to store positions of correctly identified map 
+    # positions
+    correct_matrix: npt.NDArray = np.full(sub_matrix.shape, 0)
 
     for i in range(len(answer_matrix)):
         for j in range(len(answer_matrix[0])):
@@ -111,19 +140,23 @@ def _calculate_completeness(
                     answer_matrix[i][j] == '20'):
                 if sub_matrix[i][j] == answer_matrix[i][j]:
                     correct += 1
+                    correct_matrix[i][j] = 1
                 # if a victim is on either side of the wall
                 elif len(answer_matrix[i][j]) == 2:
                     if (sub_matrix[i][j] == answer_matrix[i][j] or
                             sub_matrix[i][j] == answer_matrix[i][j][::-1]):
                         correct += 1
+                        correct_matrix[i][j] = 1
                     else:
                         incorrect += 1
                 else:
                     incorrect += 1
+            else:
+                correct_matrix[i][j] = 1
 
     # Calculate completeness as a ratio of the correct count over the sum of
     # the correct count and incorrect count
-    return (correct / (correct + incorrect))
+    return (correct / (correct + incorrect)), correct_matrix
 
 
 def _calculate_map_completeness(
@@ -148,9 +181,15 @@ def _calculate_map_completeness(
         answer_matrix = np.rot90(answer_matrix, k=i, axes=(1, 0))
         aligned_sub_matrix = _align(answer_matrix, sub_matrix)
 
-        completeness:float = _calculate_completeness(answer_matrix, 
-                                                     aligned_sub_matrix)
+        completeness, correct_matrix = _calculate_completeness(answer_matrix, 
+                                                      aligned_sub_matrix)
         completeness_list.append(completeness)
+        
+        if Console.DEBUG_MODE and len(correct_matrix) > 0:
+            Console.log_debug(f"Printing aligned correct matrix for rotation "
+                              f"{i * 90} degrees")
+            pretty_print_correct_matrix(aligned_sub_matrix, correct_matrix)
+            
 
     # Return the highest score
     return max(completeness_list)

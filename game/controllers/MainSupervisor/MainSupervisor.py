@@ -28,7 +28,7 @@ from Tools import *
 from ConsoleLog import Console
 from Logger import Logger
 from ProtoGenerator import generate_robot_proto
-from MapAnswer import MapAnswer
+from MapAnswer import MapAnswer, pretty_print_map
 from Config import Config
 from Camera import *
 from Tile import *
@@ -139,7 +139,10 @@ class Erebus(Supervisor):
 
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer(self)
-        self._map_sol: list[list] = self._map_ans.generateAnswer(False)
+        map_ans: list[list] | None = self._map_ans.generateAnswer()
+        if map_ans is None:
+            raise Exception("Critical error: Could not generate answer matrix")
+        self._map_sol: list[list] = map_ans
 
         # Init test runner to run (unit) tests
         self._test_runner: TestRunner = TestRunner(self)
@@ -494,6 +497,12 @@ class Erebus(Supervisor):
                 if self.robot_obj.sent_maps:
                     Console.log_err(f"The map has already been evaluated.")
                     return
+                
+                if Console.DEBUG_MODE:
+                    Console.log_debug("Map solution matrix:")
+                    pretty_print_map(self._map_sol)
+                    Console.log_debug("Submitted map matrix")
+                    pretty_print_map(self.robot_obj.map_data)
 
                 map_score: float = MapScorer.calculateScore(
                     self._map_sol, self.robot_obj.map_data

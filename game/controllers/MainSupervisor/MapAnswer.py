@@ -1,5 +1,36 @@
 import numpy as np
+import numpy.typing as npt
 from ConsoleLog import Console
+
+def pretty_print_map(map: list | npt.NDArray) -> None:
+    """Print a formatted view of an Erebus map matrix
+
+    Args:
+        map (list | npt.NDArray): Erebus map matrix to print
+    """
+    for m in map:
+        for mm in m:
+            if mm == '0': #Normal
+                print(f'0', end='')
+            elif mm == '1': #Walls
+                print(f'{Color.BG_WHITE}{Color.BLACK}1{Color.RESET}', end='')
+            elif mm == '2': #Holes
+                print(f'{Color.BG_WHITE}{Color.BOLD}2{Color.RESET}', end='')
+            elif mm == '3': #Swamps
+                print(f'{Color.YELLOW}3{Color.RESET}', end='')
+            elif mm == '4': #Checkpoints
+                print(f'{Color.UNDERLINE}4{Color.RESET}', end='')
+            elif mm == '5': #Stating tile
+                print(f'{Color.GREEN}5{Color.RESET}', end='')
+            elif mm == '6': #1to2
+                print(f'{Color.BLUE}6{Color.RESET}', end='')
+            elif mm == '7': #1to3
+                print(f'{Color.MAGENTA}7{Color.RESET}', end='')
+            elif mm == '8': #2to3
+                print(f'{Color.RED}8{Color.RESET}', end='')
+            else: #Victims
+                print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
+        print('')
 
 class MapAnswer:
     def __init__(self, supervisor):
@@ -25,7 +56,7 @@ class MapAnswer:
     def setAnswer(self,z,x,k):
         self.answerMatrix[z][x] = max(self.answerMatrix[z][x], k)
 
-    def generateAnswer(self, debugPrint):
+    def generateAnswer(self):
         try:
             for i in range(self.numberTiles):
                 tile = self.tileNodes.getMFNode(i)
@@ -362,30 +393,8 @@ class MapAnswer:
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
             
-            if debugPrint:
-                for m in self.answerMatrix:
-                    for mm in m:
-                        if mm == '0': #Normal
-                            print(f'0', end='')
-                        elif mm == '1': #Walls
-                            print(f'{Color.BG_WHITE}{Color.BLACK}1{Color.RESET}', end='')
-                        elif mm == '2': #Holes
-                            print(f'{Color.BG_WHITE}{Color.BOLD}2{Color.RESET}', end='')
-                        elif mm == '3': #Swamps
-                            print(f'{Color.YELLOW}3{Color.RESET}', end='')
-                        elif mm == '4': #Checkpoints
-                            print(f'{Color.UNDERLINE}4{Color.RESET}', end='')
-                        elif mm == '5': #Stating tile
-                            print(f'{Color.GREEN}5{Color.RESET}', end='')
-                        elif mm == '6': #1to2
-                            print(f'{Color.BLUE}6{Color.RESET}', end='')
-                        elif mm == '7': #1to3
-                            print(f'{Color.MAGENTA}7{Color.RESET}', end='')
-                        elif mm == '8': #2to3
-                            print(f'{Color.RED}8{Color.RESET}', end='')
-                        else: #Victims
-                            print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
-                    print('')
+            if Console.DEBUG_MODE:
+                pretty_print_map(self.answerMatrix)
 
             return self.answerMatrix
             
