@@ -12,31 +12,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added real-world timer info to the "game info" data from the supervisor. 
   - Previously, the received data packet was in the form `char float int` - "G", game score, remaining time (e.g. `G 15 100`)
   - The received data is now in the form `char float int int` - "G", game score, remaining time, remaining real world time (e.g. `G 15 100 50`)
-
 - Added support to run controllers within docker containers (**Note: This may become the official way to run controllers for international competitions, so please familiarise yourself with this**)
   - An input field in the web UI is used to input the local directory of your docker project containing a `Dockerfile`.
-  - Pressing the run docker button next to the play button will build and run your controller within a docker container.
+  - Pressing the run docker button next to the play button will build and run your controller within a docker container. **Please note any GUI components (e.g. `cv2.imshow` will not work)**
   - For more information about running controllers in docker containers, see this the [dockerfiles](https://gitlab.com/rcj-rescue-tc/erebus/erebus-dockerfiles) repository
-
 - Added preview thumbnails to the world selection UI
-
 - Added a settings option to keep the remote controller toggled
-
 - Added a link to the changelog in the Erebus settings UI
-
 - Added a favicon to the Erebus web UI
 
 ### Changed
 
 - Converted worlds to be compatible with Webots R2023b. Erebus v24.0.0 must be run with Webots R2023b, download it [here](https://github.com/cyberbotics/webots/releases/tag/R2023b).
-
 - Reworked hazard/victim detection logic
   - Detection is now based on the nearest victim to the sent estimated score (previously, this was arbitrary if two victims were both within valid detection range)
   - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions.
 
-![Detection example](/docs/images/2024_detection_example.png)
+<img alt="Detection example" src="/docs/images/2024_detection_example.png" width=30%/>
 
 - Robots can now exit the world regardless of world position, to align with the official rules
+- Documented a majority of the code base
 
 ### Fixed
 
