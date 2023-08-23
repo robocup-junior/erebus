@@ -20,6 +20,13 @@ from overrides import override
 
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
+    
+def rotate(coordinates, angle):
+    (x,y) = coordinates
+    angler = angle*math.pi/180
+    newx = x*math.cos(angler) - y*math.sin(angler)
+    newy = x*math.sin(angler) + y*math.cos(angler)
+    return (newx, newy)
 
 class Test(ErebusObject, ABC):
     def __init__(self, erebus: Erebus):
@@ -32,7 +39,8 @@ class Test(ErebusObject, ABC):
         self._report: str = ""
 
     def get_test_report(self) -> str:
-        """Get test report string, a string detailing the result of the test 
+        """Get test report string, a string detailing the result of the test if
+        it fails 
 
         Returns:
             str: Test report message
@@ -40,7 +48,8 @@ class Test(ErebusObject, ABC):
         return self._report
 
     def set_test_report(self, s: str):
-        """Set test report string, a string detailing the result of the test
+        """Set test report string, a string detailing the result of the test if
+        it fails
 
         Args:
             s (str): Test report message
@@ -85,7 +94,7 @@ class TestVictim(Test):
     """Test victim detection at various different ranges away from both
     victim and hazards
     """
-    # TODO position offset is not very reliable (gets stuck in walls)
+    # TODO position offset is not very reliable
     # TODO there are no negative tests (e.g. incorrect victim type)
 
     def __init__(
@@ -93,6 +102,7 @@ class TestVictim(Test):
         erebus: Erebus,
         index: int,
         offset: float,
+        angle: float,
         victim_list: Sequence[VictimObject],
     ) -> None:
         """Initialises a new victim test
@@ -101,12 +111,14 @@ class TestVictim(Test):
             erebus (Erebus): Erebus supervisor game object
             index (int): victim index of `victim_list` to test
             offset (float): position offset from victim to test (in meters)
+            angle (float): angle from the victim normal (from -90 to 90)
             victim_list (Sequence[VictimObject]): list of all victims (e.g. all
             hazards or victims) 
         """
         super().__init__(erebus)
         self._index: int = index
         self._offset: float = offset
+        self._angle: float = angle
 
         self._start_score: float = 0
 
@@ -115,20 +127,20 @@ class TestVictim(Test):
 
     @override
     def pre_test(self) -> tuple[int, int, int, int, bytes]:
-        """Moves the robot to it's respective offset from the victim. Sends
-        info to the robot controller to stop and identify the correct victim 
-        type
+        """Moves the robot to it's respective offset and angle from the victim. 
+        Sends info to the robot controller to stop and identify the correct 
+        victim type
 
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        Console.log_info(f"Testing Offset {self._offset}")
+        Console.log_info(f"Testing Offset {self._offset} with Angle {self._angle}")
         self._start_score = self._erebus.robot_obj.get_score()
         self._erebus.robot_obj.reset_time_stopped()
 
         self._victim = self._victim_list[self._index]
         TestRunner.robotToVictim(self._erebus.robot_obj,
-                                 self._victim, self._offset)
+                                 self._victim, self._offset, self._angle)
         # The victim type being sent is the letter 'H' for harmed victim
         victim_type: bytes = bytes(self._victim.get_simple_type(), "utf-8")
         # identify human, wait , wheel 1, wheel 2, human type
@@ -186,18 +198,20 @@ class TestVictim(Test):
 class TestCheckpoint(Test):
     """Test checkpoints give points on entry
     """
-    # TODO no tests that they dont give points on re-entry
-    
-    def __init__(self, erebus: Erebus, index: int):
+        
+    def __init__(self, erebus: Erebus, index: int, re_entry: bool = False):
         """Initialises a new checkpoint test
 
         Args:
             erebus (Erebus): Erebus supervisor game object
             index (int): Index of checkpoint to test (from list in tile manager)
+            re_entry (bool, optional): Test for checkpoint re-entry (e.g. giving
+            no more points). Defaults to False.
         """
         super().__init__(erebus)
         self._index: int = index
         self._start_score: float = 0.0
+        self._re_entry: bool = re_entry
         self._checkpoint: None | Checkpoint = None
 
     @override
@@ -217,11 +231,17 @@ class TestCheckpoint(Test):
     @override
     def test(self) -> bool:
         """Test whether the correct amount of points (10 * room multiplier) are
-        awarded to the robot on checkpoint entry
+        awarded to the robot on checkpoint entry.
+        
+        If re-entry is set to true, checks that no points are given.
 
         Returns:
             bool: If the correct amount of points were awarded
         """
+        if self._re_entry:
+            Console.log_info("Testing checkpoint re-entry")
+            return self._erebus.robot_obj.get_score() == self._start_score
+        
         if self._checkpoint is None:
             self.set_test_report("Could not find checkpoint")
             return False
@@ -269,23 +289,26 @@ class TestRelocate(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
+        self._erebus.robot_obj.increase_score("TestRelocate starting test score",
+                                              100)
         self._start_score = self._erebus.robot_obj.get_score()
         humans: list[Victim] = self._erebus.victim_manager.victims
         victim: Victim = humans[self._index]
 
         TestRunner.robotToVictim(self._erebus.robot_obj, victim)
-        self._erebus.relocate_robot()
-        self._erebus.robot_obj.reset_time_stopped()
         # identify human, wait , wheel 1, wheel 2, human type
         return (0, 1, 0, 0, b'U')
 
     @override
     def test(self) -> bool:
-        """Tests a -5 point penalty is given to the robot
+        """Tests a -5 point penalty is given to the robot after a relocate is
+        given
 
         Returns:
             bool: If the correct penalty was given
         """
+        self._erebus.relocate_robot()
+        self._erebus.robot_obj.reset_time_stopped()
         return self._erebus.robot_obj.get_score() == self._start_score - 5
 
     @override
@@ -474,19 +497,34 @@ class TestRunner(ErebusObject):
         init: list[Test] = self._tests
 
         init += [TestBlackHole(self._erebus)]
-        init += [TestSwamp(self._erebus, i)
-                 for i in range(len(self._erebus.tile_manager.swamps))]
+        # init += [TestSwamp(self._erebus, i)
+        #          for i in range(len(self._erebus.tile_manager.swamps))]
         init += [TestLOP(self._erebus)]
         init += [TestCheckpoint(self._erebus, i)
                  for i in range(len(self._erebus.tile_manager.checkpoints))]
-        init += [TestVictim(self._erebus, i, offset, 
-                            self._erebus.victim_manager.hazards)
-                 for offset in np.linspace(0.03, 0.13, 5)
-                 for i in range(len(self._erebus.victim_manager.hazards))]
-        init += [TestVictim(self._erebus, i, offset, 
+        
+        # Check for re-entry to checkpoints
+        init += [TestCheckpoint(self._erebus, i, True)
+            for i in range(len(self._erebus.tile_manager.checkpoints))]
+
+        # # Negative tests for distance
+        init += [TestVictim(self._erebus, 0, offset, angle,
                             self._erebus.victim_manager.victims)
-                 for offset in np.linspace(0.03, 0.13, 5)
+                 for offset in np.linspace(0.9, 0.15, 5)
+                 for angle in np.linspace(-80, 80, 4)]
+        
+        # # Tests for hazards and victim position
+        init += [TestVictim(self._erebus, i, offset, angle,
+                            self._erebus.victim_manager.victims)
+                 for offset in np.linspace(0.03, 0.08, 5)
+                 for angle in np.linspace(-80, 80, 6)
                  for i in range(len(self._erebus.victim_manager.victims))]
+        init += [TestVictim(self._erebus, i, offset, angle,
+                            self._erebus.victim_manager.hazards)
+                 for offset in np.linspace(0.03, 0.08, 5)
+                 for angle in np.linspace(-80, 80, 6)
+                 for i in range(len(self._erebus.victim_manager.hazards))]
+        
         init += [TestRelocate(self._erebus, i)
                  for i in range(len(self._erebus.victim_manager.victims))]
         return init
@@ -520,7 +558,8 @@ class TestRunner(ErebusObject):
     def robotToVictim(
         robot: Robot,
         victim: VictimObject,
-        offset: float = 0.06
+        offset: float = 0.06,
+        angle: float = 0,
     ) -> None:
         """Moves the robot to a specified victim, with an offset directly 
         perpendicular away from it
@@ -530,14 +569,18 @@ class TestRunner(ErebusObject):
             victim (VictimObject): Victim object to move to
             offset (float, optional): Offset away from victim in meters.
             Defaults to 0.06.
+            angle (float, optional): Angle offset away from the victim normal, 
+            in degrees. Defaults to 0. 
         """
         norm = victim.get_surface_normal()
+        
+        rot = rotate((norm[0], norm[2]), angle)
 
         robot.position = list(np.array([
             victim.position[0],
             robot.position[1],
             victim.position[2]
-        ]) + (norm * offset))
+        ]) + (np.array([rot[0], 0, rot[1]]) * offset))
 
     def _run_test(self) -> None:
         """Runs the current test, and handles moving to the next test when

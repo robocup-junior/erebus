@@ -237,6 +237,22 @@ class Erebus(Supervisor):
             # Write to a log file to write game events to file
             Logger.write_log(self.robot_obj, self.max_time)
 
+
+    def _add_physicsless_robot_proto(self) -> None:
+        """Copies a physics-less version of the default robot proto to 
+        the custom_robot.proto proto location, forcing the use of this proto
+        instead of any other that may have been loaded
+        
+        Note: This should really only be used for automated testing
+        """
+
+        # Copy physicsless proto file to be used as custom robot proto
+        path: str = get_file_path("proto_defaults/E-puck-custom-default-FLU-physicsless.proto",
+                                  "../../proto_defaults/E-puck-custom-default-FLU-physicsless.proto")
+        dest: str = get_file_path("protos/custom_robot.proto",
+                                  "../../protos/custom_robot.proto")
+        shutil.copyfile(path, dest)
+
     def _add_robot(self) -> Node:
         """Add a robot Node to the root of the Webots scene tree.
         
@@ -247,6 +263,9 @@ class Erebus(Supervisor):
         Returns:
             Node: Node reference to newly added robot
         """
+        
+        if self._run_tests:
+            self._add_physicsless_robot_proto()
 
         controller: str = "robot0Controller"
         if self._remote_enabled:
@@ -396,9 +415,14 @@ class Erebus(Supervisor):
         for h in iterator:
             Console.log_debug("===")
             Console.log_debug(
+                f"Position {self.robot_obj.position}")
+            Console.log_debug(
                 f"Distance {h.get_distance(self.robot_obj.position)}/0.09")
             Console.log_debug(
                 f"In range: ({h.check_position(self.robot_obj.position)})")
+            Console.log_debug(f"Est pos: {est_vic_pos}")
+            Console.log_debug(
+                f"Est distance {h.get_distance(est_vic_pos)}/0.09")
             Console.log_debug(
                 f"Est distance in range: {h.check_position(est_vic_pos)}")
             Console.log_debug(
