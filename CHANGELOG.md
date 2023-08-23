@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Release v24.0.0]() - 2023-XX-XX
+## [Release v24.0.0_beta-1]() - 2023-XX-XX
 
 > Please note this version only works with Webots R2023b, please update your Webots client before using this version.
 
@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 
 - Moved black-hole tiles down slightly to help reduce wheel physics issues when moving over them.
+- Fixed a bug where the custom robot json button state isn't correctly updated when remote controllers are enabled.  
 
 ### Removed
 

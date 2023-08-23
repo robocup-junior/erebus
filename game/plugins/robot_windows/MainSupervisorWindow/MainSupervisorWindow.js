@@ -149,10 +149,11 @@ function resetHistory() {
 function loadedController(id){
 	//A controller has been loaded into a robot id is 0 or 1 and name is the name of the robot
 	//Set name and toggle to unload button for robot 0
-	if (document.getElementById("keepRemote").checked) return
+	if (document.getElementById("keepRemote").checked && id == 0) return
 	document.getElementById("load"+ id).style.display = "none";
 	document.getElementById("unload"+ id).style.display = "inline-block";
-	disableWhileSending(false);
+	if (id == 0)
+		disableWhileSending(false);
 }
 
 function unloadedController(id){

@@ -367,7 +367,7 @@ span{
 
 .hidden_box input:checked ~ .hidden_show {
   padding: 10px 0;
-  max-height: 500px;
+  max-height: 1000px;
   opacity: 1;
 }
 
