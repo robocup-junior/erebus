@@ -1,5 +1,10 @@
 from __future__ import annotations
-from re import S
+
+import random
+import struct
+import math
+from abc import ABC, abstractmethod
+
 from ConsoleLog import Console
 from Victim import VictimObject
 from Victim import HazardMap
@@ -8,10 +13,6 @@ from Robot import Robot
 from Tile import Checkpoint, Swamp
 from typing import TYPE_CHECKING
 from typing import Sequence
-
-import struct
-import math
-from abc import ABC, abstractmethod
 
 from ErebusObject import ErebusObject
 
@@ -268,7 +269,6 @@ class TestCheckpoint(Test):
 class TestRelocate(Test):
     """Test if relocates give a -5 penalty
     """
-    # TODO doesn't check if the robot was actually moved
     
     def __init__(self, erebus: Erebus, index: int):
         """Initialises a new relocate test
@@ -279,7 +279,9 @@ class TestRelocate(Test):
         """
         super().__init__(erebus)
         self._index: int = index
+        
         self._start_score: float = 0.0
+        self._start_pos: list[float] = []
 
     @override
     def pre_test(self) -> tuple[int, int, int, int, bytes]:
@@ -292,6 +294,8 @@ class TestRelocate(Test):
         self._erebus.robot_obj.increase_score("TestRelocate starting test score",
                                               100)
         self._start_score = self._erebus.robot_obj.get_score()
+        self._start_pos = self._erebus.robot_obj.position
+        
         humans: list[Victim] = self._erebus.victim_manager.victims
         victim: Victim = humans[self._index]
 
@@ -302,14 +306,20 @@ class TestRelocate(Test):
     @override
     def test(self) -> bool:
         """Tests a -5 point penalty is given to the robot after a relocate is
-        given
+        given, and the robot correctly relocates to a random checkpoint in the
+        world
 
         Returns:
             bool: If the correct penalty was given
         """
+        relocate_tile: Checkpoint = random.choice(
+            self._erebus.tile_manager.checkpoints)
+        self._erebus.robot_obj.last_visited_checkpoint_pos = relocate_tile.center
+        
         self._erebus.relocate_robot()
         self._erebus.robot_obj.reset_time_stopped()
-        return self._erebus.robot_obj.get_score() == self._start_score - 5
+        return (self._erebus.robot_obj.get_score() == self._start_score - 5 and
+                relocate_tile.check_position(self._erebus.robot_obj.position))
 
     @override
     def post_test(self) -> None: pass
