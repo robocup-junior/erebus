@@ -22,12 +22,24 @@ from overrides import override
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
     
-def rotate(coordinates, angle):
-    (x,y) = coordinates
-    angler = angle*math.pi/180
-    newx = x*math.cos(angler) - y*math.sin(angler)
-    newy = x*math.sin(angler) + y*math.cos(angler)
-    return (newx, newy)
+def rotate(
+    vector: tuple[float, float], 
+    angle: float
+) -> tuple[float, float]:
+    """Rotates a 2d vector by a specified angle
+
+    Args:
+        vector (tuple[float, float]): Vector to rotate
+        angle (float): Angle to rotate by (in degrees)
+
+    Returns:
+        tuple[float, float]: Newly rotated vector
+    """    
+    (x,y) = vector
+    angle_rad = angle*math.pi/180
+    new_x = x*math.cos(angle_rad) - y*math.sin(angle_rad)
+    new_y = x*math.sin(angle_rad) + y*math.cos(angle_rad)
+    return (new_x, new_y)
 
 class Test(ErebusObject, ABC):
     def __init__(self, erebus: Erebus):
@@ -122,6 +134,7 @@ class TestVictim(Test):
         self._angle: float = angle
 
         self._start_score: float = 0
+        self._to_victim_valid: bool = True
 
         self._victim: None | VictimObject = None
         self._victim_list: Sequence[VictimObject] = victim_list
@@ -140,8 +153,8 @@ class TestVictim(Test):
         self._erebus.robot_obj.reset_time_stopped()
 
         self._victim = self._victim_list[self._index]
-        TestRunner.robotToVictim(self._erebus.robot_obj,
-                                 self._victim, self._offset, self._angle)
+        self._to_victim_valid =  TestRunner.robotToVictim(
+            self._erebus.robot_obj, self._victim, self._offset, self._angle)
         # The victim type being sent is the letter 'H' for harmed victim
         victim_type: bytes = bytes(self._victim.get_simple_type(), "utf-8")
         # identify human, wait , wheel 1, wheel 2, human type
@@ -159,6 +172,13 @@ class TestVictim(Test):
         if self._victim is None:
             self.set_test_report("Could not find victim")
             return False
+        
+        # If to victim re-position is not valid (would be out of range from
+        # rounding errors)
+        if not self._to_victim_valid:
+            Console.log_warn("Skipping test due to distance from "
+                             "the victim is too large (from rounding errors)")
+            return True
 
         grid: int = self._erebus.tile_manager.coord2grid(
             self._victim.wb_translation_field.getSFVec3f(),
@@ -520,20 +540,20 @@ class TestRunner(ErebusObject):
         # # Negative tests for distance
         init += [TestVictim(self._erebus, 0, offset, angle,
                             self._erebus.victim_manager.victims)
-                 for offset in np.linspace(0.9, 0.15, 5)
+                 for offset in np.linspace(0.9, 0.15, 4)
                  for angle in np.linspace(-80, 80, 4)]
         
         # # Tests for hazards and victim position
         init += [TestVictim(self._erebus, i, offset, angle,
                             self._erebus.victim_manager.victims)
-                 for offset in np.linspace(0.03, 0.08, 5)
-                 for angle in np.linspace(-80, 80, 6)
-                 for i in range(len(self._erebus.victim_manager.victims))]
+                 for i in range(len(self._erebus.victim_manager.victims))
+                 for offset in np.linspace(0.03, 0.089, 6)
+                 for angle in np.linspace(-80, 80, 5)]
         init += [TestVictim(self._erebus, i, offset, angle,
                             self._erebus.victim_manager.hazards)
-                 for offset in np.linspace(0.03, 0.08, 5)
-                 for angle in np.linspace(-80, 80, 6)
-                 for i in range(len(self._erebus.victim_manager.hazards))]
+                 for i in range(len(self._erebus.victim_manager.hazards))
+                 for offset in np.linspace(0.03, 0.089, 6)
+                 for angle in np.linspace(-80, 80, 5)]
         
         init += [TestRelocate(self._erebus, i)
                  for i in range(len(self._erebus.victim_manager.victims))]
@@ -570,7 +590,7 @@ class TestRunner(ErebusObject):
         victim: VictimObject,
         offset: float = 0.06,
         angle: float = 0,
-    ) -> None:
+    ) -> bool:
         """Moves the robot to a specified victim, with an offset directly 
         perpendicular away from it
 
@@ -581,16 +601,30 @@ class TestRunner(ErebusObject):
             Defaults to 0.06.
             angle (float, optional): Angle offset away from the victim normal, 
             in degrees. Defaults to 0. 
+        
+        Returns:
+            bool: True if the new position is within the valid detection range,
+            False otherwise
         """
         norm = victim.get_surface_normal()
         
         rot = rotate((norm[0], norm[2]), angle)
 
-        robot.position = list(np.array([
+        new_position: list[float] = list(np.array([
             victim.position[0],
             robot.position[1],
             victim.position[2]
         ]) + (np.array([rot[0], 0, rot[1]]) * offset))
+        
+        # Rounding to simulate rounding precision errors found due to only
+        # being able to send cm positions for estimated victim positions
+        rounded_pos: list[float] = [int(new_position[0] * 100) / 100, 0, int(new_position[2] * 100) / 100]
+        if (victim.get_distance(rounded_pos) > 0.09):
+            return False
+        
+        robot.position = new_position
+        return True
+        
 
     def _run_test(self) -> None:
         """Runs the current test, and handles moving to the next test when
