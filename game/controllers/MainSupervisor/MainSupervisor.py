@@ -77,6 +77,8 @@ class Erebus(Supervisor):
         )
         self.config: Config = self._get_config(config_file_path)
         
+        self.simulation_mode = self.SIMULATION_MODE_REAL_TIME
+        
         # Send message to robot window to perform setup
         self.rws.send("startup")
         self._get_erebus_version()
@@ -588,6 +590,7 @@ class Erebus(Supervisor):
                 self._game_state = GameState.MATCH_RUNNING
                 self._run_tests = True
                 self.config.disable_lop = True
+                self.simulation_mode = self.SIMULATION_MODE_FAST
 
             # Start running the match using a docker controller
             if command == "runDocker":

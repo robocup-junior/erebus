@@ -1,6 +1,8 @@
 # Tests that need to be added:
+# - Victim detection overlap
 # - Game info
 # - Maps
+# - Curved victim mis-identification
 
 from __future__ import annotations
 
@@ -677,6 +679,8 @@ class TestRunner(ErebusObject):
         init += [TestCheckpoint(self._erebus, i, True)
             for i in range(len(self._erebus.tile_manager.checkpoints))]
 
+
+        ###### VICTIM ######
         # Negative tests for distance
         init += [TestVictim(self._erebus, 0, offset, angle,
                             self._erebus.victim_manager.victims)
@@ -700,15 +704,34 @@ class TestRunner(ErebusObject):
                             delay=int(delay))
                  for delay in np.linspace(0, 5, 5)
                  for i in range(len(self._erebus.victim_manager.victims))]
-
+        ###################
         
-        # Tests for hazard position
+        ###### HAZARD ######
+        # Negative tests for distance
+        init += [TestVictim(self._erebus, 0, offset, angle,
+                            self._erebus.victim_manager.hazards)
+                 for offset in np.linspace(0.9, 0.15, 4)
+                 for angle in np.linspace(-80, 80, 4)]
+        
+        # Tests for victim position
         init += [TestVictim(self._erebus, i, offset, angle,
                             self._erebus.victim_manager.hazards)
                  for i in range(len(self._erebus.victim_manager.hazards))
                  for offset in np.linspace(0.03, 0.089, 6)
-                 for angle in np.linspace(-80, 80, 5)]
-
+                 for angle in np.linspace(-80, 80, 5)]        
+        # Tests for victim misidentification
+        init += [TestVictim(self._erebus, i, offset, 0,
+                            self._erebus.victim_manager.hazards, True)
+                 for offset in np.linspace(0.05, 0.07, 2)
+                 for i in range(len(self._erebus.victim_manager.hazards))]
+        # Tests for victim delays
+        init += [TestVictim(self._erebus, i, 0.06, 0,
+                            self._erebus.victim_manager.hazards, 
+                            delay=int(delay))
+                 for delay in np.linspace(0, 5, 5)
+                 for i in range(len(self._erebus.victim_manager.hazards))]
+        #################
+        
         return init
 
     def get_stage(self, received_data: bytes) -> bool:
