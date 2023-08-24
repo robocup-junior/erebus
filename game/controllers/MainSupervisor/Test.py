@@ -149,6 +149,7 @@ class TestVictim(Test):
         angle: float,
         victim_list: Sequence[VictimObject],
         misidentify: bool = False,
+        delay: int = 3
     ) -> None:
         """Initialises a new victim test
 
@@ -161,15 +162,18 @@ class TestVictim(Test):
             hazards or victims) 
             misidentify (bool, optional): whether to purposefully misidentify the victim
             type. Defaults to False.
+            delay (int, optional): Delay before identification
         """
         super().__init__(erebus)
         self._index: int = index
         self._offset: float = offset
         self._angle: float = angle
         self._misidentify: bool = misidentify
+        self._delay: int = delay
 
         self._start_score: float = 0
         self._to_victim_valid: bool = True
+        self._start_time: float = 0
 
         self._simple_victim_type: str = ''
 
@@ -187,7 +191,10 @@ class TestVictim(Test):
             test controller
         """
         Console.log_info(f"Testing Offset {self._offset} with Angle {self._angle}, "
-                         f"with misidentifications: {self._misidentify}")
+                         f"with misidentifications: {self._misidentify} and "
+                         f"delay: {self._delay}")
+        
+        self._start_time = self._erebus.getTime()
         
         self._erebus.robot_obj.increase_score("TestVictim starting test score",
                                               100)
@@ -207,7 +214,7 @@ class TestVictim(Test):
         victim_type: bytes = bytes(self._simple_victim_type, "utf-8")
         # identify human, wait , wheel 1, wheel 2, human type, command
         # command args
-        return (1, 3, 0, 0, victim_type, b' ', b' ')
+        return (1, self._delay, 0, 0, victim_type, b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -241,8 +248,15 @@ class TestVictim(Test):
             .getSFInt32() - 1
         )
         multiplier: float = self._erebus.tile_manager.ROOM_MULT[room_num]
+        
+        # Test time stopped, if too short, no points should be awarded
+        if (self._erebus.getTime() - self._start_time) < 1:
+            self.set_test_report(f"Time stopped: "
+                                 f"{self._erebus.getTime() - self._start_time} "
+                                 f"(Internal {self._erebus.robot_obj.time_stopped()})")
+            return self._erebus.robot_obj.get_score() == self._start_score
 
-        if self._offset > 0.09:
+        if self._offset > 0.093:
             self.set_test_report((
                 f"Expected score: {self._start_score - 5}, "
                 f"but was: {self._erebus.robot_obj.get_score()}"
@@ -272,6 +286,7 @@ class TestVictim(Test):
         """Resets the victim textures, so the next test has victim textures
         as unidentified
         """
+        self._erebus.robot_obj.reset_time_stopped()
         self._erebus.victim_manager.reset_victim_textures()
 
 
@@ -643,7 +658,7 @@ class TestRunner(ErebusObject):
         Returns:
             list[Test]: List of tests to run
         """
-        init: list[Test] = self._tests      
+        init: list[Test] = self._tests     
         
         init += [TestBlackHole(self._erebus)]
         # init += [TestSwamp(self._erebus, i)
@@ -678,6 +693,12 @@ class TestRunner(ErebusObject):
         init += [TestVictim(self._erebus, i, offset, 0,
                             self._erebus.victim_manager.victims, True)
                  for offset in np.linspace(0.05, 0.07, 2)
+                 for i in range(len(self._erebus.victim_manager.victims))]
+        # Tests for victim delays
+        init += [TestVictim(self._erebus, i, 0.06, 0,
+                            self._erebus.victim_manager.victims, 
+                            delay=int(delay))
+                 for delay in np.linspace(0, 5, 5)
                  for i in range(len(self._erebus.victim_manager.victims))]
 
         
