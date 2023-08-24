@@ -232,20 +232,22 @@ function updateConfig (data){
 		document.getElementById("keepRemote").checked = Boolean(Number(data[4]));
 		if (Boolean(Number(data[4]))) window.enableRemotePressed()
 		else window.disableRemotePressed()
-		document.getElementById("dockerPath").value = String(data[5])
+		document.getElementById("enableDebugging").checked = Boolean(Number(data[5]))
+		document.getElementById("dockerPath").value = String(data[6])
 	}
 
 	updateTestBtnState(Boolean(Number(data[0])))
 }
 
 window.configChanged = function(){
-	let data = [0,0,0,0,0,""];
+	let data = [0,0,0,0,0,0,""];
 	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
 	data[2] = String(Number(document.getElementById("recording").checked));
 	data[3] = String(Number(document.getElementById("autoCam").checked));
 	data[4] = String(Number(document.getElementById("keepRemote").checked));
-	data[5] = String(document.getElementById("dockerPath").value)
+	data[5] = String(Number(document.getElementById("enableDebugging").checked))
+	data[6] = String(document.getElementById("dockerPath").value)
 	if (document.getElementById("keepRemote").checked) window.enableRemotePressed()
 	else window.disableRemotePressed()
 

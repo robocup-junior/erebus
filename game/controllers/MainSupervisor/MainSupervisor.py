@@ -69,6 +69,14 @@ class Erebus(Supervisor):
 
         # Robot window send text wrapper
         self.rws: RWSender = RWSender(self)
+        
+        # Get the config data from config.txt
+        config_file_path = get_file_path(
+            "controllers/MainSupervisor/config.txt",
+            "config.txt"
+        )
+        self.config: Config = self._get_config(config_file_path)
+        
         # Send message to robot window to perform setup
         self.rws.send("startup")
         self._get_erebus_version()
@@ -104,13 +112,6 @@ class Erebus(Supervisor):
         # which ever is greater
         self._max_real_world_time: int = int(max(self.max_time + 60,
                                                 self.max_time * 1.25))
-
-        # Get the config data from config.txt
-        config_file_path = get_file_path(
-            "controllers/MainSupervisor/config.txt",
-            "config.txt"
-        )
-        self.config: Config = self._get_config(config_file_path)
 
         # Init tile and victim managers
         self.tile_manager: TileManager = TileManager(self)

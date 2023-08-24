@@ -1,3 +1,6 @@
+from ConsoleLog import Console
+
+
 class Config():
     """Holds data for the settings configuration of Erebus
     """
@@ -15,7 +18,8 @@ class Config():
         # [2]: Recording
         # [3]: Automatic camera
         # [4]: Keep remote
-        # [5]: Docker path
+        # [5]: Debug enabled
+        # [6]: Docker path
 
         self.path: str = path
 
@@ -30,4 +34,5 @@ class Config():
 
         if len(config_data) >= 5:
             self.keep_remote = bool(int(config_data[4]))
-            self.docker_path = str(config_data[5])
+            Console.update_debug_mode(bool(int(config_data[5])))
+            self.docker_path = str(config_data[6])

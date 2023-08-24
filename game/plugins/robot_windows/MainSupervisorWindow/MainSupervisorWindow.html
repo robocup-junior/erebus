@@ -110,21 +110,21 @@
 									</label>
 								</div>
 							</div>
-							<div class="col-12">
-								<span>Recording</span>
-								<div class="switch">
-									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="recording" onchange="configChanged()"/>
-										<span class="switch__content"></span>
-										<span class="switch__circle"></span>
-									</label>
-								</div>
-							</div>
 							
 
 						</div>
 						<div class="col-4">
 							<div class="col-12">
+								<div class="col-12">
+									<span>Recording</span>
+									<div class="switch">
+										<label class="switch__label">
+											<input type="checkbox" class="switch__input" id="recording" onchange="configChanged()"/>
+											<span class="switch__content"></span>
+											<span class="switch__circle"></span>
+										</label>
+									</div>
+								</div>
 								<span>Keep remote controller on</span>
 								<div class="switch">
 									<label class="switch__label">
@@ -140,6 +140,16 @@
 							<span>Dev - Tests</span>
 							<div>
 								<button class="btn-test" type="button" onclick="testPressed()" id="test">Run Tests (must disable 'Keep controller')</button>
+							</div>
+							<div class="col-12">
+								<span>Enable debugging</span>
+								<div class="switch">
+									<label class="switch__label">
+										<input type="checkbox" class="switch__input" id="enableDebugging" onchange="configChanged()"/>
+										<span class="switch__content"></span>
+										<span class="switch__circle"></span>
+									</label>
+								</div>
 							</div>
 						</div>
 					</div>

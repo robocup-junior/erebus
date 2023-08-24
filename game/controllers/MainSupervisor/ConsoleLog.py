@@ -39,6 +39,21 @@ class Console:
 
     _COLOR_CODE_PREFIX: str = "\033"
     _RESET: str = "\033[0m"
+    
+    @staticmethod
+    def update_debug_mode(state: bool) -> None:
+        """Update debugging state
+
+        Args:
+            state (bool): Debug state, True to enable, False to disable
+        """
+        if (Console.DEBUG_MODE == state):
+            return
+        Console.DEBUG_MODE = state
+        if Console.DEBUG_MODE:
+            Console.log_warn("Erebus debug logging enabled")
+        else:
+            Console.log_warn("Erebus debug logging disabled")
 
     @staticmethod
     def log_err(msg: str, sep: str | None = "\n", end = "\n") -> None:
@@ -203,7 +218,3 @@ class Console:
             print(
                 f"{Console._COLOR_CODE_PREFIX}[{Console._COLORS[color]}m[{prefix}] {line}{Console._RESET}",
                 end=end)
-
-
-if Console.DEBUG_MODE:
-    Console.log_warn("Erebus debug logging is enabled")
