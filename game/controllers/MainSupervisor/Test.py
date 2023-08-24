@@ -1,3 +1,7 @@
+# Tests that need to be added:
+# - Game info
+# - Maps
+
 from __future__ import annotations
 
 import random
@@ -99,14 +103,14 @@ class Test(ErebusObject, ABC):
 
     
     @abstractmethod
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Abstract method run before the test is computed. Used to initialise
         what the robot will do during the test.
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data sent to the robot test 
-            controller in the form [identify human, wait length, wheel 1 vel, 
-            wheel 2 vel, human type]
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data sent to the 
+            robot test controller in the form [identify human, wait length, 
+            wheel 1 vel, wheel 2 vel, human type, command, command args]
         """
         ...
 
@@ -135,7 +139,7 @@ class TestVictim(Test):
     """Test victim detection at various different ranges away from both
     victim and hazards
     """
-    # TODO there are no negative tests (e.g. incorrect victim type)
+    # TODO tests for different waiting times
 
     def __init__(
         self, 
@@ -173,13 +177,14 @@ class TestVictim(Test):
         self._victim_list: Sequence[VictimObject] = victim_list
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Moves the robot to it's respective offset and angle from the victim. 
         Sends info to the robot controller to stop and identify the correct 
         victim type
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         Console.log_info(f"Testing Offset {self._offset} with Angle {self._angle}, "
                          f"with misidentifications: {self._misidentify}")
@@ -200,8 +205,9 @@ class TestVictim(Test):
             self._simple_victim_type = wrong_victim(self._simple_victim_type)
         
         victim_type: bytes = bytes(self._simple_victim_type, "utf-8")
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (1, 3, 0, 0, victim_type)
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (1, 3, 0, 0, victim_type, b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -289,18 +295,20 @@ class TestCheckpoint(Test):
         self._checkpoint: None | Checkpoint = None
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Moves the robot to the corresponding checkpoint to test
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         self._start_score = self._erebus.robot_obj.get_score()
         checkpoints: list[Checkpoint] = self._erebus.tile_manager.checkpoints
         self._checkpoint = checkpoints[self._index]
         self._erebus.robot_obj.position = list(self._checkpoint.center)
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 0, 0, b'U')
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 1, 0, 0, b'U', b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -340,7 +348,8 @@ class TestCheckpoint(Test):
 
 
 class TestRelocate(Test):
-    """Test if relocates give a -5 penalty
+    """Test if relocates give a -5 penalty and relocated to the last visited
+    checkpoint
     """
     
     def __init__(self, erebus: Erebus, index: int):
@@ -352,17 +361,17 @@ class TestRelocate(Test):
         """
         super().__init__(erebus)
         self._index: int = index
-        
         self._start_score: float = 0.0
         self._start_pos: list[float] = []
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Moves the robot to a specified victim before relocating.
         Increases the robot's score, to ensure the penalty will be applied.
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         self._erebus.robot_obj.increase_score("TestRelocate starting test score",
                                               100)
@@ -373,8 +382,13 @@ class TestRelocate(Test):
         victim: Victim = humans[self._index]
 
         TestRunner.robotToVictim(self._erebus.robot_obj, victim)
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 0, 0, b'U')
+        
+        self._relocate_tile: Checkpoint = random.choice(
+            self._erebus.tile_manager.checkpoints)
+        self._erebus.robot_obj.last_visited_checkpoint_pos = self._relocate_tile.center
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 1, 0, 0, b'U', b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -383,16 +397,14 @@ class TestRelocate(Test):
         world
 
         Returns:
-            bool: If the correct penalty was given
+            bool: If the correct penalty was given and the robot relocated to 
+            the correct position
         """
-        relocate_tile: Checkpoint = random.choice(
-            self._erebus.tile_manager.checkpoints)
-        self._erebus.robot_obj.last_visited_checkpoint_pos = relocate_tile.center
         
         self._erebus.relocate_robot()
         self._erebus.robot_obj.reset_time_stopped()
         return (self._erebus.robot_obj.get_score() == self._start_score - 5 and
-                relocate_tile.check_position(self._erebus.robot_obj.position))
+                self._relocate_tile.check_position(self._erebus.robot_obj.position))
 
     @override
     def post_test(self) -> None: pass
@@ -412,13 +424,14 @@ class TestBlackHole(Test):
         self._start_score: float = 0.0
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Moves the robot below the world, to simulate falling into a 
         black-hole. 
         Increases the robot's score, to ensure the penalty will be applied.
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         self._erebus.robot_obj.increase_score("TestBlackHole starting test score",
                                               100)
@@ -428,8 +441,9 @@ class TestBlackHole(Test):
         self._erebus.robot_obj.reset_time_stopped()
         self._erebus.robot_obj.position = [-10., -1., -10.]
 
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 0, 0, b'U')
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 1, 0, 0, b'U', b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -463,19 +477,21 @@ class TestSwamp(Test):
         self._start_score: float = 0.0
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Moves the robot to the specified swamp, and enables wheel movement
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         self._start_score = self._erebus.robot_obj.get_score()
         swamps: list[Swamp] = self._erebus.tile_manager.swamps
         swamp: Swamp = swamps[self._index]
 
         self._erebus.robot_obj.position = list(swamp.center)
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 1, 6, 6, b'U')
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 1, 6, 6, b'U', b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -513,12 +529,13 @@ class TestLOP(Test):
         self._start_score: float = 0.0
 
     @override
-    def pre_test(self) -> tuple[int, int, int, int, bytes]:
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
         """Waits for 20s until an automatic relocation is applied.
         Increases the robot's score, to ensure the penalty will be applied.
 
         Returns:
-            tuple[int, int, int, int, bytes]: Data to send to test controller
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
         """
         self._erebus.robot_obj.increase_score("TestLOP starting test score",
                                               100)
@@ -526,8 +543,9 @@ class TestLOP(Test):
         self._erebus.robot_obj.reset_time_stopped()
         self._start_score = self._erebus.robot_obj.get_score()
 
-        # identify human, wait , wheel 1, wheel 2, human type
-        return (0, 25, 0, 0, b'U')
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 25, 0, 0, b'U', b' ', b' ')
 
     @override
     def test(self) -> bool:
@@ -545,6 +563,54 @@ class TestLOP(Test):
         self._erebus.robot_obj.reset_time_stopped()
         self._erebus.config.disable_lop = True
 
+class TestLOPMessage(TestRelocate):
+    """Tests for lack of progress calls given from the robot controller
+    
+    Make sure these tests are done after checkpoint checks, to ensure the 
+    checkpoints don't give the robot points
+    """
+
+    def __init__(self, erebus: Erebus, index: int):
+        """Initialises new lack of progress tests called from a robot controller 
+
+        Args:
+            erebus (Erebus): Erebus supervisor game object
+            index (int): Index of human victim to move to before relocate
+        """
+        super().__init__(erebus, index)
+
+    @override
+    def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:
+        """Moves the robot to a specified victim before the test
+        controller calls a relocate.
+        Increases the robot's score, to ensure the penalty will be applied.
+
+        Returns:
+            tuple[int, int, int, int, bytes, bytes, bytes]: Data to send to 
+            test controller
+        """
+        super().pre_test()
+        # identify human, wait , wheel 1, wheel 2, human type, command
+        # command args
+        return (0, 2, 0, 0, b'U', b'L', b' ')
+
+    @override
+    def test(self) -> bool:
+        """Tests a -5 point penalty is given to the robot.
+
+        Returns:
+            bool: If the correct penalty was given and the robot relocated to 
+            the correct position
+        """
+        return (self._erebus.robot_obj.get_score() == 
+                self._start_score - 5 and
+                self._relocate_tile.check_position(
+                    self._erebus.robot_obj.position))
+
+    @override
+    def post_test(self) -> None: pass
+        
+        
 
 class TestRunner(ErebusObject):
     """Erebus test runner manager, used to run all Erebus (unit) tests. Records
@@ -577,14 +643,20 @@ class TestRunner(ErebusObject):
         Returns:
             list[Test]: List of tests to run
         """
-        init: list[Test] = self._tests        
-
+        init: list[Test] = self._tests      
+        
         init += [TestBlackHole(self._erebus)]
         # init += [TestSwamp(self._erebus, i)
         #          for i in range(len(self._erebus.tile_manager.swamps))]
         init += [TestLOP(self._erebus)]
         init += [TestCheckpoint(self._erebus, i)
                  for i in range(len(self._erebus.tile_manager.checkpoints))]
+        
+                
+        init += [TestRelocate(self._erebus, i)
+                 for i in range(len(self._erebus.victim_manager.victims))]
+        init += [TestLOPMessage(self._erebus, i) 
+                 for i in range(len(self._erebus.victim_manager.victims))]  
         
         # Check for re-entry to checkpoints
         init += [TestCheckpoint(self._erebus, i, True)
@@ -615,14 +687,13 @@ class TestRunner(ErebusObject):
                  for i in range(len(self._erebus.victim_manager.hazards))
                  for offset in np.linspace(0.03, 0.089, 6)
                  for angle in np.linspace(-80, 80, 5)]
-        
-        init += [TestRelocate(self._erebus, i)
-                 for i in range(len(self._erebus.victim_manager.victims))]
+
         return init
 
     def get_stage(self, received_data: bytes) -> bool:
         """Gets the current stage of the test runner via the received data
-        from the test controller.
+        from the test controller. Data is also received about if a test
+        needs to be started or finished.
 
         Args:
             received_data (bytes): Emitter data from test controller to process
@@ -698,8 +769,10 @@ class TestRunner(ErebusObject):
             ))
 
             params: tuple = self._tests[self._stage].pre_test()
-            # G, stage, identify human, wait , wheel 1, wheel 2, human type
-            message = struct.pack("c i i i i i c", b'G', self._stage, *params)
+            # G, stage, identify human, wait , wheel 1, wheel 2, human type,
+            # command, command args
+            message = struct.pack("c i i i i i c c", b'G', self._stage, *params[:-1])
+            message += params[-1]
             self._erebus.emitter.send(message)
 
             self._pre_test = True

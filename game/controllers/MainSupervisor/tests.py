@@ -68,9 +68,12 @@ class TestRobot(Robot):
                 received_data: bytes = self._receiver.getBytes()
                 data_len: int = len(received_data)
                 if data_len > 8:
-                    tup: tuple = struct.unpack('c i i i i i c', received_data)
+                    options: bytes = received_data[:26]
+                    map_args: bytes = received_data[26::]
+                    tup: tuple = struct.unpack('c i i i i i c c', options)
                     message = [tup[0].decode("utf-8"),
-                               *tup[1:-1],
+                               *tup[1:-2],
+                               tup[-2].decode("utf-8"),
                                tup[-1].decode("utf-8")]
                     # Start test
                     if message[0] == 'G' and message[1] == self._stage:
@@ -93,7 +96,8 @@ class TestRobot(Robot):
         wait: int,
         wheel1: int,
         wheel2: int,
-        victim_type: str
+        victim_type: str,
+        command: str
     ) -> None:
         """Perform any actions need by a specific test (data from pre_test).
 
@@ -104,7 +108,12 @@ class TestRobot(Robot):
             wheel1 (int): Wheel 1 velocity
             wheel2 (int): Wheel 2 velocity
             victim_type (str): Victim type to identify
+            command (str): Emitter command to send to MainSupervisor
         """
+        # Pack message to send to MainSupervisor
+        if command == "L":
+            message = struct.pack('c', 'L'.encode())
+            self._emitter.send(message)
         self._wheel1.setVelocity(wheel1)
         self._wheel2.setVelocity(wheel2)
         self.wait(wait)
