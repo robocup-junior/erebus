@@ -327,14 +327,15 @@ class Erebus(Supervisor):
 
     def _get_worlds(self) -> str:
         """Gets all worlds from the `worlds` directory as a list of file names,
-        separated by commas. File extensions are stripped.
+        separated by commas. File extensions are stripped and hidden files
+        are ignored.
 
         Returns:
             str: List of worlds as a string. Example: `"world1,world2,room4"`
         """
         path: str = get_file_path("worlds", "../../worlds")
         files: list[str] = [file for file in os.listdir(path)
-                            if file[-3:] == 'wbt']
+                            if file[-3:] == 'wbt' and file[0] != '.']
         return ','.join(files)
 
     def _load_world(self, world: str) -> None:

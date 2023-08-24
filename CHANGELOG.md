@@ -18,23 +18,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - For more information about running controllers in docker containers, see this the [dockerfiles](https://gitlab.com/rcj-rescue-tc/erebus/erebus-dockerfiles) repository
 - Added preview thumbnails to the world selection UI
 - Added a settings option to keep the remote controller toggled
-- Added a link to the changelog in the Erebus settings UI
+- Added a settings option to enable debug output to the console
 - Added a favicon to the Erebus web UI
+- Added a link to the changelog in the Erebus settings UI
+- Added new Erebus automated tests and `.Tests.wbt` world.
+  - Automated tests are designed to be run with this world only, and isn't designed to be used as a normal competition world.
 
 ### Changed
 
 - Converted worlds to be compatible with Webots R2023b. Erebus v24.0.0 must be run with Webots R2023b, download it [here](https://github.com/cyberbotics/webots/releases/tag/R2023b).
 - Reworked hazard/victim detection logic
   - Detection is now based on the nearest victim to the sent estimated score (previously, this was arbitrary if two victims were both within valid detection range)
-  - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions.
+  - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions. See the diagram below for more details:
 
 <img alt="Detection example" src="/docs/images/2024_detection_example.png" width=50%/>
 
 - Robots can now exit the world regardless of world position, to align with the official rules
-- Game log scores are rounded to two decimal places
-- Updated `MapScorerExample.py` example controller to work with all example worlds
+- Game log scores are now rounded to two decimal places
+- Updated `MapScorerExample.py` example controller to work with all supplied example worlds
 - Improved debug console logging
-- Documented a majority of the code base
+- Updated documentation and code style for a majority of the code base
 
 ### Fixed
 
