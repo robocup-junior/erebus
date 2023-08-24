@@ -41,6 +41,34 @@ def rotate(
     new_y = x*math.sin(angle_rad) + y*math.cos(angle_rad)
     return (new_x, new_y)
 
+def wrong_victim(simple_type: str) -> str:
+    """Helper function to get a different victim type to the open given
+
+    Args:
+        simple_type (str): Simple victim/hazard type
+
+    Returns:
+        str: Random wrong victim/hazard type
+    """
+    if simple_type == 'H':
+        return random.choice(['S','U','F','P','C','O'])
+    if simple_type == 'S':
+        return random.choice(['H','U','F','P','C','O'])
+    if simple_type == 'U':
+        return random.choice(['S','H','F','P','C','O'])
+
+    if simple_type == 'F':
+        return random.choice(['P','C','O','H','S','U'])
+    if simple_type == 'P':
+        return random.choice(['F','C','O','H','S','U'])
+    if simple_type == 'C':
+        return random.choice(['P','F','O','H','S','U'])
+    if simple_type == 'O':
+        return random.choice(['P','C','F','H','S','U'])
+    
+    Console.log_err(f"Include simple type: {simple_type}. Returning 'H'")
+    return 'H'
+
 class Test(ErebusObject, ABC):
     def __init__(self, erebus: Erebus):
         """Initialises a new Erebus (unit) test
@@ -107,7 +135,6 @@ class TestVictim(Test):
     """Test victim detection at various different ranges away from both
     victim and hazards
     """
-    # TODO position offset is not very reliable
     # TODO there are no negative tests (e.g. incorrect victim type)
 
     def __init__(
@@ -117,6 +144,7 @@ class TestVictim(Test):
         offset: float,
         angle: float,
         victim_list: Sequence[VictimObject],
+        misidentify: bool = False,
     ) -> None:
         """Initialises a new victim test
 
@@ -127,14 +155,19 @@ class TestVictim(Test):
             angle (float): angle from the victim normal (from -90 to 90)
             victim_list (Sequence[VictimObject]): list of all victims (e.g. all
             hazards or victims) 
+            misidentify (bool, optional): whether to purposefully misidentify the victim
+            type. Defaults to False.
         """
         super().__init__(erebus)
         self._index: int = index
         self._offset: float = offset
         self._angle: float = angle
+        self._misidentify: bool = misidentify
 
         self._start_score: float = 0
         self._to_victim_valid: bool = True
+
+        self._simple_victim_type: str = ''
 
         self._victim: None | VictimObject = None
         self._victim_list: Sequence[VictimObject] = victim_list
@@ -148,15 +181,25 @@ class TestVictim(Test):
         Returns:
             tuple[int, int, int, int, bytes]: Data to send to test controller
         """
-        Console.log_info(f"Testing Offset {self._offset} with Angle {self._angle}")
+        Console.log_info(f"Testing Offset {self._offset} with Angle {self._angle}, "
+                         f"with misidentifications: {self._misidentify}")
+        
+        self._erebus.robot_obj.increase_score("TestVictim starting test score",
+                                              100)
+        
         self._start_score = self._erebus.robot_obj.get_score()
         self._erebus.robot_obj.reset_time_stopped()
 
         self._victim = self._victim_list[self._index]
         self._to_victim_valid =  TestRunner.robotToVictim(
             self._erebus.robot_obj, self._victim, self._offset, self._angle)
-        # The victim type being sent is the letter 'H' for harmed victim
-        victim_type: bytes = bytes(self._victim.get_simple_type(), "utf-8")
+        
+        self._simple_victim_type: str = self._victim.get_simple_type()
+        if self._misidentify:
+            # If testing misidentifications, test the wrong victim
+            self._simple_victim_type = wrong_victim(self._simple_victim_type)
+        
+        victim_type: bytes = bytes(self._simple_victim_type, "utf-8")
         # identify human, wait , wheel 1, wheel 2, human type
         return (1, 3, 0, 0, victim_type)
 
@@ -200,9 +243,19 @@ class TestVictim(Test):
             ))
             return self._erebus.robot_obj.get_score() == self._start_score - 5
 
+        types: list[str] = ['H', 'S', 'U']
         correct_type_bonus: float = 10.0
         if type(self._victim) == HazardMap:
             correct_type_bonus = 20.0
+            types = ['F', 'O', 'C', 'P']
+        
+        # Check various scores from mis-identifications of victims to hazards
+        # or if the type is just wrong...
+        if self._misidentify:
+            if self._simple_victim_type in types:
+                return (self._erebus.robot_obj.get_score() - self._start_score ==
+                        (self._victim.score_worth * multiplier))
+            return self._erebus.robot_obj.get_score() == self._start_score - 5 
 
         return (self._erebus.robot_obj.get_score() - self._start_score ==
                 (correct_type_bonus * multiplier) +
@@ -524,7 +577,7 @@ class TestRunner(ErebusObject):
         Returns:
             list[Test]: List of tests to run
         """
-        init: list[Test] = self._tests
+        init: list[Test] = self._tests        
 
         init += [TestBlackHole(self._erebus)]
         # init += [TestSwamp(self._erebus, i)
@@ -537,18 +590,26 @@ class TestRunner(ErebusObject):
         init += [TestCheckpoint(self._erebus, i, True)
             for i in range(len(self._erebus.tile_manager.checkpoints))]
 
-        # # Negative tests for distance
+        # Negative tests for distance
         init += [TestVictim(self._erebus, 0, offset, angle,
                             self._erebus.victim_manager.victims)
                  for offset in np.linspace(0.9, 0.15, 4)
                  for angle in np.linspace(-80, 80, 4)]
         
-        # # Tests for hazards and victim position
+        # Tests for victim position
         init += [TestVictim(self._erebus, i, offset, angle,
                             self._erebus.victim_manager.victims)
                  for i in range(len(self._erebus.victim_manager.victims))
                  for offset in np.linspace(0.03, 0.089, 6)
-                 for angle in np.linspace(-80, 80, 5)]
+                 for angle in np.linspace(-80, 80, 5)]        
+        # Tests for victim misidentification
+        init += [TestVictim(self._erebus, i, offset, 0,
+                            self._erebus.victim_manager.victims, True)
+                 for offset in np.linspace(0.05, 0.07, 2)
+                 for i in range(len(self._erebus.victim_manager.victims))]
+
+        
+        # Tests for hazard position
         init += [TestVictim(self._erebus, i, offset, angle,
                             self._erebus.victim_manager.hazards)
                  for i in range(len(self._erebus.victim_manager.hazards))
