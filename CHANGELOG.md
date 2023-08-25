@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added a favicon to the Erebus web UI
 - Added a link to the changelog in the Erebus settings UI
 - Added new Erebus automated tests and `.Tests.wbt` world.
-  - Automated tests are designed to be run with this world only, and isn't designed to be used as a normal competition world.
+  - Automated tests can now only be run with this world, and isn't designed to be used as a normal competition world.
 
 ### Changed
 

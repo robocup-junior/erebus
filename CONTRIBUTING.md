@@ -149,3 +149,9 @@ The reciever recieves data from the team's robot such as:
 - Data for the world map to be scored.
 - Request for relocate.
 - Exit message to end simulation.
+
+## Testing
+
+Automated tests are run through the `.Tests.wbt` world. Starting tests can be done via the UI, under settings. Note this button isn't available on other worlds.
+
+Within `MainSupervisor/Test.py` contains all automated tests to run, using the `MainSupervisor/test.py` robot controller code to communicate test stages and complete detection/wheel movements.

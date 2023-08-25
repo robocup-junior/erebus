@@ -92,6 +92,9 @@ function receive (message){
 			case "dockerSuccess":
 				preRun();
 				break;
+			case "currentWorld":
+				enableTestButton(parts[1]);
+				break;
 		}
 	}
 }
@@ -517,4 +520,12 @@ window.disableRemotePressed = function() {
 	document.getElementById("keepRemote").checked = false
 	if (keep_before) configChanged()
 	window.robotWindow.send("remoteDisable");
+}
+
+function enableTestButton(world_name) {
+	if (world_name != ".Tests"){ 
+		document.getElementById("dev-tests").style.display = "none";
+		return;
+	}
+	document.getElementById("dev-tests").style.display = "block";
 }

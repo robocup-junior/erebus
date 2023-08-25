@@ -155,6 +155,8 @@ class Erebus(Supervisor):
 
         # Export the answer map to an image used within the world selector UI
         export_map_to_img(self, self._map_sol)
+        
+        self.rws.send("currentWorld", self._get_current_world())
 
         self.rws.send("update", f"0,0,{self.max_time},0")
 
@@ -324,6 +326,14 @@ class Erebus(Supervisor):
             self.step(Erebus.TIME_STEP)
             if self.getTime() - first > sec:
                 break
+            
+    def _get_current_world(self) -> str:
+        """Gets the current world name, with no file extension
+
+        Returns:
+            str: Current world name
+        """
+        return os.path.basename(self.getWorldPath())[:-4]
 
     def _get_worlds(self) -> str:
         """Gets all worlds from the `worlds` directory as a list of file names,
