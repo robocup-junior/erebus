@@ -84,10 +84,10 @@ class Erebus(Supervisor):
         self._get_erebus_version()
 
         # Subprocess for running controllers in docker containers
-        self._docker_process: subprocess.Popen | None = None
+        self._docker_process: Optional[subprocess.Popen] = None
 
         self._game_state: GameState = GameState.MATCH_NOT_STARTED
-        self._last_frame: bool | None = False
+        self._last_frame: Optional[bool] = False
         self._first_frame: bool = True
         self._robot_initialised: bool = False
 
@@ -140,7 +140,7 @@ class Erebus(Supervisor):
 
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer(self)
-        map_ans: list[list] | None = self._map_ans.generateAnswer()
+        map_ans: Optional[list[list]] = self._map_ans.generateAnswer()
         if map_ans is None:
             raise Exception("Critical error: Could not generate answer matrix")
         self._map_sol: list[list] = map_ans
@@ -169,7 +169,7 @@ class Erebus(Supervisor):
             Recorder.start_recording(self)
 
         # Get the robot node by DEF name
-        robot_node: Node | None = self.getFromDef("ROBOT0")
+        robot_node: Optional[Node] = self.getFromDef("ROBOT0")
         # Add robot into world
         if robot_node == None:
             robot_node = self._add_robot()
@@ -862,7 +862,7 @@ class Erebus(Supervisor):
                 self.rws.send("ended")
 
         # Get the message in from the robot window(if there is one)
-        message: str | None = self.wwiReceiveText()
+        message: Optional[str] = self.wwiReceiveText()
         while message not in ['', None]:
             Console.log_debug(f"Received wwi message: {message}")
             self._process_rw_message(message)  # type: ignore

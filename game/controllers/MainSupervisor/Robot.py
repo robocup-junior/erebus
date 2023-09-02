@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 from typing import TYPE_CHECKING
 
 import datetime
@@ -132,7 +132,7 @@ class Robot(ErebusObject):
 
         self._stopped: bool = False
         self._robot_time_stopped: float = 0
-        self._stopped_time: float | None = None
+        self._stopped_time: Optional[float] = None
 
         self.message: list[Any] = []
         self.map_data = np.array([])
@@ -144,8 +144,8 @@ class Robot(ErebusObject):
         self.victim_identified: bool = False
 
         # TODO these should be tuples... something to do when changing Tile code
-        self.last_visited_checkpoint_pos: tuple[float,
-                                                float, float] | None = None
+        self.last_visited_checkpoint_pos: Optional[
+            tuple[float,float, float]] = None
         self.visited_checkpoints: list = []
 
     @property

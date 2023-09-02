@@ -19,6 +19,7 @@ from Robot import Robot
 from Tile import Checkpoint, Swamp
 from typing import TYPE_CHECKING
 from typing import Sequence
+from typing import Optional
 
 from ErebusObject import ErebusObject
 
@@ -179,7 +180,7 @@ class TestVictim(Test):
 
         self._simple_victim_type: str = ''
 
-        self._victim: None | VictimObject = None
+        self._victim: Optional[VictimObject] = None
         self._victim_list: Sequence[VictimObject] = victim_list
 
     @override
@@ -309,7 +310,7 @@ class TestCheckpoint(Test):
         self._index: int = index
         self._start_score: float = 0.0
         self._re_entry: bool = re_entry
-        self._checkpoint: None | Checkpoint = None
+        self._checkpoint: Optional[Checkpoint] = None
 
     @override
     def pre_test(self) -> tuple[int, int, int, int, bytes, bytes, bytes]:

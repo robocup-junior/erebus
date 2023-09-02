@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from typing import Optional
 
 from ConsoleLog import Console
 import subprocess
@@ -57,14 +58,15 @@ def _get_local_ip() -> str:
 def run_docker_container(
     erebus: Erebus, 
     project_dir: str
-) -> subprocess.Popen | None:
+) -> Optional[subprocess.Popen]:
     """Run a controller via a docker container
 
     Args:
         project_dir (str): System path to directory containing a Dockerfile
 
     Returns:
-        bool: True if docker container runs successfully
+        Optional[subprocess.Popen]: Subprocess if docker container runs 
+        successfully, None otherwise.
     """
     Console.log_info(f"Checking if erebus image exists (tag={EREBUS_IMAGE})")
     if not _erebus_image_exists():
