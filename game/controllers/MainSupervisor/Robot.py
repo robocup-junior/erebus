@@ -464,27 +464,23 @@ class Robot(ErebusObject):
             self.increase_score("Found checkpoint", 10, 
                                 multiplier=TileManager.ROOM_MULT[room_num])
 
-    def update_in_swamp(self, in_swamp: bool, max_velocity: float) -> None:
-        """Updates the robot's velocity if within a swamp.
+    def update_in_swamp(self, in_swamp: bool, default_multiplier: float) -> None:
+        """Updates the game's timer countdown multiplier when in a swamp.
 
         Args:
             in_swamp (bool): Whether the robot has entered a swamp
-            max_velocity (float): Max velocity multiplier to slow the robot by
+            default_multiplier (float): Default time multiplier
         """
         # Check if robot is in swamp
         if self.in_swamp != in_swamp:
             self.in_swamp = in_swamp
             if self.in_swamp:
-                # Cap the robot's velocity to 2
-                self.set_max_velocity(TileManager.SWAMP_SLOW_MULT)
-                # Reset physics
-                self._wb_node.resetPhysics()
+                # Update time multiplier 
+                self._erebus.set_time_multiplier(TileManager.SWAMP_TIME_MULT)
                 # Update history
                 self.history.enqueue("Entered swamp")
             else:
-                # If not in swamp, reset max velocity to default
-                self.set_max_velocity(max_velocity)
-                # Reset physics
-                self._wb_node.resetPhysics()
+                # Reset time multiplier
+                self._erebus.set_time_multiplier(default_multiplier)
                 # Update history
                 self.history.enqueue("Exited swamp,")

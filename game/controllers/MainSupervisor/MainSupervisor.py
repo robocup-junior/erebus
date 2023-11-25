@@ -97,6 +97,7 @@ class Erebus(Supervisor):
         self._real_time_elapsed: float = 0.0
         self._last_real_time: float = -1.0
         self._first_real_time: bool = True
+        self._time_muliplier: float = 1.0
         # Maximum time for a match
         self.max_time: int = 8 * 60
 
@@ -326,6 +327,14 @@ class Erebus(Supervisor):
             self.step(Erebus.TIME_STEP)
             if self.getTime() - first > sec:
                 break
+    
+    def set_time_multiplier(self, multiplier: float) -> None:
+        """Set time multiplier for game countdown timer
+
+        Args:
+            multiplier (float): Countdown time multiplier
+        """
+        self._time_muliplier = multiplier
             
     def _get_current_world(self) -> str:
         """Gets the current world name, with no file extension
@@ -887,6 +896,8 @@ class Erebus(Supervisor):
             self._last_real_time = time.time()
             # Get the time since the last frame
             frameTime = self.getTime() - self._last_time
+            # Scale frame time by countdown time multiplier (used for swamps)
+            frameTime *= self._time_muliplier
             # Add to the elapsed time
             self.time_elapsed += frameTime
             # Get the current time

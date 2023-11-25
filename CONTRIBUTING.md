@@ -87,6 +87,7 @@ As a quick summary: Stick to 80 character lines, detailed doc strings, type hint
 | Function/Method Parameters | `lower_with_under`    |                          |
 | Local Variables            | `lower_with_under`    |                          |
 
+For instances where a `type | None` type hint is required, prefer the syntax `Optional[type]`. 
 
 ### Note regarding Webots controllers
 
