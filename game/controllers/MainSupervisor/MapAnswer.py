@@ -1,12 +1,13 @@
+from typing import Union
 import numpy as np
 import numpy.typing as npt
 from ConsoleLog import Console
 
-def pretty_print_map(map: list | npt.NDArray) -> None:
+def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
     """Print a formatted view of an Erebus map matrix
 
     Args:
-        map (list | npt.NDArray): Erebus map matrix to print
+        map (Union[list, npt.NDArray]): Erebus map matrix to print
     """
     for m in map:
         for mm in m:

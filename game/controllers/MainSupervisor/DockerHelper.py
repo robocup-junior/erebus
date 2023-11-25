@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from typing import Optional
 
 from ConsoleLog import Console
 import subprocess
-import fcntl
 import socket
-import os
 
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
@@ -57,14 +56,15 @@ def _get_local_ip() -> str:
 def run_docker_container(
     erebus: Erebus, 
     project_dir: str
-) -> subprocess.Popen | None:
+) -> Optional[subprocess.Popen]:
     """Run a controller via a docker container
 
     Args:
         project_dir (str): System path to directory containing a Dockerfile
 
     Returns:
-        bool: True if docker container runs successfully
+        Optional[subprocess.Popen]: Subprocess if docker container runs 
+        successfully, None otherwise.
     """
     Console.log_info(f"Checking if erebus image exists (tag={EREBUS_IMAGE})")
     if not _erebus_image_exists():
@@ -122,23 +122,3 @@ def run_docker_container(
         return None
     
     return run_process
-
-
-def print_process_stdout(process: subprocess.Popen) -> None:
-    """Print a sub process's stdout to the erebus console
-    
-    Used for printing docker container outputs to the console
-
-    Args:
-        process (subprocess.Popen): Popen subprocess to print stdout
-    """
-    if process.stdout:
-        # https://gist.github.com/sebclaeys/1232088
-        # Print stdout without blocking
-        fd = process.stdout.fileno()
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-        try:
-            Console.log_controller(process.stdout.read().decode())
-        except:
-            pass

@@ -6,20 +6,23 @@
 import numpy as np
 import numpy.typing as npt
 
+from typing import Optional
+from typing import Union
+
 from MapAnswer import Color
 from ConsoleLog import Console
 
 
 def pretty_print_correct_matrix(
-    map: list | npt.NDArray, 
-    correct_map: list | npt.NDArray
+    map: Union[list, npt.NDArray], 
+    correct_map: Union[list, npt.NDArray]
 ) -> None:
     """Print a formatted view of an Erebus map matrix, with correct/incorrect
     map features highlighted
 
     Args:
         map (list): Erebus map matrix to print
-        correct_map (list | npt.NDArray): Binary matrix representing which
+        correct_map (Union[list, npt.NDArray]): Binary matrix representing which
         map features are correct (1 for correct, 0 for incorrect)
     """
     for i in range(len(map)):
@@ -32,16 +35,16 @@ def pretty_print_correct_matrix(
             print(f"{bg}{map[i][j]}{Color.RESET}", end='')
         print('')
 
-def _get_start_instance(matrix: npt.NDArray) -> npt.NDArray | None:
+def _get_start_instance(matrix: npt.NDArray) -> Optional[npt.NDArray]:
     """Gets the matrix coordinate of the first occurrence of the start
     tile char '5'.
 
     Args:
-        matrix (np.array): Map matrix
+        matrix (npt.NDArray): Map matrix
 
     Returns:
-        np.array: Matrix coordinate of the first occurrence of the start
-        tile char '5' 
+        Optional[npt.NDArray]: Matrix coordinate of the first occurrence 
+        of the start tile char '5'. None if no start tile char was found.
     """
     n, m = matrix.shape
     for y in range(n):
@@ -61,13 +64,13 @@ def _shift_matrix(
     the same and empty space from the shift is filled with 0s.
 
     Args:
-        answer_matrix (np.array): Answer matrix
-        sub_matrix (np.array): Submission matrix to be shifted
+        answer_matrix (npt.NDArray): Answer matrix
+        sub_matrix (npt.NDArray): Submission matrix to be shifted
         dy (int): Shift by x direction
         dx (int): Shift by y direction
 
     Returns:
-        np.array: Shifted matrix
+        npt.NDArray: Shifted matrix
     """
     n, m = sub_matrix.shape
     an, am = answer_matrix.shape
@@ -87,15 +90,15 @@ def _align(
     """Aligns the sub_matrix with the answer_matrix via the start tile
 
     Args:
-        answer_matrix (np.array): Answer matrix to align to
-        sub_matrix (np.array): Submission matrix to align
+        answer_matrix (npt.NDArray): Answer matrix to align to
+        sub_matrix (npt.NDArray): Submission matrix to align
 
     Raises:
         Exception: No starting tile found in the answer matrix
         Exception: No starting tile found in the submitted map
 
     Returns:
-        np.array: Shifted matrix aligned via the start tile of the two matrices
+        npt.NDArray: Shifted matrix aligned via the start tile of the two matrices
     """
     ans_con_pos = _get_start_instance(answer_matrix)
     if ans_con_pos is None:
@@ -118,8 +121,8 @@ def _calculate_completeness(
     another
 
     Args:
-        answer_matrix (np.array): answer matrix to check against
-        subMatrix (np.array): matrix to compare
+        answer_matrix (npt.NDArray): answer matrix to check against
+        subMatrix (npt.NDArray): matrix to compare
 
     Returns:
         tuple[float, npt.NDArray]: tuple of completeness score and matrix of 
@@ -172,7 +175,7 @@ def _calculate_map_completeness(
 
     Args:
         answer_matrix (int): specifies which map to score
-        sub_matrix (np.array): team submitted array
+        sub_matrix (npt.NDArray): team submitted array
 
     Returns:
         float: completeness score
@@ -198,16 +201,16 @@ def _calculate_map_completeness(
 
 
 def calculateScore(
-    answer_matrices: list | npt.NDArray,
-    sub_matrix: list | npt.NDArray
+    answer_matrices: Union[list, npt.NDArray],
+    sub_matrix: Union[list, npt.NDArray]
 ) -> float:
     """
     Calculate the quantifiable completeness score of a matrix, compared to
     another
 
     Args:
-        answer_matrix (list | npt.NDArray): answer matrix to check against
-        subMatrix (list | npt.NDArray): matrix to compare
+        answer_matrix (Union[list, npt.NDArray]): answer matrix to check against
+        subMatrix (Union[list, npt.NDArray]): matrix to compare
 
     Returns:
         float: completeness score
