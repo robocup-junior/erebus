@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added support to run controllers within docker containers (**Note: This may become the official way to run controllers for international competitions, so please familiarise yourself with this**)
   - An input field in the web UI is used to input the local directory of your docker project containing a `Dockerfile`.
   - Pressing the run docker button next to the play button will build and run your controller within a docker container. **Please note any GUI components (e.g. `cv2.imshow`) will not work**
-  - For more information about running controllers in docker containers, see this the [dockerfiles](https://gitlab.com/rcj-rescue-tc/erebus/erebus-dockerfiles) repository
+  - For more information about running controllers in docker containers, see this the [dockerfiles](https://github.com/robocup-junior/erebus-dockerfiles) repository
 - Added preview thumbnails to the world selection UI
 - Added a settings option to keep the remote controller toggled
 - Added a settings option to enable debug output to the console
