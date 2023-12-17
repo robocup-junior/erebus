@@ -20,7 +20,7 @@ def export_map_to_img(
 
     for row in map:
         for element in row:
-            if element == '20':
+            if element == '*':
                 img_array.append(128)
             elif element == '1':
                 img_array.append(0)
