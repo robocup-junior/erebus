@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Detection is now based on the nearest victim to the sent estimated score (previously, this was arbitrary if two victims were both within valid detection range)
   - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions. See the diagram below for more details (for illustration purposes only):
 - Implemented new robot customiser rules to specify camera resolution. 
+  - New camera pixel counts cost different amounts: `32: 0, 40: 0, 64: 100, 128: 200, 256: 300`. Costs are applied for both width and height. For example, creating a camera with width = 256, height = 128 will cost `300 + 200 = 500`.
 
 <img alt="Detection example" src="/docs/images/2024_detection_example.png" width=50%/>
 
