@@ -29,6 +29,14 @@ def generate_robot_proto(robot_json: dict) -> bool:
         'Wheel': 300,
         'Distance Sensor': 50
     }
+    
+    cam_costs = {
+        32: 0,
+        40: 0,
+        64: 100,
+        128: 200,
+        256: 300,
+    }
 
     component_counts: dict[str, int] = {}
     
@@ -78,7 +86,15 @@ def generate_robot_proto(robot_json: dict) -> bool:
 
         # Cost calculation
         try:
+            # If a new camera with custom resolution is selected
+            if (robot_json[component]["name"] == "Camera" and 
+                    "custom" in robot_json[component]):
+                width = int(robot_json[component]["custom"][0])
+                height = int(robot_json[component]["custom"][1])
+                cost += cam_costs[width]
+                cost += cam_costs[height]
             cost += costs[robot_json[component]["name"]]
+                
             if cost > budget:
                 Console.log_err("The necessary costs exceed the budget.")
                 Console.log_err(f"Budget: {budget}  Cost: {cost}")
@@ -269,6 +285,13 @@ def generate_robot_proto(robot_json: dict) -> bool:
             """
 
         if (robot_json[component]["name"] == "Camera"):
+            width = "IS camera_width"
+            height = "IS camera_height"
+            # Set custom camera resolution
+            # Check to allow for backwards compatibility
+            if "custom" in robot_json[component]:
+                width = int(robot_json[component]["custom"][0])
+                height = int(robot_json[component]["custom"][1])
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -309,8 +332,8 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     }}
                 ]
                 fieldOfView IS camera_fieldOfView
-                width IS camera_width
-                height IS camera_height
+                width {width}
+                height {height}
                 near 0.0045
                 antiAliasing IS camera_antiAliasing
                 motionBlur IS camera_motionBlur
