@@ -14,7 +14,6 @@ import shutil
 import json
 import time
 import subprocess
-
 import requests as req
 
 from controller import Supervisor
@@ -738,7 +737,7 @@ class Erebus(Supervisor):
         """
 
         with open(config_file_path, 'r') as f:
-            configData = f.read().split(',')
+            configData = f.read().replace('\\', '/').split(',')
 
         self.rws.send("config", ','.join(configData))
 
