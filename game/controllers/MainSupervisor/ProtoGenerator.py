@@ -94,6 +94,13 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     "custom" in robot_json[component]):
                 cam_width = int(robot_json[component]["custom"][0])
                 cam_height = int(robot_json[component]["custom"][1])
+                # Check for illegal camera resolutions (e.g. from manual json edits)
+                if cam_width not in cam_costs or cam_height not in cam_costs:
+                    Console.log_warn(
+                        f"{cam_width}x{cam_height} is an illegal camera "
+                        f"resolution. Skipping..."
+                    )
+                    continue
                 sub_cost += cam_costs[cam_width] + cam_costs[cam_height]
             sub_cost += costs[robot_json[component]["name"]]
             cost += sub_cost
@@ -105,7 +112,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
                 break
         except KeyError as e:
             Console.log_warn(
-                f"[SKIP] {e.args[0]} is no longer supported in this version.")
+                f"{e.args[0]} is no longer supported in this version. Skipping...")
             continue
 
         if (robot_json[component].get("customName") is None or
