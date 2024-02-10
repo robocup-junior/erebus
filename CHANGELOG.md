@@ -28,7 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Converted worlds to be compatible with Webots R2023b. Erebus v24.0.0 must be run with Webots R2023b, download it [here](https://github.com/cyberbotics/webots/releases/tag/R2023b).
 - Reworked swamps
-  - Swamps no longer slow, instead multiplies the game's timer countdown rate by 2.0x.
+  - Swamps no longer slow, instead multiplies the game's timer countdown rate by 5.0x.
 - Reworked hazard/victim detection logic
   - Detection is now based on the nearest victim to the sent estimated score (previously, this was arbitrary if two victims were both within valid detection range)
   - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions. See the diagram below for more details (for illustration purposes only):

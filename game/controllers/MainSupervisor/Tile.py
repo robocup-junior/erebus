@@ -129,7 +129,7 @@ class TileManager(ErebusObject):
     
     # Room multipliers
     ROOM_MULT: list[float] = [1, 1.25, 1.5, 2]
-    SWAMP_TIME_MULT: float = 2.0
+    SWAMP_TIME_MULT: float = 5.0
 
     def __init__(self, erebus: Erebus):
         """Creates a new TileManager object. Initialises start tile, checkpoint
