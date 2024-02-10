@@ -83,17 +83,20 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     f"limited to only one."
                 ))
                 continue
-
+        
+        cam_width: int = 40
+        cam_height: int = 32
+        sub_cost: int = 0
         # Cost calculation
         try:
             # If a new camera with custom resolution is selected
             if (robot_json[component]["name"] == "Camera" and 
                     "custom" in robot_json[component]):
-                width = int(robot_json[component]["custom"][0])
-                height = int(robot_json[component]["custom"][1])
-                cost += cam_costs[width]
-                cost += cam_costs[height]
-            cost += costs[robot_json[component]["name"]]
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
+                sub_cost += cam_costs[cam_width] + cam_costs[cam_height]
+            sub_cost += costs[robot_json[component]["name"]]
+            cost += sub_cost
                 
             if cost > budget:
                 Console.log_err("The necessary costs exceed the budget.")
@@ -118,16 +121,21 @@ def generate_robot_proto(robot_json: dict) -> bool:
         if robot_json[component].get("name") == "Wheel":
             Console.log_info((
                 f"Adding motor... {robot_json[component].get('dictName')} "
-                f"({robot_json[component].get('customName')} motor)"
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
             ))
             Console.log_info((
                 f"Adding sensor... {robot_json[component].get('dictName')} "
                 f"({robot_json[component].get('customName')} sensor)"
             ))
+        elif robot_json[component].get("name") == "Camera":
+            Console.log_info((
+                f"Adding camera ({cam_width}x{cam_height})... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
+            ))
         else:
             Console.log_info((
                 f"Adding sensor... {robot_json[component].get('dictName')} "
-                f"({robot_json[component].get('customName')})"
+                f"({robot_json[component].get('customName')}) = {sub_cost} pts"
             ))
 
         # Hard coded, so if ranges change in the website,
@@ -285,13 +293,13 @@ def generate_robot_proto(robot_json: dict) -> bool:
             """
 
         if (robot_json[component]["name"] == "Camera"):
-            width = "IS camera_width"
-            height = "IS camera_height"
+            cam_width = "IS camera_width"
+            cam_height = "IS camera_height"
             # Set custom camera resolution
             # Check to allow for backwards compatibility
             if "custom" in robot_json[component]:
-                width = int(robot_json[component]["custom"][0])
-                height = int(robot_json[component]["custom"][1])
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -332,8 +340,8 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     }}
                 ]
                 fieldOfView IS camera_fieldOfView
-                width {width}
-                height {height}
+                width {cam_width}
+                height {cam_height}
                 near 0.0045
                 antiAliasing IS camera_antiAliasing
                 motionBlur IS camera_motionBlur
