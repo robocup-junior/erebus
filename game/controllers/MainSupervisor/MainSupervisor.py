@@ -188,14 +188,23 @@ class Erebus(Supervisor):
 
         if self.config.recording:
             Recorder.reset_countdown(self)
+            
+        # Enqueue warning if debug mode is on when game the starts
+        if Console.DEBUG_MODE:
+            self.robot_obj.history.enqueue("WARNING: Debug mode is on. This "
+                                           "should not be on during competitions.")
 
         self._last_time = self.getTime()
         self._first_frame = False
         self._robot_initialised = True
         self._last_real_time = time.time()
 
-    def relocate_robot(self) -> None:
+    def relocate_robot(self, manual = False) -> None:
         """Relocate robot to last visited checkpoint
+
+        Args:
+            manual (bool, optional): Whether the robot relocate is manual (from
+            the UI) or not (via robot packet info). Defaults to False.
         """
         if self.robot_obj.last_visited_checkpoint_pos is None:
             Console.log_err("Last visited checkpoint was None.")
@@ -214,8 +223,14 @@ class Erebus(Supervisor):
         self.robot_obj.reset_physics()
         # Notify robot
         self.emitter.send(struct.pack("c", bytes("L", "utf-8")))
+        
+        # Suffix for event history to log what causes a relocate
+        suffix = "(via robot)"
+        if manual:
+            suffix = "(via UI)"
+        
         # Update history with event
-        self.robot_obj.increase_score("Lack of Progress", -5)
+        self.robot_obj.increase_score(f"Lack of Progress {suffix}", -5)
 
         # Update the camera position since the robot has now suddenly moved
         if self.config.automatic_camera and self._camera.wb_viewpoint_node:
@@ -239,7 +254,7 @@ class Erebus(Supervisor):
             if not time_up:
                 self.robot_obj.history.enqueue("Successful Exit")
             # Write to a log file to write game events to file
-            Logger.write_log(self.robot_obj, self.max_time)
+            Logger.write_log(self.robot_obj, self.rws, self.max_time)
 
 
     def _add_physicsless_robot_proto(self) -> None:
@@ -354,6 +369,10 @@ class Erebus(Supervisor):
         Args:
             world (str): World file name within the worlds directory
         """
+        # If game started
+        if self.robot_obj.in_simulation:
+            # Write to a log file to write game events to file
+            Logger.write_log(self.robot_obj, self.rws, self.max_time)
         path: str = get_file_path("worlds", "../../worlds")
         path = os.path.join(path, world)
         self.worldLoad(path)
@@ -508,18 +527,20 @@ class Erebus(Supervisor):
         
         # Process exit commands
         if robot_message[0] == 'E':
+            # TODO check this is inline with rules
             # Check robot position is on starting tile
             if self.tile_manager.start_tile.check_position(self.robot_obj.position):
-                self._game_state = GameState.MATCH_FINISHED
-                self.rws.send("ended")
                 if self.robot_obj.victim_identified:
                     self.robot_obj.increase_score("Exit Bonus",
                                                   self.robot_obj.get_score() * 0.1)
                 else:
                     self.robot_obj.history.enqueue("No Exit Bonus")
-            self._add_map_multiplier()
             # Update score and history
+            self._add_map_multiplier()
             self._robot_quit(False)
+            
+            self.rws.send("ended")
+            self._game_state = GameState.MATCH_FINISHED
             self._last_frame = True
         # Process map scoring commands
         elif robot_message[0] == 'M':
@@ -589,6 +610,7 @@ class Erebus(Supervisor):
 
         if len(parts) > 0:
             command: str = parts[0]
+            self.rws.update_received_history(command, str(parts[1:]))
 
             # Start running the match
             if command == "run":
@@ -655,7 +677,7 @@ class Erebus(Supervisor):
                 data = message.split(",", 1)
                 if len(data) > 1:
                     if int(data[1]) == 0:
-                        self.relocate_robot()
+                        self.relocate_robot(manual=True)
 
             # Quite the robot from the simulation
             if command == 'quit':
@@ -664,7 +686,7 @@ class Erebus(Supervisor):
                     if int(data[1]) == 0:
                         if self._game_state == GameState.MATCH_RUNNING:
                             self._add_map_multiplier()
-                            self.robot_obj.history.enqueue("Give up!")
+                            self.robot_obj.history.enqueue("Manual give up!")
                             self._robot_quit(True)
                             self._game_state = GameState.MATCH_FINISHED
                             self._last_frame = True
@@ -681,6 +703,10 @@ class Erebus(Supervisor):
                 configData = message.split(",")[1:]
                 self.config = Config(configData, self.config.path)
                 self.robot_obj.update_config(self.config)
+                
+                # Enqueue warning when config is updated when the game is running
+                if self._game_state == GameState.MATCH_RUNNING:
+                    self.robot_obj.history.enqueue("WARNING: Erebus config updated")
 
                 with open(self.config.path, 'w') as f:
                     f.write(','.join(message.split(",")[1:]))

@@ -135,7 +135,11 @@ function updateHistory(history0){
 			html += `<td style='font-size:18px;color:#2980b9;width:'>${history0[0]}</td><td style='font-size:18px;color:#2980b9;'>${history0[1]}</td>`;
 		}else if(history0[1].indexOf("-") != -1){
 			html += `<td style='font-size:18px;color:#c0392b;'>${history0[0]}</td><td style='font-size:18px;color:#c0392b;'>${history0[1]}</td>`;
-		}else{
+		}
+		else if(history0[1].indexOf("WARNING") != -1) {
+			html += `<td style='font-size:18px;color:#d98236;'>${history0[0]}</td><td style='font-size:18px;color:#d98236;'>${history0[1]}</td>`;
+		}
+		else{
 			html += `<td style='font-size:18px;color:#2c3e50;'>${history0[0]}</td><td style='font-size:18px;color:#2c3e50;'>${history0[1]}</td>`;
 		}
 	}

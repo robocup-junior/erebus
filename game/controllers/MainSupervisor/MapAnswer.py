@@ -57,7 +57,7 @@ class MapAnswer:
     def setAnswer(self,z,x,k):
         self.answerMatrix[z][x] = max(self.answerMatrix[z][x], k)
 
-    def generateAnswer(self):
+    def generateAnswer(self, debug = False):
         try:
             for i in range(self.numberTiles):
                 tile = self.tileNodes.getMFNode(i)
@@ -394,7 +394,8 @@ class MapAnswer:
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
             
-            if Console.DEBUG_MODE:
+            # DO NOT PRINT MAP PROGRAMMATICALLY
+            if debug:
                 pretty_print_map(self.answerMatrix)
 
             return self.answerMatrix
