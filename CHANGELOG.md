@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Release v24.0.0_beta-1]() - 2023-XX-XX
+## [Release v24.0.0]() - 2023-XX-XX
 
 > Please note this version only works with Webots R2023b, please update your Webots client before using this version.
 
@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added a link to the changelog in the Erebus settings UI
 - Added new Erebus automated tests and `.Tests.wbt` world.
   - Automated tests can now only be run with this world, and isn't designed to be used as a normal competition world.
+- Added debug log file saving
 
 ### Changed
 
@@ -35,8 +36,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Robots can now exit the world regardless of world position, to align with the official rules
 - Game log scores are now rounded to two decimal places
-- Updated `MapScorerExample.py` example controller to work with all supplied example worlds
+- Improved robot history event descriptions
 - Improved debug console logging
+- Updated `MapScorerExample.py` example controller to work with all supplied example worlds
 - Updated documentation and code style for a majority of the code base
 
 ### Fixed
