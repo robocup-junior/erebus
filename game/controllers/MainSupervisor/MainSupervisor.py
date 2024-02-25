@@ -619,10 +619,11 @@ class Erebus(Supervisor):
                 
             # Run tests
             if command == 'runTest':
-                self._game_state = GameState.MATCH_RUNNING
-                self._run_tests = True
-                self.config.disable_lop = True
-                self.simulation_mode = self.SIMULATION_MODE_FAST
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self._game_state = GameState.MATCH_RUNNING
+                    self._run_tests = True
+                    self.config.disable_lop = True
+                    self.simulation_mode = self.SIMULATION_MODE_FAST
 
             # Start running the match using a docker controller
             if command == "runDocker":
@@ -694,9 +695,10 @@ class Erebus(Supervisor):
 
             # If custom robot json is loaded
             if command == 'robotJson':
-                data = message.split(",", 1)
-                if len(data) > 1:
-                    self._process_robot_json(data[1])
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    data = message.split(",", 1)
+                    if len(data) > 1:
+                        self._process_robot_json(data[1])
 
             # If config is updated
             if command == 'config':
@@ -717,7 +719,8 @@ class Erebus(Supervisor):
 
             # Load test controller
             if command == 'loadTest':
-                self._load_test_script()
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self._load_test_script()
 
             # The robot window was reloaded, commands must be re-sent to
             # achieve the same state it was previously in
@@ -731,21 +734,25 @@ class Erebus(Supervisor):
 
             # Robot controller ui button was pressed 
             if command == 'loadControllerPressed':
-                self.rws.update_history("loadControllerPressed,", parts[1])
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self.rws.update_history("loadControllerPressed,", parts[1])
 
             # Robot unload controller ui button was pressed
             if command == 'unloadControllerPressed':
-                self.rws.update_history("unloadControllerPressed,", parts[1])
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self.rws.update_history("unloadControllerPressed,", parts[1])
 
             # Enable remote controller
             if command == 'remoteEnable':
-                self._remote_enabled = True
-                self.rws.update_history("remoteEnabled")
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self._remote_enabled = True
+                    self.rws.update_history("remoteEnabled")
 
             # Disable remote controller
             if command == 'remoteDisable':
-                self._remote_enabled = False
-                self.rws.update_history("remoteDisabled")
+                if self._game_state == GameState.MATCH_NOT_STARTED:
+                    self._remote_enabled = False
+                    self.rws.update_history("remoteDisabled")
 
             # Send the list of Erebus worlds
             if command == 'getWorlds':
