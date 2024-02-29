@@ -10,9 +10,9 @@ Erebus is under constant development and will continue to serve as the basis for
 ## Quick Start
 
 1. Download and install [Python 3.9+](https://www.python.org/). Don't forget to add a path to the "Python".
-2. Download and install [Webots 2023a](https://cyberbotics.com/).
-3. Download our [latest release](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/releases) and extract the zip file.
-4. Open world1.wbt in the [/game/worlds folder](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/player_controllers/ExamplePlayerController_updated.py).
+2. Download and install [Webots 2023b](https://cyberbotics.com/).
+3. Download our [latest release](https://github.com/robocup-junior/erebus/releases) and extract the zip file. Old releases can be found [here](https://github.com/robocup-junior/erebus/tags).
+4. Open world1.wbt in the [/game/worlds folder](https://github.com/robocup-junior/erebus/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://github.com/robocup-junior/erebus/blob/master/player_controllers/ExamplePlayerController_updated.py).
 
 
 ## Documentation
@@ -47,19 +47,18 @@ Announcements will be made in a number of different locations.
 ### Known issues
 
 - The robot customization wheel rotations are off by 0.5*pi in the y axis compared to the sensor values. However, what you see in the 3d output in the webpage is still what Erebus generates.
-- Moving sensor sliders very fast within robot customizer v23 can result in visual bugs where some sensors are not removed correctly. This is purely visual, and does not affect the resulting JSON.
 
 ### Reporting bugs and fixes
 
 Please report bugs and potential fixes either through:
 
 - Raising issues on this repository
-    - [Erebus issues page](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/issues)
-    - [Robot Customization issue page](https://gitlab.com/rcj-rescue-tc/erebus/robot-customisation/-/issues)
+    - [Erebus issues page](https://github.com/robocup-junior/erebus/issues)
+    - [Robot Customization issue page](https://github.com/robocup-junior/erebus-robot-customisation/issues)
 - Pull requests
 - Through the community Discord server
 
-## [Changelog](https://gitlab.com/rcj-rescue-tc/erebus/erebus/-/blob/master/CHANGELOG.md)
+## [Changelog](https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md)
 
 ## [Release v24.0.0]() - 2024-XX-XX
 
