@@ -29,6 +29,14 @@ def generate_robot_proto(robot_json: dict) -> bool:
         'Wheel': 300,
         'Distance Sensor': 50
     }
+    
+    cam_costs = {
+        32: 0,
+        40: 0,
+        64: 100,
+        128: 200,
+        256: 300,
+    }
 
     component_counts: dict[str, int] = {}
     
@@ -75,10 +83,28 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     f"limited to only one."
                 ))
                 continue
-
+        
+        cam_width: int = 40
+        cam_height: int = 32
+        sub_cost: int = 0
         # Cost calculation
         try:
-            cost += costs[robot_json[component]["name"]]
+            # If a new camera with custom resolution is selected
+            if (robot_json[component]["name"] == "Camera" and 
+                    "custom" in robot_json[component]):
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
+                # Check for illegal camera resolutions (e.g. from manual json edits)
+                if cam_width not in cam_costs or cam_height not in cam_costs:
+                    Console.log_warn(
+                        f"{cam_width}x{cam_height} is an illegal camera "
+                        f"resolution. Skipping..."
+                    )
+                    continue
+                sub_cost += cam_costs[cam_width] + cam_costs[cam_height]
+            sub_cost += costs[robot_json[component]["name"]]
+            cost += sub_cost
+                
             if cost > budget:
                 Console.log_err("The necessary costs exceed the budget.")
                 Console.log_err(f"Budget: {budget}  Cost: {cost}")
@@ -86,7 +112,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
                 break
         except KeyError as e:
             Console.log_warn(
-                f"[SKIP] {e.args[0]} is no longer supported in this version.")
+                f"{e.args[0]} is no longer supported in this version. Skipping...")
             continue
 
         if (robot_json[component].get("customName") is None or
@@ -102,16 +128,21 @@ def generate_robot_proto(robot_json: dict) -> bool:
         if robot_json[component].get("name") == "Wheel":
             Console.log_info((
                 f"Adding motor... {robot_json[component].get('dictName')} "
-                f"({robot_json[component].get('customName')} motor)"
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
             ))
             Console.log_info((
                 f"Adding sensor... {robot_json[component].get('dictName')} "
                 f"({robot_json[component].get('customName')} sensor)"
             ))
+        elif robot_json[component].get("name") == "Camera":
+            Console.log_info((
+                f"Adding camera ({cam_width}x{cam_height})... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
+            ))
         else:
             Console.log_info((
                 f"Adding sensor... {robot_json[component].get('dictName')} "
-                f"({robot_json[component].get('customName')})"
+                f"({robot_json[component].get('customName')}) = {sub_cost} pts"
             ))
 
         # Hard coded, so if ranges change in the website,
@@ -269,6 +300,13 @@ def generate_robot_proto(robot_json: dict) -> bool:
             """
 
         if (robot_json[component]["name"] == "Camera"):
+            cam_width = "IS camera_width"
+            cam_height = "IS camera_height"
+            # Set custom camera resolution
+            # Check to allow for backwards compatibility
+            if "custom" in robot_json[component]:
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -309,8 +347,8 @@ def generate_robot_proto(robot_json: dict) -> bool:
                     }}
                 ]
                 fieldOfView IS camera_fieldOfView
-                width IS camera_width
-                height IS camera_height
+                width {cam_width}
+                height {cam_height}
                 near 0.0045
                 antiAliasing IS camera_antiAliasing
                 motionBlur IS camera_motionBlur
