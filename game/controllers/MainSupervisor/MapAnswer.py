@@ -82,8 +82,8 @@ class MapAnswer:
             return
         self.answerMatrix[z][x] = k
 
-    def generateAnswer(self):
-        # try:
+    def generateAnswer(self, debug = False):
+        try:
             for i in range(self.numberTiles):
                 tile = self.tileNodes.getMFNode(i)
                 x = 4*tile.getField("xPos").getSFInt32()
@@ -431,7 +431,8 @@ class MapAnswer:
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
             
-            if Console.DEBUG_MODE:
+            # DO NOT PRINT MAP PROGRAMMATICALLY
+            if debug:
                 pretty_print_map(self.answerMatrix)
 
             return self.answerMatrix

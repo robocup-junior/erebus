@@ -5,6 +5,7 @@ from typing import Optional
 from ConsoleLog import Console
 import subprocess
 import socket
+from threading import Thread
 
 if TYPE_CHECKING:
     from MainSupervisor import Erebus
@@ -45,6 +46,7 @@ def _get_local_ip() -> str:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(None)
     try:
+        # Trick to find local ip address
         sock.connect(('foo.foo.foo.foo', 1))
         ip_addr: str = sock.getsockname()[0]
     except:
@@ -55,8 +57,8 @@ def _get_local_ip() -> str:
 
 def run_docker_container(
     erebus: Erebus, 
-    project_dir: str
-) -> Optional[subprocess.Popen]:
+    project_dir: str,
+) -> Optional[subprocess.Popen] | None:
     """Run a controller via a docker container
 
     Args:
@@ -115,10 +117,26 @@ def run_docker_container(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            shell=False
+            shell=False,
         )
+        # Thread to print non-blocking stdout from docker container
+        thread: Thread = Thread(target=print_stdout, args=[run_process.stdout])
+        thread.daemon = True # thread dies with the program
+        thread.start()
     except Exception as e:
         Console.log_err(f"Error running project image - {e}")
         return None
     
     return run_process
+
+def print_stdout(out) -> None:
+    """Print a sub process's stdout to the erebus console
+    
+    Used for printing docker container outputs to the console
+
+    Args:
+        out (IO[bytes]): Popen subprocess stdout bytes buffer
+    """
+    for line in iter(out.readline, b''):
+        print(line.decode())
+    out.close()

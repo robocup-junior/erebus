@@ -23,6 +23,17 @@ class RWSender(ErebusObject):
         """
         super().__init__(erebus)
         self.history: list[list[str]] = []
+        self.log_history: list[str] = []
+
+    def _update_log_history(self, command: str, args: str = '') -> None:
+        """Update rws history for outputting to debug logs
+
+        Args:
+            command (str): Robot window command
+            args (str, optional): Optional args associated with the robot window
+            command. Defaults to ''.
+        """
+        self.log_history.append(f"{command}\t{args}")
 
     def update_history(self, command: str, args: str = '') -> None:
         """Updates the robot window message history
@@ -33,6 +44,18 @@ class RWSender(ErebusObject):
             command. Defaults to ''.
         """
         self.history.append([command, args])
+        self._update_log_history(command, args)
+        
+    def update_received_history(self, command: str, args: str = '') -> None:
+        """Updates the robot window message received history
+
+        Args:
+            command (str): Robot window command
+            args (str, optional): Optional args associated with the robot window
+            command. Defaults to ''.
+        """
+        self._update_log_history(command, args)
+        
 
     def send(self, command: str, args: str = '') -> None:
         """Sends a command to the robot window
