@@ -11,26 +11,49 @@ def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
     """
     for m in map:
         for mm in m:
+            # Default (for victims)
+            color = Color.CYAN
+            bkg = Color.BG_WHITE
             if mm == '0': #Normal
-                print(f'0', end='')
+                color = Color.WHITE
+                bkg = Color.BG_DEFAULT
             elif mm == '1': #Walls
-                print(f'{Color.BG_WHITE}{Color.BLACK}1{Color.RESET}', end='')
+                bkg = Color.BG_WHITE
+                color = Color.BLACK
             elif mm == '2': #Holes
-                print(f'{Color.BG_WHITE}{Color.BOLD}2{Color.RESET}', end='')
+                bkg = Color.BG_WHITE
+                color = Color.BOLD
             elif mm == '3': #Swamps
-                print(f'{Color.YELLOW}3{Color.RESET}', end='')
+                color = Color.YELLOW
+                bkg = Color.BG_DEFAULT
             elif mm == '4': #Checkpoints
-                print(f'{Color.UNDERLINE}4{Color.RESET}', end='')
+                color = Color.UNDERLINE
+                bkg = Color.BG_DEFAULT
             elif mm == '5': #Stating tile
-                print(f'{Color.GREEN}5{Color.RESET}', end='')
-            elif mm == '6': #1to2
-                print(f'{Color.BLUE}6{Color.RESET}', end='')
-            elif mm == '7': #1to3
-                print(f'{Color.MAGENTA}7{Color.RESET}', end='')
-            elif mm == '8': #2to3
-                print(f'{Color.RED}8{Color.RESET}', end='')
+                color = Color.GREEN
+                bkg = Color.BG_DEFAULT
+            elif mm == 'b': #1 to 2
+                color = Color.BLUE
+                bkg = Color.BG_DEFAULT
+            elif mm == 'y': #1 to 3
+                color = Color.YELLOW
+                bkg = Color.BG_DEFAULT
+            elif mm == 'g': #1 to 4
+                color = Color.GREEN
+                bkg = Color.BG_DEFAULT
+            elif mm == 'p': #2 to 3
+                color = Color.MAGENTA
+                bkg = Color.BG_DEFAULT
+            elif mm == 'o': #2 to 4
+                color = Color.RED
+                bkg = Color.BG_YELLOW
+            elif mm == 'r': #3 to 4
+                color = Color.RED
+                bkg = Color.BG_DEFAULT
             else: #Victims
-                print(f'{Color.BG_WHITE}{Color.CYAN}{mm}{Color.RESET}', end='')
+                color = Color.CYAN
+                bkg = Color.BG_WHITE
+            print(f'{bkg}{color}{mm}{Color.RESET}', end='')
         print('')
 
 class MapAnswer:
@@ -55,7 +78,9 @@ class MapAnswer:
         self.zStart = -(self.tileNodes.getMFNode(0).getField("height").getSFFloat() * (0.3 * self.tileNodes.getMFNode(0).getField("zScale").getSFFloat()) / 2.0) -0.06
     
     def setAnswer(self,z,x,k):
-        self.answerMatrix[z][x] = max(self.answerMatrix[z][x], k)
+        if self.answerMatrix[z][x] == '*':
+            return
+        self.answerMatrix[z][x] = k
 
     def generateAnswer(self, debug = False):
         try:
@@ -70,7 +95,7 @@ class MapAnswer:
                 if room == 4:
                     for a in range(5):
                         for b in range(5):
-                            self.answerMatrix[z+a][x+b] = 20
+                            self.answerMatrix[z+a][x+b] = '*'
                     continue
 
                 # Wall
@@ -298,30 +323,42 @@ class MapAnswer:
                 
                 colour = tile.getField("tileColor").getSFColor()
                 colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
-                if colour == [0.0, 0.8, 0.0]:
+                if colour == [0.0, 0.8, 0.0]: # Green
                     # 1 to 4
-                    self.answerMatrix[z+1][x+1] = 9
-                    self.answerMatrix[z+1][x+3] = 9
-                    self.answerMatrix[z+3][x+1] = 9
-                    self.answerMatrix[z+3][x+3] = 9
-                elif colour == [0.1, 0.1, 0.9]:
+                    self.answerMatrix[z+1][x+1] = 'g'
+                    self.answerMatrix[z+1][x+3] = 'g'
+                    self.answerMatrix[z+3][x+1] = 'g'
+                    self.answerMatrix[z+3][x+3] = 'g'
+                elif colour == [0.1, 0.1, 0.9]: # Blue
                     # 1 to 2
-                    self.answerMatrix[z+1][x+1] = 6
-                    self.answerMatrix[z+1][x+3] = 6
-                    self.answerMatrix[z+3][x+1] = 6
-                    self.answerMatrix[z+3][x+3] = 6
-                elif colour == [0.3, 0.1, 0.6]:
+                    self.answerMatrix[z+1][x+1] = 'b'
+                    self.answerMatrix[z+1][x+3] = 'b'
+                    self.answerMatrix[z+3][x+1] = 'b'
+                    self.answerMatrix[z+3][x+3] = 'b'
+                elif colour == [0.3, 0.1, 0.6]: # Purple
                     # 2 to 3
-                    self.answerMatrix[z+1][x+1] = 7
-                    self.answerMatrix[z+1][x+3] = 7
-                    self.answerMatrix[z+3][x+1] = 7
-                    self.answerMatrix[z+3][x+3] = 7
-                elif colour == [0.9, 0.1, 0.1]:
+                    self.answerMatrix[z+1][x+1] = 'p'
+                    self.answerMatrix[z+1][x+3] = 'p'
+                    self.answerMatrix[z+3][x+1] = 'p'
+                    self.answerMatrix[z+3][x+3] = 'p'
+                elif colour == [0.9, 0.1, 0.1]: # Red
                     # 3 to 4
-                    self.answerMatrix[z+1][x+1] = 8
-                    self.answerMatrix[z+1][x+3] = 8
-                    self.answerMatrix[z+3][x+1] = 8
-                    self.answerMatrix[z+3][x+3] = 8
+                    self.answerMatrix[z+1][x+1] = 'r'
+                    self.answerMatrix[z+1][x+3] = 'r'
+                    self.answerMatrix[z+3][x+1] = 'r'
+                    self.answerMatrix[z+3][x+3] = 'r'
+                elif colour == [0.9, 0.6, 0.1]: # Orange
+                    # 2 to 4
+                    self.answerMatrix[z+1][x+1] = 'o'
+                    self.answerMatrix[z+1][x+3] = 'o'
+                    self.answerMatrix[z+3][x+1] = 'o'
+                    self.answerMatrix[z+3][x+3] = 'o'
+                elif colour == [0.9, 0.9, 0.1]: # Yellow
+                    # 1 to 3
+                    self.answerMatrix[z+1][x+1] = 'y'
+                    self.answerMatrix[z+1][x+3] = 'y'
+                    self.answerMatrix[z+3][x+1] = 'y'
+                    self.answerMatrix[z+3][x+3] = 'y'
             
             # Victims
 
@@ -384,7 +421,7 @@ class MapAnswer:
                         col_temp = 2*xCount + 1 + xShift
 
                 # Concatenate if victims on either side of the wall
-                if self.answerMatrix[row_temp][col_temp] != 20:
+                if self.answerMatrix[row_temp][col_temp] != '*':
                     if type(self.answerMatrix[row_temp][col_temp]) == str:
                         self.answerMatrix[row_temp][col_temp] += victimType
                     else:
@@ -400,9 +437,9 @@ class MapAnswer:
 
             return self.answerMatrix
             
-        except:
-            Console.log_err("Generating map answer error.")
-            
+        # except Exception as e:
+        #     Console.log_err("Generating map answer error.")
+        #     print(e)
 
 class Color:
 	BLACK          = '\033[30m'
