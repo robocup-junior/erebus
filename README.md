@@ -90,6 +90,9 @@ Please report bugs and potential fixes either through:
 - Reworked hazard/victim detection logic
   - Detection is now based on the nearest victim to the sent estimated score (previously, this was arbitrary if two victims were both within valid detection range)
   - The semi-circle detection area logic has been reworked. Previously this was calculated at fixed 90° intervals, corresponding to the 4 different wall angles a victim could face. However, this didn't work well for complex wall regions (curved or in room 4). The semi-circle detection area is now based on the surface normal of the hazard/victim, allowing for more accurate detection regions. See the diagram below for more details (for illustration purposes only):
+- Changed map submission legend.
+  - Connection tiles: Changed to lower case letters. Passages from 1 to 2 as 'b', 1 to 3 as 'y', 1 to 4 as 'g', 2 to 3 as 'p', 2 to 4 as 'o' and 3 to 4 as 'r' (as per 2024 rules).
+  - Area 4: Changed from `20` to `*`
 
 <img alt="Detection example" src="/docs/images/2024_detection_example.png" width=50%/>
 

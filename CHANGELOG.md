@@ -12,7 +12,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added real-world timer info to the "game info" data from the supervisor. 
   - Previously, the received data packet was in the form `char float int` - "G", game score, remaining time (e.g. `G 15 100`)
   - The received data is now in the form `char float int int` - "G", game score, remaining time, remaining real world time (e.g. `G 15 100 50`)
-- Added new tile passage colors between areas. Please refer to the rules section 2.4 for more information.
 - Added support to run controllers within docker containers (**Note: This may become the official way to run controllers for international competitions, so please familiarise yourself with this**)
   - An input field in the web UI is used to input the local directory of your docker project containing a `Dockerfile`.
   - Pressing the run docker button next to the play button will build and run your controller within a docker container. **Please note any GUI components (e.g. `cv2.imshow`) will not work**
