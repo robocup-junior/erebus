@@ -2,7 +2,6 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 from ConsoleLog import Console
-from symbol import except_clause
 
 def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
     """Print a formatted view of an Erebus map matrix
@@ -324,30 +323,42 @@ class MapAnswer:
                 
                 colour = tile.getField("tileColor").getSFColor()
                 colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
-                if colour == [0.0, 0.8, 0.0]:
+                if colour == [0.0, 0.8, 0.0]: # Green
                     # 1 to 4
                     self.answerMatrix[z+1][x+1] = 'g'
                     self.answerMatrix[z+1][x+3] = 'g'
                     self.answerMatrix[z+3][x+1] = 'g'
                     self.answerMatrix[z+3][x+3] = 'g'
-                elif colour == [0.1, 0.1, 0.9]:
+                elif colour == [0.1, 0.1, 0.9]: # Blue
                     # 1 to 2
                     self.answerMatrix[z+1][x+1] = 'b'
                     self.answerMatrix[z+1][x+3] = 'b'
                     self.answerMatrix[z+3][x+1] = 'b'
                     self.answerMatrix[z+3][x+3] = 'b'
-                elif colour == [0.3, 0.1, 0.6]:
+                elif colour == [0.3, 0.1, 0.6]: # Purple
                     # 2 to 3
                     self.answerMatrix[z+1][x+1] = 'p'
                     self.answerMatrix[z+1][x+3] = 'p'
                     self.answerMatrix[z+3][x+1] = 'p'
                     self.answerMatrix[z+3][x+3] = 'p'
-                elif colour == [0.9, 0.1, 0.1]:
+                elif colour == [0.9, 0.1, 0.1]: # Red
                     # 3 to 4
                     self.answerMatrix[z+1][x+1] = 'r'
                     self.answerMatrix[z+1][x+3] = 'r'
                     self.answerMatrix[z+3][x+1] = 'r'
                     self.answerMatrix[z+3][x+3] = 'r'
+                elif colour == [0.9, 0.6, 0.1]: # Orange
+                    # 2 to 4
+                    self.answerMatrix[z+1][x+1] = 'o'
+                    self.answerMatrix[z+1][x+3] = 'o'
+                    self.answerMatrix[z+3][x+1] = 'o'
+                    self.answerMatrix[z+3][x+3] = 'o'
+                elif colour == [0.9, 0.9, 0.1]: # Yellow
+                    # 1 to 3
+                    self.answerMatrix[z+1][x+1] = 'y'
+                    self.answerMatrix[z+1][x+3] = 'y'
+                    self.answerMatrix[z+3][x+1] = 'y'
+                    self.answerMatrix[z+3][x+3] = 'y'
             
             # Victims
 
