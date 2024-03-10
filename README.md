@@ -22,11 +22,11 @@ However, some pages are currently under construction.
 
 ## Robot Customization
 
-The robot customizer can be accessed through [this link](https://v23.robot.erebus.rcj.cloud/).
+The robot customizer can be accessed through [this link](https://v24.robot.erebus.rcj.cloud/).
 
 ## Map Generator
 
-The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2023).
+The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2024).
 
 
 ## Communication
