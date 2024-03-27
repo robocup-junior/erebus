@@ -83,7 +83,7 @@ class MapAnswer:
         self.answerMatrix[z][x] = k
 
     def generateAnswer(self, debug = False):
-        try:
+        # try:
             for i in range(self.numberTiles):
                 tile = self.tileNodes.getMFNode(i)
                 x = 4*tile.getField("xPos").getSFInt32()
