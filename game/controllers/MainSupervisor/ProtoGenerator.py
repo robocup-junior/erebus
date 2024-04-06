@@ -1,34 +1,26 @@
 from Tools import *
-import AutoInstall
-import math
-import numpy as np
 from ConsoleLog import Console
 
-AutoInstall._import("cl", "termcolor")
+def generate_robot_proto(robot_json: dict) -> bool:
+    """Generates a custom webots proto file for loading custom robots
 
-def generate_robot_proto(robot_json):
-    
+    Args:
+        robot_json (dict): Custom robot json data
+
+    Returns:
+        bool: Generation success, True if the proto is generated successfully
+    """
+
     # Hard coded, values from website
-    component_max_counts = {
+    component_max_counts: dict[str, int] = {
         "Wheel": 4,
         "Distance Sensor": 8,
         "Camera": 3
     }
-
-    component_counts = {}
     
-    templatePath = getFilePath("controllers/MainSupervisor/protoHeaderTemplateFLU.txt", "protoHeaderTemplateFLU.txt")
-
-    with open(templatePath) as protoTemplate:
-        proto_code = protoTemplate.read() 
-    
-    closeBracket = "\n\t\t}\n"
-
-    budget = 3000
-    cost = 0
-    costs = {
+    costs: dict[str, int] = {
         'Gyro': 100,
-        'InertialUnit': 100, 
+        'InertialUnit': 100,
         'GPS': 250,
         'Camera': 500,
         'Colour sensor': 100,
@@ -37,8 +29,30 @@ def generate_robot_proto(robot_json):
         'Wheel': 300,
         'Distance Sensor': 50
     }
+    
+    cam_costs = {
+        32: 0,
+        40: 0,
+        64: 100,
+        128: 200,
+        256: 300,
+    }
 
-    genERR = False
+    component_counts: dict[str, int] = {}
+    
+    close_bracket: str = "\n\t\t}\n"
+
+    budget: int = 3000
+    cost: int = 0
+    gen_err: bool = False
+
+    template_path: str = get_file_path(
+        "controllers/MainSupervisor/protoHeaderTemplateFLU.txt",
+        "protoHeaderTemplateFLU.txt"
+    )
+
+    with open(template_path) as proto_template:
+        proto_code: str = proto_template.read()
 
     for component in robot_json:
 
@@ -55,44 +69,85 @@ def generate_robot_proto(robot_json):
             component_max_count = component_max_counts[robot_json[component]["name"]]
             # If there are more components in json than there should be, continue
             if component_count > component_max_count:
-                Console.log_warn(f"[SKIP] The number of {robot_json[component]['name']} is limited to {component_max_count}.")
+                Console.log_warn((
+                    f"[SKIP] The number of {robot_json[component]['name']} is "
+                    f"limited to {component_max_count}."
+                ))
                 continue
         else:
             # If there should only be one component
             # Skip if count is > 1
             if component_count > 1:
-                Console.log_warn(f"[SKIP] The number of {robot_json[component]['name']} is limited to only one.")
+                Console.log_warn((
+                    f"[SKIP] The number of {robot_json[component]['name']} is "
+                    f"limited to only one."
+                ))
                 continue
-
+        
+        cam_width: int = 40
+        cam_height: int = 32
+        sub_cost: int = 0
         # Cost calculation
         try:
-            cost += costs[robot_json[component]["name"]]
+            # If a new camera with custom resolution is selected
+            if (robot_json[component]["name"] == "Camera" and 
+                    "custom" in robot_json[component]):
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
+                # Check for illegal camera resolutions (e.g. from manual json edits)
+                if cam_width not in cam_costs or cam_height not in cam_costs:
+                    Console.log_warn(
+                        f"{cam_width}x{cam_height} is an illegal camera "
+                        f"resolution. Skipping..."
+                    )
+                    continue
+                sub_cost += cam_costs[cam_width] + cam_costs[cam_height]
+            sub_cost += costs[robot_json[component]["name"]]
+            cost += sub_cost
+                
             if cost > budget:
                 Console.log_err("The necessary costs exceed the budget.")
                 Console.log_err(f"Budget: {budget}  Cost: {cost}")
-                genERR = True
+                gen_err = True
                 break
         except KeyError as e:
-            Console.log_warn(f"[SKIP] {e.args[0]} is no longer supported in this version.")
+            Console.log_warn(
+                f"{e.args[0]} is no longer supported in this version. Skipping...")
             continue
 
-        if robot_json[component].get("customName") is None or robot_json[component].get("customName") == "":
-            Console.log_err(f"No tag name has been specified for {robot_json[component].get('name')}. Please specify a suitable name in the robot generator.")
-            genERR = True
+        if (robot_json[component].get("customName") is None or
+                robot_json[component].get("customName") == ""):
+            Console.log_err((
+                f"No tag name has been specified for "
+                f"{robot_json[component].get('name')}. Please specify a "
+                "suitable name in the robot generator."
+            ))
+            gen_err = True
             break
 
         if robot_json[component].get("name") == "Wheel":
-            Console.log_info(
-                f"Adding motor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} motor)")
-            Console.log_info(
-                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')} sensor)")
+            Console.log_info((
+                f"Adding motor... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
+            ))
+            Console.log_info((
+                f"Adding sensor... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')} sensor)"
+            ))
+        elif robot_json[component].get("name") == "Camera":
+            Console.log_info((
+                f"Adding camera ({cam_width}x{cam_height})... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')} motor) = {sub_cost} pts"
+            ))
         else:
-            Console.log_info(
-                f"Adding sensor... {robot_json[component].get('dictName')} ({robot_json[component].get('customName')})")
+            Console.log_info((
+                f"Adding sensor... {robot_json[component].get('dictName')} "
+                f"({robot_json[component].get('customName')}) = {sub_cost} pts"
+            ))
 
         # Hard coded, so if ranges change in the website,
         # I need to change them here too :(
-        if(robot_json[component]["name"] == "Wheel"):
+        if (robot_json[component]["name"] == "Wheel"):
             x = clamp(robot_json[component]['x'], -370, 370) / 10000
             y = clamp(robot_json[component]['y'], -100, 370) / 10000
             z = clamp(robot_json[component]['z'], -260, 260) / 10000
@@ -103,7 +158,7 @@ def generate_robot_proto(robot_json):
 
         y += 18.5/1000
 
-        if(robot_json[component]["name"] == "Wheel"):
+        if (robot_json[component]["name"] == "Wheel"):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -244,7 +299,14 @@ def generate_robot_proto(robot_json):
             
             """
 
-        if(robot_json[component]["name"] == "Camera"):
+        if (robot_json[component]["name"] == "Camera"):
+            cam_width = "IS camera_width"
+            cam_height = "IS camera_height"
+            # Set custom camera resolution
+            # Check to allow for backwards compatibility
+            if "custom" in robot_json[component]:
+                cam_width = int(robot_json[component]["custom"][0])
+                cam_height = int(robot_json[component]["custom"][1])
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -285,8 +347,8 @@ def generate_robot_proto(robot_json):
                     }}
                 ]
                 fieldOfView IS camera_fieldOfView
-                width IS camera_width
-                height IS camera_height
+                width {cam_width}
+                height {cam_height}
                 near 0.0045
                 antiAliasing IS camera_antiAliasing
                 motionBlur IS camera_motionBlur
@@ -321,7 +383,7 @@ def generate_robot_proto(robot_json):
             }}
             """
 
-        if(robot_json[component]["name"] == "Colour sensor"):
+        if (robot_json[component]["name"] == "Colour sensor"):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -377,7 +439,7 @@ def generate_robot_proto(robot_json):
             }}
             """
 
-        if(robot_json[component]["name"] == "Accelerometer"):
+        if (robot_json[component]["name"] == "Accelerometer"):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -395,7 +457,7 @@ def generate_robot_proto(robot_json):
             ]
             }}"""
 
-        if(robot_json[component]["name"] == "Lidar"):
+        if (robot_json[component]["name"] == "Lidar"):
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -458,18 +520,18 @@ def generate_robot_proto(robot_json):
     customData IS customData
     """
     proto_code += "\n}"
-    proto_code += closeBracket
+    proto_code += close_bracket
 
-    if not genERR:
+    if not gen_err:
         Console.log_succ("Your custom robot has been successfully generated!")
         Console.log_succ(f"Budget: {budget}  Cost: {cost}")
-            
-        path = getFilePath("protos", "../../protos")
+
+        path: str = get_file_path("protos", "../../protos")
         path = os.path.join(path, "custom_robot.proto")
 
         with open(path, 'w') as robot_file:
             robot_file.write(proto_code)
         return True
-    else:
-        Console.log_err("Your custom robot generation has been cancelled.")
+
+    Console.log_err("Your custom robot generation has been cancelled.")
     return False
