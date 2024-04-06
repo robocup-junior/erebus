@@ -60,9 +60,11 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md)
 
-## [Release v24.0.0]() - 2024-XX-XX
+## [Release v24.0.0](https://github.com/robocup-junior/erebus/releases) - 2024-04-06
 
 > Please note this version only works with Webots R2023b, please update your Webots client before using this version.
+
+**New v24 versions of the [world generator](https://osaka.rcj.cloud/service/editor/simulation/2024) and [robot customizer](https://v24.robot.erebus.rcj.cloud/) are intended to be used along side this new client update.**
 
 ### Added
 
@@ -98,7 +100,6 @@ Please report bugs and potential fixes either through:
 
 - Implemented new robot customiser rules to specify camera resolution. 
   - New camera pixel counts cost different amounts: `32: 0, 40: 0, 64: 100, 128: 200, 256: 300`. Costs are applied for both width and height. For example, creating a camera with width = 256, height = 128 will cost `300 + 200 = 500`.
-
 - Robots can now exit the world regardless of world position, to align with the official rules
 - Game log scores are now rounded to two decimal places
 - Improved robot history event descriptions
