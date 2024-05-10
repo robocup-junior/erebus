@@ -17,7 +17,7 @@ Erebus is under constant development and will continue to serve as the basis for
 
 ## Documentation
 
-Documentation for the platform can be accessed through [this link](https://v23.erebus.rcj.cloud/docs/).  
+Documentation for the platform can be accessed through [this link](https://v24.erebus.rcj.cloud/docs/).  
 However, some pages are currently under construction.
 
 ## Robot Customization
