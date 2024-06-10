@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v24.1.0]() - 2024-XX-XX
+
+## Changed
+
+- Updated the remote controller tooltip help link to now point to the [wiki](https://erebus.rcj.cloud/docs/tutorials/remotecontroller/).
+
+## Fixed
+
+- Fixed `MapScorerExample.py` having `'20'` characters for room 4 instead of `'*'`. 
+
+
 ## [Release v24.0.0](https://github.com/robocup-junior/erebus/releases) - 2024-04-06
 
 > Please note this version only works with Webots R2023b, please update your Webots client before using this version.
