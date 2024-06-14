@@ -893,7 +893,7 @@ class Erebus(Supervisor):
             # If the time is up
             if ((self.time_elapsed >= self.max_time or
                  self._real_time_elapsed >= self._max_real_world_time) and
-                    self._last_frame != -1):
+                    self._last_frame != None):
                 self._add_map_multiplier()
                 self._robot_quit(True)
 
