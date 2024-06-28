@@ -41,6 +41,7 @@ from DockerHelper import run_docker_container
 
 from typing import Sequence, cast
 
+from controller.wb import wb
 
 class GameState(Enum):
     MATCH_NOT_STARTED = 1
@@ -159,6 +160,23 @@ class Erebus(Supervisor):
         self.rws.send("currentWorld", self._get_current_world())
 
         self.rws.send("update", f"0,0,{self.max_time},0")
+
+    def wwiReceiveText(self) -> Optional[str]:
+        """
+        Allow a robot controller to receive a message sent from a JavaScript
+        function running in the HTML robot window
+
+        This overrides Webot's Robot class implementation
+
+        Returns:
+            Optional[str]: Decoded robot window message
+        """
+        
+        # Note: We are decoding with ISO-8859-1, as decoding with UTF-8
+        # cannot handle some non-utf-8 chars that seem to mysteriously
+        # come through
+        text: bytes = wb.wb_robot_wwi_receive_text()
+        return None if text is None else text.decode('ISO-8859-1')
 
     def _game_init(self) -> None:
         """Initialises Erebus' initial game state. This should be run on the 

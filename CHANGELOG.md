@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
+- Fixed a bug where UI signals to the Erebus client could crash on decoding.
 - Fixed a bug where the supervisor would award infinite points for the mapping bonus. Thanks to MasterOfRespawn for finding this.
 - Fixed `MapScorerExample.py` having `'20'` characters for room 4 instead of `'*'`.
 
