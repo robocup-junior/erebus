@@ -446,6 +446,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
             rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
             Accelerometer {{
+                name "{robot_json[component]["customName"]}"
                 lookupTable [ -100 -100 0.003 100 100 0.003 ]
                 rotation 0.577 -0.577 -0.577 2.09
                 physics Physics {{
@@ -463,7 +464,8 @@ def generate_robot_proto(robot_json: dict) -> bool:
             translation {x} {y} {z}
             rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
             children [
-                Lidar {{
+            Lidar {{
+                name "{robot_json[component]["customName"]}"
                 rotation 0 0 1 3.14159
                 fieldOfView 6.2832
                 physics Physics {{
@@ -471,7 +473,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
                 boundingObject Sphere {{
                     radius 0.003
                 }}
-                }}
+            }}
             ]
             }}"""
 
