@@ -172,11 +172,15 @@ class Erebus(Supervisor):
             Optional[str]: Decoded robot window message
         """
         
-        # Note: We are decoding with ISO-8859-1, as decoding with UTF-8
-        # cannot handle some non-utf-8 chars that seem to mysteriously
-        # come through
         text: bytes = wb.wb_robot_wwi_receive_text()
-        return None if text is None else text.decode('ISO-8859-1')
+        if text is None:
+            return None
+        else: 
+            try:
+                return text.decode()
+            except:
+                Console.log_debug(f"<wwiReceiveText> failed to decode {text}")
+                pass
 
     def _game_init(self) -> None:
         """Initialises Erebus' initial game state. This should be run on the 
