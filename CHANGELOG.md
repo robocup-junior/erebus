@@ -11,9 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
-- Fixed a bug where UI signals to the Erebus client could crash on decoding.
-- Fixed a bug where the supervisor would award infinite points for the mapping bonus. Thanks to MasterOfRespawn for finding this.
 - Fixed a bug where generated robots would ignore custom names for Lidar and Accelerometer sensors.
+  - **This may cause errors in your code so please double check your custom robot sensor names.**
+- Fixed a bug where UI signals to the Erebus client could crash on decoding.
+- Fixed a bug where the supervisor would award infinite points for the mapping bonus. Thanks @MasterOfRespawn.
 - Fixed `MapScorerExample.py` having `'20'` characters for room 4 instead of `'*'`.
 
 ## [Release v24.0.0](https://github.com/robocup-junior/erebus/releases) - 2024-04-06
