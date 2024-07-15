@@ -60,7 +60,7 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md)
 
-## [Latest Release v24.1.0]() - 2024-07-XX
+## [Latest Release v24.1.0](https://github.com/robocup-junior/erebus/releases/tag/v24.1.0) - 2024-07-15
 
 ### Changed
 
