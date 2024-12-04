@@ -1,7 +1,7 @@
 from typing import Union
 import numpy as np
 import numpy.typing as npt
-from ConsoleLog import Console
+import json
 
 def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
     """Print a formatted view of an Erebus map matrix
@@ -57,26 +57,93 @@ def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
         print('')
 
 class MapAnswer:
-    def __init__(self, supervisor):
-        self.supervisor = supervisor
+    @classmethod
+    def from_supervisor(cls, supervisor):
         #Count the number of tiles
-        self.numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
+        numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
         #Retrieve the node containing the tiles
-        self.tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
+        tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
         
-        if self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "TILE" and self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "START_TILE":
-            self.numberTiles -= 1
+        # TODO(Richo): I don't understand this. If the last node is not a TILE or START_TILE we just ignore it? When could that happen?
+        if tileNodes.getMFNode(numberTiles - 1).getDef() != "TILE" and tileNodes.getMFNode(numberTiles - 1).getDef() != "START_TILE":
+            numberTiles -= 1
         
-        self.xPos = [self.tileNodes.getMFNode(i).getField("xPos").getSFInt32() for i in range(self.numberTiles)]
-        self.zPos = [self.tileNodes.getMFNode(i).getField("zPos").getSFInt32() for i in range(self.numberTiles)]
+        tiles = []
+        for i in range(numberTiles):
+            tiles.append(Tile.from_node(tileNodes.getMFNode(i)))
+        
+        #Retrieve the node containing the victims
+        victimNodes = supervisor.getFromDef('HUMANGROUP').getField("children")
+        victims = []
+        for i in range(victimNodes.getCount()):
+            node = victimNodes.getMFNode(i)
+            victims.append(Sign.from_node(node))
 
-        self.x_size = max(self.xPos) - min(self.xPos) + 1
-        self.z_size = max(self.zPos) - min(self.zPos) + 1
-        self.answerMatrix = [[0] * (self.x_size * 4 + 1) for i in range(self.z_size * 4 + 1)]
+        #Retrieve the node containing the victims
+        hazardNodes = supervisor.getFromDef('HAZARDGROUP').getField("children")
+        hazards = []
+        for i in range(hazardNodes.getCount()):
+            node = hazardNodes.getMFNode(i)
+            hazards.append(Sign.from_node(node))
 
-        self.xStart = -(self.tileNodes.getMFNode(0).getField("width").getSFFloat() * (0.3 * self.tileNodes.getMFNode(0).getField("xScale").getSFFloat()) / 2.0) -0.06
-        self.zStart = -(self.tileNodes.getMFNode(0).getField("height").getSFFloat() * (0.3 * self.tileNodes.getMFNode(0).getField("zScale").getSFFloat()) / 2.0) -0.06
+        return cls(tiles, victims, hazards)
     
+    @classmethod
+    def from_dict(cls, dict):
+        tiles = []
+        for t in dict["tiles"]:
+            tiles.append(Tile.from_dict(t))
+
+        victims = []
+        for v in dict["victims"]:
+            victims.append(Sign.from_dict(v))
+
+        hazards = []
+        for h in dict["hazards"]:
+            hazards.append(Sign.from_dict(h))
+        return cls(tiles, victims, hazards)
+    
+    def __init__(self, tiles, victims, hazards):
+        self.tiles = tiles
+        self.victims = victims
+        self.hazards = hazards
+        
+        # TODO(Richo): I don't understand this. If the last node is not a TILE or START_TILE we just ignore it? When could that happen?
+        # if self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "TILE" and self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "START_TILE":
+        #     self.numberTiles -= 1
+        
+        xPos = [t.xPos for t in tiles]
+        zPos = [t.zPos for t in tiles]
+        x_size = max(xPos) - min(xPos) + 1
+        z_size = max(zPos) - min(zPos) + 1
+        self.answerMatrix = [[0] * (x_size * 4 + 1) for _ in range(z_size * 4 + 1)]
+
+        self.xStart = -(tiles[0].width * (0.3 * tiles[0].xScale) / 2.0) -0.06
+        self.zStart = -(tiles[0].height * (0.3 * tiles[0].zScale) / 2.0) -0.06
+    
+    def to_dict(self):
+        tiles = []
+        for tile in self.tiles:
+            tiles.append(tile.to_dict())
+    
+        victims = []
+        for victim in self.victims:
+            victims.append(victim.to_dict())
+        
+        hazards = []
+        for hazard in self.hazards:
+            hazards.append(hazard.to_dict())
+        
+        return {
+            "tiles": tiles,
+            "victims": victims,
+            "hazards": hazards
+        }
+    
+    def writeJSON(self, path):
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
+
     def setAnswer(self,z,x,k):
         if self.answerMatrix[z][x] == '*':
             return
@@ -84,11 +151,10 @@ class MapAnswer:
 
     def generateAnswer(self, debug = False):
         # try:
-            for i in range(self.numberTiles):
-                tile = self.tileNodes.getMFNode(i)
-                x = 4*tile.getField("xPos").getSFInt32()
-                z = 4*tile.getField("zPos").getSFInt32()
-                room = tile.getField("room").getSFInt32()
+            for tile in self.tiles:
+                x = 4*tile.xPos
+                z = 4*tile.zPos
+                room = tile.room
 
                 # Room 4
                 # self.answerMatrix[z+a][x+b] = '*'
@@ -99,25 +165,25 @@ class MapAnswer:
                     continue
 
                 # Wall
-                if tile.getField("topWall").getSFInt32() > 0:
+                if tile.topWall > 0:
                     self.setAnswer(z, x, 1)
                     self.setAnswer(z, x+1, 1)
                     self.setAnswer(z, x+2, 1)
                     self.setAnswer(z, x+3, 1)
                     self.setAnswer(z, x+4, 1)
-                if tile.getField("bottomWall").getSFInt32() > 0:
+                if tile.bottomWall > 0:
                     self.setAnswer(z+4, x, 1)
                     self.setAnswer(z+4, x+1, 1)
                     self.setAnswer(z+4, x+2, 1)
                     self.setAnswer(z+4, x+3, 1)
                     self.setAnswer(z+4, x+4, 1)
-                if tile.getField("rightWall").getSFInt32() > 0:
+                if tile.rightWall > 0:
                     self.setAnswer(z, x+4, 1)
                     self.setAnswer(z+1, x+4, 1)
                     self.setAnswer(z+2, x+4, 1)
                     self.setAnswer(z+3, x+4, 1)
                     self.setAnswer(z+4, x+4, 1)
-                if tile.getField("leftWall").getSFInt32() > 0:
+                if tile.leftWall > 0:
                     self.setAnswer(z, x, 1)
                     self.setAnswer(z+1, x, 1)
                     self.setAnswer(z+2, x, 1)
@@ -125,75 +191,76 @@ class MapAnswer:
                     self.setAnswer(z+4, x, 1)
                 
                 ## Half wall
-                if tile.getTypeName() == "halfTile":
-                    if tile.getField("tile1Walls").getMFInt32(0) > 0:
+                if tile.type == "halfTile":
+                    if tile.tile1Walls[0] > 0:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z, x+1, 1)
                         self.setAnswer(z, x+2, 1)
-                    if tile.getField("tile1Walls").getMFInt32(1) > 0:
+                    if tile.tile1Walls[1] > 0:
                         self.setAnswer(z, x+2, 1)
                         self.setAnswer(z+1, x+2, 1)
                         self.setAnswer(z+2, x+2, 1)
-                    if tile.getField("tile1Walls").getMFInt32(2) > 0:
+                    if tile.tile1Walls[2] > 0:
                         self.setAnswer(z+2, x, 1)
                         self.setAnswer(z+2, x+1, 1)
                         self.setAnswer(z+2, x+2, 1)
-                    if tile.getField("tile1Walls").getMFInt32(3) > 0:
+                    if tile.tile1Walls[3] > 0:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z+1, x, 1)
                         self.setAnswer(z+2, x, 1)
-                    if tile.getField("tile2Walls").getMFInt32(0) > 0:
+                    if tile.tile2Walls[0] > 0:
                         self.setAnswer(z, x+2, 1)
                         self.setAnswer(z, x+3, 1)
                         self.setAnswer(z, x+4, 1)
-                    if tile.getField("tile2Walls").getMFInt32(1) > 0:
+                    if tile.tile2Walls[1] > 0:
                         self.setAnswer(z, x+4, 1)
                         self.setAnswer(z+1, x+4, 1)
                         self.setAnswer(z+2, x+4, 1)
-                    if tile.getField("tile2Walls").getMFInt32(2) > 0:
+                    if tile.tile2Walls[2] > 0:
                         self.setAnswer(z+2, x+2, 1)
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
-                    if tile.getField("tile2Walls").getMFInt32(3) > 0:
+                    if tile.tile2Walls[3] > 0:
                         self.setAnswer(z, x+2, 1)
                         self.setAnswer(z+1, x+2, 1)
                         self.setAnswer(z+2, x+2, 1)
-                    if tile.getField("tile3Walls").getMFInt32(0) > 0:
+                    if tile.tile3Walls[0] > 0:
                         self.setAnswer(z+2, x, 1)
                         self.setAnswer(z+2, x+1, 1)
                         self.setAnswer(z+2, x+2, 1)
-                    if tile.getField("tile3Walls").getMFInt32(1) > 0:
+                    if tile.tile3Walls[1] > 0:
                         self.setAnswer(z+2, x+2, 1)
                         self.setAnswer(z+3, x+2, 1)
                         self.setAnswer(z+4, x+2, 1)
-                    if tile.getField("tile3Walls").getMFInt32(2) > 0:
+                    if tile.tile3Walls[2] > 0:
                         self.setAnswer(z+4, x, 1)
                         self.setAnswer(z+4, x+1, 1)
                         self.setAnswer(z+4, x+2, 1)
-                    if tile.getField("tile3Walls").getMFInt32(3) > 0:
+                    if tile.tile3Walls[3] > 0:
                         self.setAnswer(z+2, x, 1)
                         self.setAnswer(z+3, x, 1)
                         self.setAnswer(z+4, x, 1)
-                    if tile.getField("tile4Walls").getMFInt32(0) > 0:
+                    if tile.tile4Walls[0] > 0:
                         self.setAnswer(z+2, x+2, 1)
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
-                    if tile.getField("tile4Walls").getMFInt32(1) > 0:
+                    if tile.tile4Walls[1] > 0:
                         self.setAnswer(z+2, x+4, 1)
                         self.setAnswer(z+3, x+4, 1)
                         self.setAnswer(z+4, x+4, 1)
-                    if tile.getField("tile4Walls").getMFInt32(2) > 0:
+                    if tile.tile4Walls[2] > 0:
                         self.setAnswer(z+4, x+2, 1)
                         self.setAnswer(z+4, x+3, 1)
                         self.setAnswer(z+4, x+4, 1)
-                    if tile.getField("tile4Walls").getMFInt32(3) > 0:
+                    if tile.tile4Walls[3] > 0:
                         self.setAnswer(z+2, x+2, 1)
                         self.setAnswer(z+3, x+2, 1)
                         self.setAnswer(z+4, x+2, 1)
+            
                 
                     # Curved walls
                     # Left top
-                    lt = tile.getField("curve").getMFInt32(0)
+                    lt = tile.curve[0]
                     if lt == 1:
                         self.setAnswer(z, x, 1)
                         self.setAnswer(z, x+1, 1)
@@ -220,7 +287,7 @@ class MapAnswer:
                         self.setAnswer(z, x+2, 1)
                     
                     # Right top
-                    rt = tile.getField("curve").getMFInt32(1)
+                    rt = tile.curve[1]
                     if rt == 1:
                         self.setAnswer(z, x+2, 1)
                         self.setAnswer(z, x+3, 1)
@@ -247,7 +314,7 @@ class MapAnswer:
                         self.setAnswer(z, x+4, 1)
                     
                     # Left bottom
-                    lb = tile.getField("curve").getMFInt32(2)
+                    lb = tile.curve[2]
                     if lb == 1:
                         self.setAnswer(z+2, x, 1)
                         self.setAnswer(z+2, x+1, 1)
@@ -274,7 +341,7 @@ class MapAnswer:
                         self.setAnswer(z+2, x+2, 1)
                     
                     # Right bottom
-                    rb = tile.getField("curve").getMFInt32(3)
+                    rb = tile.curve[3]
                     if rb == 1:
                         self.setAnswer(z+2, x+2, 1)
                         self.setAnswer(z+2, x+3, 1)
@@ -300,81 +367,67 @@ class MapAnswer:
                         self.setAnswer(z+2, x+3, 1)
                         self.setAnswer(z+2, x+4, 1)
 
-                if tile.getField("trap").getSFBool():
+                if tile.trap:
                     self.answerMatrix[z+1][x+1] = 2
                     self.answerMatrix[z+1][x+3] = 2
                     self.answerMatrix[z+3][x+1] = 2
                     self.answerMatrix[z+3][x+3] = 2
-                if tile.getField("swamp").getSFBool():
+                if tile.swamp:
                     self.answerMatrix[z+1][x+1] = 3
                     self.answerMatrix[z+1][x+3] = 3
                     self.answerMatrix[z+3][x+1] = 3
                     self.answerMatrix[z+3][x+3] = 3
-                if tile.getField("checkpoint").getSFBool():
+                if tile.checkpoint:
                     self.answerMatrix[z+1][x+1] = 4
                     self.answerMatrix[z+1][x+3] = 4
                     self.answerMatrix[z+3][x+1] = 4
                     self.answerMatrix[z+3][x+3] = 4
-                if tile.getField("start").getSFBool():
+                if tile.start:
                     self.answerMatrix[z+1][x+1] = 5
                     self.answerMatrix[z+1][x+3] = 5
                     self.answerMatrix[z+3][x+1] = 5
                     self.answerMatrix[z+3][x+3] = 5
                 
-                colour = tile.getField("tileColor").getSFColor()
-                colour = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
-                if colour == [0.0, 0.8, 0.0]: # Green
+                if tile.tileColor == [0.0, 0.8, 0.0]: # Green
                     # 1 to 4
                     self.answerMatrix[z+1][x+1] = 'g'
                     self.answerMatrix[z+1][x+3] = 'g'
                     self.answerMatrix[z+3][x+1] = 'g'
                     self.answerMatrix[z+3][x+3] = 'g'
-                elif colour == [0.1, 0.1, 0.9]: # Blue
+                elif tile.tileColor == [0.1, 0.1, 0.9]: # Blue
                     # 1 to 2
                     self.answerMatrix[z+1][x+1] = 'b'
                     self.answerMatrix[z+1][x+3] = 'b'
                     self.answerMatrix[z+3][x+1] = 'b'
                     self.answerMatrix[z+3][x+3] = 'b'
-                elif colour == [0.3, 0.1, 0.6]: # Purple
+                elif tile.tileColor == [0.3, 0.1, 0.6]: # Purple
                     # 2 to 3
                     self.answerMatrix[z+1][x+1] = 'p'
                     self.answerMatrix[z+1][x+3] = 'p'
                     self.answerMatrix[z+3][x+1] = 'p'
                     self.answerMatrix[z+3][x+3] = 'p'
-                elif colour == [0.9, 0.1, 0.1]: # Red
+                elif tile.tileColor == [0.9, 0.1, 0.1]: # Red
                     # 3 to 4
                     self.answerMatrix[z+1][x+1] = 'r'
                     self.answerMatrix[z+1][x+3] = 'r'
                     self.answerMatrix[z+3][x+1] = 'r'
                     self.answerMatrix[z+3][x+3] = 'r'
-                elif colour == [0.9, 0.6, 0.1]: # Orange
+                elif tile.tileColor == [0.9, 0.6, 0.1]: # Orange
                     # 2 to 4
                     self.answerMatrix[z+1][x+1] = 'o'
                     self.answerMatrix[z+1][x+3] = 'o'
                     self.answerMatrix[z+3][x+1] = 'o'
                     self.answerMatrix[z+3][x+3] = 'o'
-                elif colour == [0.9, 0.9, 0.1]: # Yellow
+                elif tile.tileColor == [0.9, 0.9, 0.1]: # Yellow
                     # 1 to 3
                     self.answerMatrix[z+1][x+1] = 'y'
                     self.answerMatrix[z+1][x+3] = 'y'
                     self.answerMatrix[z+3][x+1] = 'y'
                     self.answerMatrix[z+3][x+3] = 'y'
             
-            # Victims
-
-            #Count the number of victims
-            numberVictims = self.supervisor.getFromDef('HUMANGROUP').getField("children").getCount()
-            numberHazards = self.supervisor.getFromDef('HAZARDGROUP').getField("children").getCount()
-            #Retrieve the node containing the victims
-            victimNodes = self.supervisor.getFromDef('HUMANGROUP').getField("children")
-            hazardNodes = self.supervisor.getFromDef('HAZARDGROUP').getField("children")
-
-            for i in range(numberVictims + numberHazards):
-                if i < numberVictims:
-                    victim = victimNodes.getMFNode(i)
-                else:
-                    victim = hazardNodes.getMFNode(i - numberVictims)
-                translation = victim.getField("translation").getSFVec3f()
+            # Victims & Hazards
+            for victim in self.victims + self.hazards:
+                translation = victim.translation.copy()
                 xCount = 0
                 while translation[0] - self.xStart > 0.03:
                     translation[0] -= 0.03
@@ -386,13 +439,8 @@ class MapAnswer:
 
                 xShift = 0
                 zShift = 0
-                #if round(translation[0] - xStart, 4) == 0.03:
-                #    xShift = 1
-                #if round(translation[2] - zStart, 4) == 0.03:
-                #    zShift = 1
-
                 
-                victimType = victim.getField("type").getSFString()
+                victimType = victim.type
                 if victimType == "harmed":
                     victimType = "H"
                 elif victimType == "unharmed":
@@ -400,7 +448,7 @@ class MapAnswer:
                 elif victimType == "stable":
                     victimType = "S"
 
-                rotation = victim.getField("rotation").getSFRotation()
+                rotation = victim.rotation
                 if abs(round(rotation[3],2)) == 1.57:
                     # Vertical
                     zCount = int(zCount/2)
@@ -466,3 +514,181 @@ class Color:
 	BG_DEFAULT     = '\033[49m'
 	RESET          = '\033[0m'
 
+class Tile:
+    @classmethod
+    def from_node(cls, tile):
+        xPos = tile.getField("xPos").getSFInt32()
+        zPos = tile.getField("zPos").getSFInt32()
+        room = tile.getField("room").getSFInt32()
+        width = tile.getField("width").getSFFloat()
+        height = tile.getField("height").getSFFloat()
+        xScale = tile.getField("xScale").getSFFloat()
+        zScale = tile.getField("zScale").getSFFloat()
+        topWall = tile.getField("topWall").getSFInt32()
+        bottomWall = tile.getField("bottomWall").getSFInt32()
+        leftWall = tile.getField("leftWall").getSFInt32()
+        rightWall = tile.getField("rightWall").getSFInt32()
+        trap = tile.getField("trap").getSFBool()
+        swamp = tile.getField("swamp").getSFBool()
+        checkpoint = tile.getField("checkpoint").getSFBool()
+        start = tile.getField("start").getSFBool()
+        
+        colour = tile.getField("tileColor").getSFColor()
+        tileColor = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
+        
+        # TODO(Richo): Maybe subclasses are better?
+        type = tile.getTypeName()
+        tile1Walls = None
+        tile2Walls = None
+        tile3Walls = None
+        tile4Walls = None
+        curve = None
+        if tile.getTypeName() == "halfTile":
+            tile1Walls = [
+                tile.getField("tile1Walls").getMFInt32(0),
+                tile.getField("tile1Walls").getMFInt32(1),
+                tile.getField("tile1Walls").getMFInt32(2),
+                tile.getField("tile1Walls").getMFInt32(3)
+            ]
+            tile2Walls = [
+                tile.getField("tile2Walls").getMFInt32(0),
+                tile.getField("tile2Walls").getMFInt32(1),
+                tile.getField("tile2Walls").getMFInt32(2),
+                tile.getField("tile2Walls").getMFInt32(3)
+            ]
+            tile3Walls = [
+                tile.getField("tile3Walls").getMFInt32(0),
+                tile.getField("tile3Walls").getMFInt32(1),
+                tile.getField("tile3Walls").getMFInt32(2),
+                tile.getField("tile3Walls").getMFInt32(3)
+            ]
+            tile4Walls = [
+                tile.getField("tile4Walls").getMFInt32(0),
+                tile.getField("tile4Walls").getMFInt32(1),
+                tile.getField("tile4Walls").getMFInt32(2),
+                tile.getField("tile4Walls").getMFInt32(3)
+            ]
+            curve = [
+                tile.getField("curve").getMFInt32(0),
+                tile.getField("curve").getMFInt32(1),
+                tile.getField("curve").getMFInt32(2),
+                tile.getField("curve").getMFInt32(3)
+            ]
+
+        return cls(type, xPos, zPos, room, width, height, xScale, zScale, \
+                   topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
+                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve)
+    
+    @classmethod
+    def from_dict(cls, dict):
+        xPos = dict["xPos"]
+        zPos = dict["zPos"]
+        room = dict["room"]
+        width = dict["width"]
+        height = dict["height"]
+        xScale = dict["xScale"]
+        zScale = dict["zScale"]
+        topWall = dict["topWall"]
+        bottomWall = dict["bottomWall"]
+        leftWall = dict["leftWall"]
+        rightWall = dict["rightWall"]
+        trap = dict["trap"]
+        swamp = dict["swamp"]
+        checkpoint = dict["checkpoint"]
+        start = dict["start"]
+        tileColor = dict["tileColor"]
+        type = dict["type"]
+        tile1Walls = dict.get("tile1Walls")
+        tile2Walls = dict.get("tile2Walls")
+        tile3Walls = dict.get("tile3Walls")
+        tile4Walls = dict.get("tile4Walls")
+        curve = dict.get("curve")
+
+        return cls(type, xPos, zPos, room, width, height, xScale, zScale, \
+                   topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
+                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve)
+
+    def __init__(self, type, xPos, zPos, room, width, height, xScale, zScale, \
+                topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
+                tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve):
+        self.type = type
+        self.xPos = xPos
+        self.zPos = zPos
+        self.room = room
+        self.width = width
+        self.height = height
+        self.xScale = xScale
+        self.zScale = zScale
+        self.topWall = topWall
+        self.bottomWall = bottomWall
+        self.leftWall = leftWall
+        self.rightWall = rightWall
+        self.trap = trap
+        self.swamp = swamp
+        self.checkpoint = checkpoint
+        self.start = start
+        self.tileColor = tileColor
+        self.tile1Walls = tile1Walls
+        self.tile2Walls = tile2Walls
+        self.tile3Walls = tile3Walls
+        self.tile4Walls = tile4Walls
+        self.curve = curve
+        
+    def to_dict(self):
+        result = {
+            "xPos": self.xPos,
+            "zPos": self.zPos,
+            "room": self.room,
+            "width": self.width,
+            "height": self.height,
+            "xScale": self.xScale,
+            "zScale": self.zScale,
+            "topWall": self.topWall,
+            "bottomWall": self.bottomWall,
+            "leftWall": self.leftWall,
+            "rightWall": self.rightWall,
+            "trap": self.trap,
+            "swamp": self.swamp,
+            "checkpoint": self.checkpoint,
+            "start": self.start,
+            "tileColor": self.tileColor,
+            "type": self.type
+        }
+
+        if self.type == "halfTile":
+            result["tile1Walls"] = self.tile1Walls
+            result["tile2Walls"] = self.tile2Walls
+            result["tile3Walls"] = self.tile3Walls
+            result["tile4Walls"] = self.tile4Walls
+            result["curve"] = self.curve
+
+        return result
+
+class Sign:
+    @classmethod
+    def from_node(cls, node):
+        type = node.getField("type").getSFString()
+
+        t = node.getField("translation").getSFVec3f()
+        translation = [t[0], t[1], t[2]]
+
+        r = node.getField("rotation").getSFRotation()
+        rotation = [r[0], r[1], r[2], r[3]]
+        
+        return cls(type, translation, rotation)
+    
+    @classmethod
+    def from_dict(cls, dict):
+        return cls(dict["type"], dict["translation"], dict["rotation"])
+
+    def __init__(self, type, translation, rotation):
+        self.type = type
+        self.translation = translation
+        self.rotation = rotation
+    
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "translation": self.translation,
+            "rotation": self.rotation
+        }
