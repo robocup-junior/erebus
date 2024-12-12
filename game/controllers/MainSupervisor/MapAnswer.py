@@ -2,6 +2,7 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 import json
+import math
 
 def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
     """Print a formatted view of an Erebus map matrix
@@ -427,19 +428,7 @@ class MapAnswer:
             
             # Victims & Hazards
             for victim in self.victims + self.hazards:
-                translation = victim.translation.copy()
-                xCount = 0
-                while translation[0] - self.xStart > 0.03:
-                    translation[0] -= 0.03
-                    xCount += 1
-                zCount = 0
-                while translation[2] - self.zStart > 0.03:
-                    translation[2] -= 0.03
-                    zCount += 1
-
-                xShift = 0
-                zShift = 0
-                
+                               
                 victimType = victim.type
                 if victimType == "harmed":
                     victimType = "H"
@@ -448,25 +437,74 @@ class MapAnswer:
                 elif victimType == "stable":
                     victimType = "S"
 
+                # NOTE(Richo): First we take the victim's translation and transform it relative
+                # to the map's start coordinate (which should be the top left corner). Then, we
+                # estimate a pair of col/row coordinates based on the victim's position. These
+                # coordinates will later have to be adjusted depending on the victim's rotation.
+                translation = victim.translation
+                t_x = translation[0] - self.xStart
+                col_temp = int(t_x / 0.024) - int(t_x / 0.12)
+                t_z = translation[2] - self.zStart
+                row_temp = int(t_z / 0.024) - int(t_z / 0.12)
+
                 rotation = victim.rotation
-                if abs(round(rotation[3],2)) == 1.57:
+                if math.isclose(abs(rotation[3]), 1.57):
                     # Vertical
-                    zCount = int(zCount/2)
-                    if xCount % 2 == 0:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount
-                    else:
-                        row_temp = 2*zCount + 1 + zShift
-                        col_temp = xCount+1
+                    # NOTE(Richo): col_temp should be ok, we need to calculate row_temp. To do it, we
+                    # calculate the distance between the victim and the corresponding tile's center
+                    # (in the Z coordinate). Depending on this distance value, we either put the victim
+                    # on the center of the tile, 1 cell up, or 1 cell down.
+                    tile_idx = int(t_z / 0.12)
+                    tile_center = tile_idx * 0.12 + 0.06
+                    dist_center = t_z - tile_center
+                    row_temp = tile_idx * 4 + 2 # Assume center first
+                    if dist_center < -0.02:
+                        # Move it UP
+                        row_temp -= 1
+                    elif dist_center > 0.02:
+                        # Move it DOWN
+                        row_temp += 1
+                elif math.isclose(rotation[3], 0) or math.isclose(rotation[3], 3.14):
+                    # Horizontal                    
+                    # NOTE(Richo): row_temp should be ok, we need to calculate col_temp. To do it, we
+                    # calculate the distance between the victim and the corresponding tile's center
+                    # (in the X coordinate). Depending on this distance value, we either put the victim
+                    # on the center of the tile, 1 cell to the left, or 1 cell to the right.
+                    tile_idx = int(t_x / 0.12)
+                    tile_center = tile_idx * 0.12 + 0.06
+                    dist_center = t_x - tile_center
+                    col_temp = tile_idx * 4 + 2 # Assume center first
+                    if dist_center < -0.02:
+                        # Move it to the LEFT
+                        col_temp -= 1
+                    elif dist_center > 0.02:
+                        # Move it to the RIGHT
+                        col_temp += 1
                 else:
-                    # Horizontal
-                    xCount = int(xCount/2)
-                    if zCount % 2 == 0:
-                        row_temp = zCount
-                        col_temp = 2*xCount + 1 + xShift
-                    else:
-                        row_temp = zCount+1
-                        col_temp = 2*xCount + 1 + xShift
+                    # Curved
+                    # NOTE(Richo): Curved victims need special case for both coordinates.
+                    # We start by computing the tile center coordinates (col and row), then
+                    # we adjust each one depending on the victim's position.
+
+                    # In the case of the column, we have to either add or subtract 1 depending
+                    # on whether the victim position is before or after the tile's center.
+                    col_temp = int(t_x / 0.12) * 4 + 2
+                    tile_center_x = int(t_x / 0.12) * 0.12 + 0.06                    
+                    if t_x < tile_center_x:
+                        col_temp -= 1
+                    elif t_x > tile_center_x:
+                        col_temp += 1
+
+                    # In the case of the row, we add or subtract 2 but only if the distance
+                    # to the center is larger than a certain threshold.
+                    row_temp = int(t_z / 0.12) * 4 + 2
+                    tile_center_z = int(t_z / 0.12) * 0.12 + 0.06
+                    dist_center = t_z - tile_center_z
+                    if dist_center < -0.03:
+                        row_temp -= 2
+                    elif dist_center > 0.03:
+                        row_temp += 2
+
 
                 # Concatenate if victims on either side of the wall
                 if self.answerMatrix[row_temp][col_temp] != '*':
