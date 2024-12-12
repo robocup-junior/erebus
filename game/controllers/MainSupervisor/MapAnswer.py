@@ -109,10 +109,6 @@ class MapAnswer:
         self.victims = victims
         self.hazards = hazards
         
-        # TODO(Richo): I don't understand this. If the last node is not a TILE or START_TILE we just ignore it? When could that happen?
-        # if self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "TILE" and self.tileNodes.getMFNode(self.numberTiles - 1).getDef() != "START_TILE":
-        #     self.numberTiles -= 1
-        
         xPos = [t.xPos for t in tiles]
         zPos = [t.zPos for t in tiles]
         x_size = max(xPos) - min(xPos) + 1
