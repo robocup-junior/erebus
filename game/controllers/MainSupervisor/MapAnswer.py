@@ -423,8 +423,12 @@ class MapAnswer:
                     self.answerMatrix[z+3][x+3] = 'y'
             
             # Victims & Hazards
-            for victim in self.victims + self.hazards:
-                               
+            signs = self.victims + self.hazards
+
+            # Sort signs top to bottom, left to right
+            signs.sort(key=lambda s: (s.translation[2], s.translation[0]))
+
+            for victim in signs:                               
                 victimType = victim.type
                 if victimType == "harmed":
                     victimType = "H"
