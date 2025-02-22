@@ -90,7 +90,7 @@ def run_docker_container(
         with subprocess.Popen(
             command,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
-            bufsize=1, universal_newlines=True, shell=False
+            bufsize=1, universal_newlines=True, shell=False, encoding="utf-8"
         ) as build_process:
             # Print output from build process
             if build_process.stdout:
