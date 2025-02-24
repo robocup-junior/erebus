@@ -447,8 +447,8 @@ class MapAnswer:
                 t_z = translation[2] - self.zStart
                 row_temp = int(t_z / 0.024) - int(t_z / 0.12)
 
-                rotation = victim.rotation
-                if math.isclose(abs(rotation[3]), 1.57):
+                yaw = round(victim.get_rotation_yaw(), 2)
+                if math.isclose(abs(yaw), 1.57):
                     # Vertical
                     # NOTE(Richo): col_temp should be ok, we need to calculate row_temp. To do it, we
                     # calculate the distance between the victim and the corresponding tile's center
@@ -464,7 +464,7 @@ class MapAnswer:
                     elif dist_center > 0.02:
                         # Move it DOWN
                         row_temp += 1
-                elif math.isclose(rotation[3], 0) or math.isclose(rotation[3], 3.14):
+                elif math.isclose(abs(yaw), 0) or math.isclose(abs(yaw), 3.14):
                     # Horizontal                    
                     # NOTE(Richo): row_temp should be ok, we need to calculate col_temp. To do it, we
                     # calculate the distance between the victim and the corresponding tile's center
@@ -702,6 +702,43 @@ class Tile:
 
         return result
 
+# NOTE(Richo): Code taken from 
+# https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+def angle_axis_to_quaternion(x, y, z, a):
+    w = math.cos(a/2)
+    x = x*math.sin(a/2)
+    y = y*math.sin(a/2)
+    z = z*math.sin(a/2)
+    return [w, x, y, z]
+
+# NOTE(Richo): Code taken from
+# https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+def quaternion_to_euler(w, x, y, z):
+    sqw = w*w
+    sqx = x*x
+    sqy = y*y
+    sqz = z*z
+    unit = sqx + sqy + sqz + sqw # if normalised is one, otherwise is correction factor
+    test = x*y + z*w
+    # if test > 0.499*unit: # singularity at north pole
+    #     print("NORTH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    #     heading = 2 * math.atan2(x,w)
+    #     attitude = math.pi/2
+    #     bank = 0
+    #     return heading, attitude, bank
+
+    # if test < -0.499*unit: # singularity at south pole
+    #     print("SOUTH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    #     heading = -2 * math.atan2(x,w)
+    #     attitude = -math.pi/2
+    #     bank = 0
+    #     return heading, attitude, bank
+
+    heading = math.atan2(2*y*w-2*x*z , sqx - sqy - sqz + sqw)
+    attitude = math.asin(2*test/unit)
+    bank = math.atan2(2*x*w-2*y*z , -sqx + sqy - sqz + sqw)
+    return heading, attitude, bank
+
 class Sign:
     @classmethod
     def from_node(cls, node):
@@ -723,6 +760,21 @@ class Sign:
         self.type = type
         self.translation = translation
         self.rotation = rotation
+    
+    def get_rotation_quaternion(self):
+        x = self.rotation[0]
+        y = self.rotation[1]
+        z = self.rotation[2]
+        a = self.rotation[3]
+        return angle_axis_to_quaternion(x, y, z, a)
+    
+    def get_rotation_euler(self):
+        w, x, y, z = self.get_rotation_quaternion()
+        return quaternion_to_euler(w, x, y, z)
+    
+    def get_rotation_yaw(self):
+        yaw, _, _ = self.get_rotation_euler()
+        return yaw
     
     def to_dict(self):
         return {
