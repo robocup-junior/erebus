@@ -61,6 +61,8 @@ class VictimObject(ABC):
         
         self.wb_node: Node = node
 
+        self.orientation = node.getOrientation()
+
         self.score_worth: int = score
         self._victim_type: str = victim_type
         self.simple_victim_type: str = self.get_simple_type()
@@ -149,14 +151,7 @@ class VictimObject(ABC):
         Returns:
             npt.NDArray: Normalised surface normal vector
         """
-        # Angle of 0 (no rotation), e.g. [0,0,0,0], points upwards, therefore
-        # has surface normal of [0,0,-1]
-
-        # Rotate by rotation of victim
-        rot: npt.NDArray = rotate_2d_vector(np.array([0, -1]), 
-                                            -self.rotation[3])
-        # Convert back to 3d vector
-        return np.array([rot[0], 0, rot[1]])
+        return np.array([-self.orientation[2], 0, -self.orientation[8]])
 
     def _get_vec_to_robot(self, robot: Robot) -> npt.NDArray:
         """Get normalised direction vector from victim to robot
