@@ -447,8 +447,8 @@ class MapAnswer:
                 t_z = translation[2] - self.zStart
                 row_temp = int(t_z / 0.024) - int(t_z / 0.12)
 
-                rotation = victim.rotation
-                if math.isclose(abs(rotation[3]), 1.57):
+                yaw = round(victim.get_rotation_yaw(), 2)
+                if math.isclose(abs(yaw), 1.57):
                     # Vertical
                     # NOTE(Richo): col_temp should be ok, we need to calculate row_temp. To do it, we
                     # calculate the distance between the victim and the corresponding tile's center
@@ -464,7 +464,7 @@ class MapAnswer:
                     elif dist_center > 0.02:
                         # Move it DOWN
                         row_temp += 1
-                elif math.isclose(rotation[3], 0) or math.isclose(rotation[3], 3.14):
+                elif math.isclose(abs(yaw), 0) or math.isclose(abs(yaw), 3.14):
                     # Horizontal                    
                     # NOTE(Richo): row_temp should be ok, we need to calculate col_temp. To do it, we
                     # calculate the distance between the victim and the corresponding tile's center
@@ -712,21 +712,30 @@ class Sign:
 
         r = node.getField("rotation").getSFRotation()
         rotation = [r[0], r[1], r[2], r[3]]
+
+        orientation = node.getOrientation()
         
-        return cls(type, translation, rotation)
+        return cls(type, translation, rotation, orientation)
     
     @classmethod
     def from_dict(cls, dict):
-        return cls(dict["type"], dict["translation"], dict["rotation"])
+        return cls(dict["type"], dict["translation"], dict["rotation"], dict["orientation"])
 
-    def __init__(self, type, translation, rotation):
+    def __init__(self, type, translation, rotation, orientation):
         self.type = type
         self.translation = translation
         self.rotation = rotation
+        self.orientation = orientation
+    
+    def get_rotation_yaw(self):
+        x = self.orientation[2]
+        z = self.orientation[8]
+        return math.atan2(-x, -z)
     
     def to_dict(self):
         return {
             "type": self.type,
             "translation": self.translation,
-            "rotation": self.rotation
+            "rotation": self.rotation,
+            "orientation": self.orientation,
         }
