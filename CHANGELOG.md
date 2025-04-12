@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v25.0.0](https://github.com/robocup-junior/erebus/releases/tag/v25.0.0) - 2025-04-12
+TBU
+
 ## [Release v24.1.0](https://github.com/robocup-junior/erebus/releases/tag/v24.1.0) - 2024-07-15
 
 ### Changed

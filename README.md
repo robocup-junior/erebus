@@ -1,7 +1,7 @@
 # Erebus
 Erebus is a simulation competition environment for a sub-league of [RoboCupJunior(RCJ) Rescue](https://junior.robocup.org/), that was first introduced as a demonstration in 2021. Since 2022, simulation (Erebus) has been an integral part of RCJ Rescue. The challenge is designed for semi-experienced to highly experienced programmers. The aim of the competition is to program a customizable robot to autonomously navigate and map a complex maze environment whilst detecting victims and avoiding obstacles.
 
-Erebus is under constant development and will continue to serve as the basis for future RCJ Rescue international events. The competitions will be conducted under the [official rules](https://junior.robocup.org/wp-content/uploads/2024/01/RCJRescueSimulation2024-final.pdf).
+Erebus is under constant development and will continue to serve as the basis for future RCJ Rescue international events. The competitions will be conducted under the [official rules](https://junior.robocup.org/wp-content/uploads/2025/02/RCJRescueSimulation2025-final-1.pdf).
 
 ### [Erebus Official Website](https://erebus.rcj.cloud/)
 
@@ -17,16 +17,16 @@ Erebus is under constant development and will continue to serve as the basis for
 
 ## Documentation
 
-Documentation for the platform can be accessed through [this link](https://v24.erebus.rcj.cloud/docs/).  
+Documentation for the platform can be accessed through [this link](https://v25.erebus.rcj.cloud/docs/).  
 However, some pages are currently under construction.
 
 ## Robot Customization
 
-The robot customizer can be accessed through [this link](https://v24.robot.erebus.rcj.cloud/).
+The robot customizer can be accessed through [this link](https://v25.robot.erebus.rcj.cloud/).
 
 ## Map Generator
 
-The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2024).
+The map generator can be accessed through [this link](https://osaka.rcj.cloud/service/editor/simulation/2025).
 
 
 ## Communication
@@ -60,16 +60,11 @@ Please report bugs and potential fixes either through:
 
 ## [Changelog](https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md)
 
-## [Latest Release v24.1.0](https://github.com/robocup-junior/erebus/releases/tag/v24.1.0) - 2024-07-15
+## [Latest Release v25.0.0](https://github.com/robocup-junior/erebus/releases/tag/v25.0.0) - 2025-04-12
 
 ### Changed
-
-- Updated the remote controller tooltip help link to now point to the [wiki](https://erebus.rcj.cloud/docs/tutorials/remotecontroller/).
+- TBU
 
 ### Fixed
 
-- Fixed a bug where generated robots would ignore custom names for Lidar and Accelerometer sensors.
-  - **This may cause errors in your code so please double check your custom robot sensor names.**
-- Fixed a bug where UI signals to the Erebus client could crash on decoding.
-- Fixed a bug where the supervisor would award infinite points for the mapping bonus. Thanks @MasterOfRespawn.
-- Fixed `MapScorerExample.py` having `'20'` characters for room 4 instead of `'*'`.
+- TBU
