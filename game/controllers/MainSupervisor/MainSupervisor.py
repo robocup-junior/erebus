@@ -140,7 +140,7 @@ class Erebus(Supervisor):
         self.robot_obj.reset_proto()
 
         # Calculate the solution arrays for the map layout
-        self._map_ans = MapAnswer(self)
+        self._map_ans = MapAnswer.from_supervisor(self)
         map_ans: Optional[list[list]] = self._map_ans.generateAnswer()
         if map_ans is None:
             raise Exception("Critical error: Could not generate answer matrix")
