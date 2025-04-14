@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Release v25.0.0](https://github.com/robocup-junior/erebus/releases/tag/v25.0.0) - 2025-04-12
-TBU
+
+### Changed
+
+- Fixed scoring and mapping to allow for rotated victims/hazards (as updated in the 2025 rules).
+
+![2025_rotated_signs](docs/images/2025_rotated_signs.png)
+
+### Fixed
+
+- Fixed bug with mapping solution placing victims/hazards signs in the wrong cell when they appear in the middle of the wall (see issue #6).
+- Fixed bug with the mapping of victims/hazards placed on opposites sides of the wall (see issue #7).
+- Fixed encoding bug when trying to pip install requirements inside the dockerfile (see issue #8)
 
 ## [Release v24.1.0](https://github.com/robocup-junior/erebus/releases/tag/v24.1.0) - 2024-07-15
 
