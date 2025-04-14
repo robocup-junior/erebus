@@ -13,9 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
-- Fixed bug with mapping solution placing victims/hazards signs in the wrong cell when they appear in the middle of the wall (see issue #6).
-- Fixed bug with the mapping of victims/hazards placed on opposites sides of the wall (see issue #7).
-- Fixed encoding bug when trying to pip install requirements inside the dockerfile (see issue #8)
+- Fixed bug with mapping solution placing victims/hazards signs in the wrong cell when they appear in the middle of the wall (see [#6](https://github.com/robocup-junior/erebus/pull/6)).
+- Fixed bug with the mapping of victims/hazards placed on opposites sides of the wall (see [#7](https://github.com/robocup-junior/erebus/pull/7)).
+- Fixed encoding bug when trying to pip install requirements inside the dockerfile (see [#8](https://github.com/robocup-junior/erebus/pull/8))
 
 ## [Release v24.1.0](https://github.com/robocup-junior/erebus/releases/tag/v24.1.0) - 2024-07-15
 
