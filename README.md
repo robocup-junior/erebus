@@ -63,8 +63,13 @@ Please report bugs and potential fixes either through:
 ## [Latest Release v25.0.0](https://github.com/robocup-junior/erebus/releases/tag/v25.0.0) - 2025-04-12
 
 ### Changed
-- TBU
+
+- Fixed scoring and mapping to allow for rotated victims/hazards (as updated in the 2025 rules).
+
+![2025_rotated_signs](docs/images/2025_rotated_signs.png)
 
 ### Fixed
 
-- TBU
+- Fixed bug with mapping solution placing victims/hazards signs in the wrong cell when they appear in the middle of the wall (see [#6](https://github.com/robocup-junior/erebus/pull/6)).
+- Fixed bug with the mapping of victims/hazards placed on opposites sides of the wall (see [#7](https://github.com/robocup-junior/erebus/pull/7)).
+- Fixed encoding bug when trying to pip install requirements inside the dockerfile (see [#8](https://github.com/robocup-junior/erebus/pull/8))
