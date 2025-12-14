@@ -248,6 +248,7 @@ Robot {
     }
     GPS {
       rotation 0 1 0 0
+      accuracy 0.0025
     }
     DistanceSensor {
       translation 0.00941437 0.04 -0.037
