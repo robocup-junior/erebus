@@ -45,6 +45,7 @@ PROTO Victim [
                         appearance Appearance {
                             texture DEF human0texture ImageTexture {
                                 url [ %{= filename}% ]
+                                filtering 0
                             }
                         }
                         geometry DEF VICTIMPLANE Box {
