@@ -64,7 +64,7 @@ class MapAnswer:
         numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
         #Retrieve the node containing the tiles
         tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
-        
+
         # TODO(Richo): I don't understand this. If the last node is not a TILE or START_TILE we just ignore it? When could that happen?
         if tileNodes.getMFNode(numberTiles - 1).getDef() != "TILE" and tileNodes.getMFNode(numberTiles - 1).getDef() != "START_TILE":
             numberTiles -= 1
@@ -87,7 +87,14 @@ class MapAnswer:
             node = hazardNodes.getMFNode(i)
             hazards.append(Sign.from_node(node))
 
-        return cls(tiles, victims, hazards)
+        # Retrieve the node containing obstacles    
+        obstacleNodes = supervisor.getFromDef('OBSTACLES').getField("children")
+        obstacles = []
+        for i in range(obstacleNodes.getCount()):
+            node = obstacleNodes.getMFNode(i)
+            obstacles.append(Obstacle.from_node(node))
+
+        return cls(tiles, victims, hazards, obstacles)
     
     @classmethod
     def from_dict(cls, dict):
@@ -102,12 +109,18 @@ class MapAnswer:
         hazards = []
         for h in dict["hazards"]:
             hazards.append(Sign.from_dict(h))
-        return cls(tiles, victims, hazards)
+            
+        obstacles = []
+        for o in dict["obstacles"]:
+            obstacles.append(Obstacle.from_dict(o))
+
+        return cls(tiles, victims, hazards, obstacles)
     
-    def __init__(self, tiles, victims, hazards):
+    def __init__(self, tiles, victims, hazards, obstacles):
         self.tiles = tiles
         self.victims = victims
         self.hazards = hazards
+        self.obstacles = obstacles
         
         xPos = [t.xPos for t in tiles]
         zPos = [t.zPos for t in tiles]
@@ -130,11 +143,16 @@ class MapAnswer:
         hazards = []
         for hazard in self.hazards:
             hazards.append(hazard.to_dict())
+
+        obstacles = []
+        for obstacle in self.obstacles:
+            obstacles.append(obstacle.to_dict())
         
         return {
             "tiles": tiles,
             "victims": victims,
-            "hazards": hazards
+            "hazards": hazards,
+            "obstacles": obstacles
         }
     
     def writeJSON(self, path):
@@ -512,7 +530,17 @@ class MapAnswer:
                         self.answerMatrix[row_temp][col_temp] += victimType
                     else:
                         self.answerMatrix[row_temp][col_temp] = victimType
-                    
+
+            for obstacle in self.obstacles:
+                x = obstacle.translation[0] - self.xStart
+                z = obstacle.translation[2] - self.zStart
+                col = 4*int(x / 0.12)
+                row = 4*int(z / 0.12)
+                print([col, row])
+                self.answerMatrix[row+1][col+1] = 'x'
+                self.answerMatrix[row+1][col+3] = 'x'
+                self.answerMatrix[row+3][col+1] = 'x'
+                self.answerMatrix[row+3][col+3] = 'x'
             
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
@@ -738,4 +766,23 @@ class Sign:
             "translation": self.translation,
             "rotation": self.rotation,
             "orientation": self.orientation,
+        }
+    
+class Obstacle:
+    @classmethod
+    def from_node(cls, node):
+        t = node.getField("translation").getSFVec3f()
+        translation = [t[0], t[1], t[2]]
+        return cls(translation)
+    
+    @classmethod
+    def from_dict(cls, dict):
+        return cls(dict["translation"])
+    
+    def __init__(self, translation):
+        self.translation = translation
+
+    def to_dict(self):
+        return {
+            "translation": self.translation
         }
