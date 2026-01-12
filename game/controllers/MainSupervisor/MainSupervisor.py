@@ -15,6 +15,8 @@ import json
 import time
 import subprocess
 import requests as req
+import re
+import cv2
 
 from controller import Supervisor
 from controller import Emitter
@@ -139,6 +141,8 @@ class Erebus(Supervisor):
         self.robot_obj.controller.reset_file()
         self.robot_obj.reset_proto()
 
+        self.load_cognitive_targets()
+        
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer.from_supervisor(self)
         map_ans: Optional[list[list]] = self._map_ans.generateAnswer()
@@ -168,6 +172,67 @@ class Erebus(Supervisor):
         self.rws.send("currentWorld", self._get_current_world())
 
         self.rws.send("update", f"0,0,{self.max_time},0")
+
+    def load_cognitive_targets(self):
+        targets = self.getFromDef('TARGETGROUP').getField("children")
+        
+        # First, remove existing target textures
+        textures_path = get_file_path("protos/textures/targets", "../../protos/textures/targets")
+        files = os.listdir(textures_path)
+        for file in files:
+            if file == "blank.png": continue # DO NOT remove this file!
+            try:
+                os.remove(os.path.join(textures_path, file))
+            except:
+                pass
+
+        # Collect all the valid target types in the map
+        types = set()
+        valid_pattern = r"^[KRYGB]{5}$"
+        for i in range(targets.getCount()):
+            target = targets.getMFNode(i)
+            type = target.getField("type").getSFString()
+            if re.match(valid_pattern, type):
+                types.add(type)
+            else:
+                # If the type is invalid, make sure the sign is invisible and 
+                # its score is 0
+                target.getField("type").setSFString("blank")
+                target.getField("texture").setSFString("blank")
+                target.getField("scoreWorth").setSFInt32(0)
+
+        # Generate the target texture for each valid type
+        colors = {
+            "K": (-2, (0, 0, 0, 255)),
+            "R": (-1, (0, 0, 255, 255)),
+            "Y": ( 0, (0, 255, 255, 255)),
+            "G": ( 1, (0, 255, 0, 255)),
+            "B": ( 2, (255, 0, 0, 255))
+        }
+        for type in types:
+            size = 1024
+            img = np.zeros((size, size, 4), dtype=np.uint8)
+            radius = size//2
+            ring_width = radius//5
+            for i in range(5):
+                _, color = colors[type[i]]
+                cv2.circle(img, (size//2, size//2), radius, color, -1)
+                radius -= ring_width
+            
+            path = os.path.join(textures_path, type + ".png")
+            cv2.imwrite(path, img)
+
+        # Update each target's texture and score
+        for i in range(targets.getCount()):
+            target = targets.getMFNode(i)
+            type = target.getField("type").getSFString()
+            if type == "blank": continue
+            score_sum = 0
+            for i in range(5):
+                score, _ = colors[type[i]]
+                score_sum += score
+            target.getField("texture").setSFString(type)
+            target.getField("scoreWorth").setSFInt32(score_sum)
 
     def wwiReceiveText(self) -> Optional[str]:
         """
