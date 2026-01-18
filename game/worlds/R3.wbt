@@ -3,7 +3,7 @@
 EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/TexturedBackground.proto"
 EXTERNPROTO "../protos/halfTile.proto"
-EXTERNPROTO "../protos/HazardMap.proto"
+EXTERNPROTO "../protos/CognitiveTarget.proto"
 EXTERNPROTO "../protos/Victim.proto"
 EXTERNPROTO "../protos/worldTile.proto"
 IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
@@ -2154,86 +2154,86 @@ DEF HUMANGROUP Group {
     }
   ]
 }
-DEF HAZARDGROUP Group {
+DEF TARGETGROUP Group {
   children [
-    HazardMap {
+    CognitiveTarget {
       translation -1.0256 0 0.21
       rotation 0 1 0 1.57
       name "Hazard0"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.689 0 -0.1144
       rotation 0 1 0 3.14
       name "Hazard1"
-      type "P"
+      type "GBYKY"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.5119999999999998 0 -0.3544
       rotation 0 1 0 3.14
       name "Hazard2"
-      type "O"
+      type "BKGBY"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.44999999999999996 0 -0.1256
       name "Hazard3"
-      type "O"
+      type "YBYYG"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.14999999999999994 0 0.1744
       name "Hazard4"
-      type "C"
+      type "GRGBR"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.09000000000000005 0 -0.005599999999999994
       name "Hazard5"
-      type "C"
+      type "YKBBY"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.09800000000000006 0 0.142
       rotation 0 1 0 -2.355
       name "Hazard6"
-      type "O"
+      type "BYRYB"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.07300000000000029 0 -0.19499999999999998
       rotation 0 1 0 2.355
       name "Hazard7"
       scoreWorth 30
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.43300000000000016 0 -0.315
       rotation 0 1 0 2.355
       name "Hazard8"
-      type "O"
+      type "YGKBB"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.36560000000000015 0 -0.09
       rotation 0 1 0 -1.57
       name "Hazard9"
-      type "P"
+      type "YGKGG"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.9140000000000001 0 -0.3544
       rotation 0 1 0 3.14
       name "Hazard10"
-      type "C"
+      type "BKBBK"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 1.0743999999999998 0 -0.045
       rotation 0 1 0 1.57
       name "Hazard11"
-      type "C"
+      type "KKBBB"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 1.0039999999999998 0 0.2344
       name "Hazard12"
-      type "O"
+      type "RBBGR"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.7930000000000001 0 0.10699999999999998
       rotation 0 1 0 3.680419500270584
       name "Hazard13"
-      type "O"
+      type "RBRGB"
       scoreWorth 30
     }
   ]

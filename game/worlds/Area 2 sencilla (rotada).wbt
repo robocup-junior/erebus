@@ -3,7 +3,7 @@
 EXTERNPROTO "../protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/TexturedBackground.proto"
 EXTERNPROTO "../protos/halfTile.proto"
-EXTERNPROTO "../protos/HazardMap.proto"
+EXTERNPROTO "../protos/CognitiveTarget.proto"
 EXTERNPROTO "../protos/Victim.proto"
 EXTERNPROTO "../protos/worldTile.proto"
 IMPORTABLE EXTERNPROTO "../protos/custom_robot.proto"
@@ -824,42 +824,42 @@ DEF HUMANGROUP Group {
     }
   ]
 }
-DEF HAZARDGROUP Group {
+DEF TARGETGROUP Group {
   children [
-    HazardMap {
+    CognitiveTarget {
       translation -0.4144 0 -0.32999999999999996
       rotation -0.12942704855501933 0.983092368810612 0.12953004859366019 -1.587055307179586
       name "Hazard0"
-      type "O"
+      type "YBGKB"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.21 0 0.1144
       rotation 0 0 1 -0.785395307179586
       name "Hazard1"
-      type "P"
+      type "BRGGK"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.1144 0 -0.3296
       rotation -0.2505500890259746 0.9350663322496984 0.250750089097039 -1.6370853071795866
       name "Hazard2"
-      type "O"
+      type "BBBKR"
     }
-    HazardMap {
+    CognitiveTarget {
       translation -0.054400000000000004 0 0.21
       rotation -0.3573701719399441 0.862768415099985 0.35765517207706493 -1.7170853071795866
       name "Hazard3"
-      type "C"
+      type "YBKGG"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.12 0 -0.3544
       rotation 0.7933532630513642 0.6087612018463554 0.000631769209475098 3.14062
       name "Hazard4"
     }
-    HazardMap {
+    CognitiveTarget {
       translation 0.1744 0 -0.073
       rotation 0.621323822207903 -0.47675786357551847 0.6218188220662586 -2.2512053071795863
       name "Hazard5"
-      type "C"
+      type "GKBYG"
     }
   ]
 }

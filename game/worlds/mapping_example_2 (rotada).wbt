@@ -3,7 +3,7 @@
         EXTERNPROTO "../protos/TexturedBackground.proto"
         EXTERNPROTO "../protos/curvedWall.proto"
         EXTERNPROTO "../protos/halfTile.proto"
-        EXTERNPROTO "../protos/HazardMap.proto"
+        EXTERNPROTO "../protos/CognitiveTarget.proto"
         EXTERNPROTO "../protos/obstacle.proto"
         EXTERNPROTO "../protos/Victim.proto"
         EXTERNPROTO "../protos/worldTile.proto"
@@ -922,38 +922,38 @@
             ]
         }
         
-        DEF HAZARDGROUP Group {
+        DEF TARGETGROUP Group {
             children [
               
-            HazardMap {
+            CognitiveTarget {
                 translation -0.15 0 0.1144
                 rotation 0 0 -0.9999999999999996 5.818130688477739
                 name "Hazard0"
-                type "P"
+                type "YKBGY"
                 scoreWorth 10
             }
             
-            HazardMap {
+            CognitiveTarget {
                 translation -0.0544 0 -0.3296
                 rotation -0.6806987799521691 0.26936925685131785 0.6812410545724599 3.668240490090591
                 name "Hazard1"
-                type "O"
+                type "GBRYG"
                 scoreWorth 10
             }
             
-            HazardMap {
+            CognitiveTarget {
                 translation 0.005599999999999994 0 0.21
                 rotation 0.392246381433801 -0.8318896056460653 -0.3925588621724434 1.753038300619734
                 name "Hazard2"
-                type "C"
+                type "KGBRB"
                 scoreWorth 10
             }
             
-            HazardMap {
+            CognitiveTarget {
                 translation 0.18 0 -0.3544
                 rotation -0.7566106395343627 -0.653865412088575 -0.0006025094529227567 3.142634034811611
                 name "Hazard3"
-                type "F"
+                type "YRRYB"
                 scoreWorth 10
             }
             
