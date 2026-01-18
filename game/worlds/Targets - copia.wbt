@@ -997,22 +997,6 @@
             children [
               
         Victim {
-            translation -0.2344 0 -0.2096
-            rotation 0 1 0 -1.57
-            name "Victim0"
-            type "unharmed"
-            scoreWorth 5
-        }
-        
-        Victim {
-            translation -0.27 0 -0.1744
-            rotation 0 0 1 2.01
-            name "Victim1"
-            type "stable"
-            scoreWorth 5
-        }
-        
-        Victim {
             translation -0.03 0 -0.1144
             rotation 0 0 1 0.31
             name "Victim2"
@@ -1029,12 +1013,14 @@
         Fake {
           name "Fake0"
           translation -0.2344 0 -0.2096
+          rotation 0 1 0 -1.57
           type "phi"
         }
         
         Fake {
           name "Fake1"
           translation -0.27 0 -0.1744
+          rotation 0 1 0 3.14
           type "omega"
         }
         
