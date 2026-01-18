@@ -4,7 +4,7 @@
         EXTERNPROTO "../protos/curvedWall.proto"
         EXTERNPROTO "../protos/halfTile.proto"
         EXTERNPROTO "../protos/CognitiveTarget.proto"
-		EXTERNPROTO "../protos/CognitiveTarget.proto"
+		    EXTERNPROTO "../protos/Fake.proto"
         EXTERNPROTO "../protos/obstacle.proto"
         EXTERNPROTO "../protos/Victim.proto"
         EXTERNPROTO "../protos/worldTile.proto"
@@ -1027,13 +1027,15 @@
             children [
               
         Fake {
-            translation -0.2344 0 -0.2096
-            type "phi"
+          name "Fake0"
+          translation -0.2344 0 -0.2096
+          type "phi"
         }
         
         Fake {
-            translation -0.27 0 -0.1744
-            type "omega"
+          name "Fake1"
+          translation -0.27 0 -0.1744
+          type "omega"
         }
         
             ]
