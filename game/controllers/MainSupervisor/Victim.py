@@ -262,9 +262,6 @@ class VictimManager(ErebusObject):
         """
         super().__init__(erebus)
         
-        self._num_victims: int = 0
-        self._num_targets: int = 0
-
         self.victims: list[Victim] = self._get_victims()
         self.targets: list[CognitiveTarget] = self._get_targets()
 
@@ -278,7 +275,7 @@ class VictimManager(ErebusObject):
         
         victims: list[Victim] = []
 
-        self._num_victims = (
+        _num_victims = (
             self._erebus.getFromDef('HUMANGROUP')
             .getField("children")
             .getCount()
@@ -289,7 +286,7 @@ class VictimManager(ErebusObject):
             .getField("children")
         )
         # Iterate for each human
-        for i in range(self._num_victims):
+        for i in range(_num_victims):
             # Get each human from children field in the human root
             # node HUMANGROUP
             victim_node: Node = victim_nodes.getMFNode(i) # type: ignore
@@ -313,7 +310,7 @@ class VictimManager(ErebusObject):
         
         targets: list[CognitiveTarget] = []
 
-        self._num_targets = (
+        _num_targets = (
             self._erebus.getFromDef('TARGETGROUP')
             .getField("children")
             .getCount()
@@ -325,7 +322,7 @@ class VictimManager(ErebusObject):
         )
 
         # Iterate for each target
-        for i in range(self._num_targets):
+        for i in range(_num_targets):
             # Get each target from children field in the target root node 
             # TARGETGROUP
             target_node: Node = target_nodes.getMFNode(i) # type: ignore
@@ -345,7 +342,7 @@ class VictimManager(ErebusObject):
         """Resets all Victim and Target textures to unidentified
         """
         # Iterate for each victim
-        for i in range(self._num_victims):
-            self.victims[i].identified = False
-        for i in range(self._num_targets):
-            self.targets[i].identified = False
+        for victim in self.victims:
+            victim.identified = False
+        for target in self.targets:
+            target.identified = False
