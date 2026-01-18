@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 
 from ConsoleLog import Console
 from Victim import VictimObject
-from Victim import HazardMap
+from Victim import CognitiveTarget
 from Victim import Victim
 from Robot import Robot
 from Tile import Checkpoint, Swamp
@@ -52,10 +52,10 @@ def wrong_victim(simple_type: str) -> str:
     """Helper function to get a different victim type to the open given
 
     Args:
-        simple_type (str): Simple victim/hazard type
+        simple_type (str): Simple victim/target type
 
     Returns:
-        str: Random wrong victim/hazard type
+        str: Random wrong victim/target type
     """
     if simple_type == 'H':
         return random.choice(['S','U','F','P','C','O'])
@@ -140,7 +140,7 @@ class Test(ErebusObject, ABC):
 
 class TestVictim(Test):
     """Test victim detection at various different ranges away from both
-    victim and hazards
+    victim and targets
     """
     # TODO tests for different waiting times
 
@@ -162,7 +162,7 @@ class TestVictim(Test):
             offset (float): position offset from victim to test (in meters)
             angle (float): angle from the victim normal (from -90 to 90)
             victim_list (Sequence[VictimObject]): list of all victims (e.g. all
-            hazards or victims) 
+            targets or victims) 
             misidentify (bool, optional): whether to purposefully misidentify the victim
             type. Defaults to False.
             delay (int, optional): Delay before identification
@@ -268,11 +268,11 @@ class TestVictim(Test):
 
         types: list[str] = ['H', 'S', 'U']
         correct_type_bonus: float = 10.0
-        if type(self._victim) == HazardMap:
+        if type(self._victim) == CognitiveTarget:
             correct_type_bonus = 20.0
             types = ['F', 'O', 'C', 'P']
         
-        # Check various scores from mis-identifications of victims to hazards
+        # Check various scores from mis-identifications of victims to targets
         # or if the type is just wrong...
         if self._misidentify:
             if self._simple_victim_type in types:
@@ -707,30 +707,30 @@ class TestRunner(ErebusObject):
                  for i in range(len(self._erebus.victim_manager.victims))]
         ###################
         
-        ###### HAZARD ######
+        ###### TARGET ######
         # Negative tests for distance
         init += [TestVictim(self._erebus, 0, offset, angle,
-                            self._erebus.victim_manager.hazards)
+                            self._erebus.victim_manager.targets)
                  for offset in np.linspace(0.9, 0.15, 4)
                  for angle in np.linspace(-80, 80, 4)]
         
         # Tests for victim position
         init += [TestVictim(self._erebus, i, offset, angle,
-                            self._erebus.victim_manager.hazards)
-                 for i in range(len(self._erebus.victim_manager.hazards))
+                            self._erebus.victim_manager.targets)
+                 for i in range(len(self._erebus.victim_manager.targets))
                  for offset in np.linspace(0.03, 0.089, 6)
                  for angle in np.linspace(-80, 80, 5)]        
         # Tests for victim misidentification
         init += [TestVictim(self._erebus, i, offset, 0,
-                            self._erebus.victim_manager.hazards, True)
+                            self._erebus.victim_manager.targets, True)
                  for offset in np.linspace(0.05, 0.07, 2)
-                 for i in range(len(self._erebus.victim_manager.hazards))]
+                 for i in range(len(self._erebus.victim_manager.targets))]
         # Tests for victim delays
         init += [TestVictim(self._erebus, i, 0.06, 0,
-                            self._erebus.victim_manager.hazards, 
+                            self._erebus.victim_manager.targets, 
                             delay=int(delay))
                  for delay in np.linspace(0, 5, 5)
-                 for i in range(len(self._erebus.victim_manager.hazards))]
+                 for i in range(len(self._erebus.victim_manager.targets))]
         #################
         
         return init

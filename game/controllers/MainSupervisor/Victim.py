@@ -45,11 +45,11 @@ def normalise_vector(v: npt.NDArray) -> npt.NDArray:
 
 
 class VictimObject(ABC):
-    """Abstract object holding data about Victim/Hazard maps within the world
+    """Abstract object holding data about Victim/Target maps within the world
     """
 
     def __init__(self, node: Node, victim_type: str, score: int):
-        """Initialises a new VictimObject, representing a Victim or Hazard
+        """Initialises a new VictimObject, representing a Victim or Target
         within the world.
     
         Args:
@@ -223,17 +223,6 @@ class Victim(VictimObject):
             return 'S'
         else:
             return self._victim_type
-
-
-class HazardMap(VictimObject):
-    """HazardMap object holding data about a Hazard within the world
-    """
-
-    HAZARD_TYPES: list[str] = ['F', 'P', 'C', 'O']
-
-    @override
-    def get_simple_type(self) -> str:
-        return self._victim_type
     
 
 class CognitiveTarget(VictimObject):
@@ -259,13 +248,13 @@ class CognitiveTarget(VictimObject):
 
 
 class VictimManager(ErebusObject):
-    """VictimManager Object for managing Hazards and Victims actions within the
+    """VictimManager Object for managing Targets and Victims actions within the
     simulation
     """
     
     def __init__(self, erebus: Erebus):
-        """Initialises a new VictimManager object to manage both Hazards and 
-        Victims, initialising HazardMap and Victim object lists from the Webots
+        """Initialises a new VictimManager object to manage both Targets and 
+        Victims, initialising Target and Victim object lists from the Webots
         world
 
         Args:
@@ -274,11 +263,9 @@ class VictimManager(ErebusObject):
         super().__init__(erebus)
         
         self._num_victims: int = 0
-        self._num_hazards: int = 0
         self._num_targets: int = 0
 
         self.victims: list[Victim] = self._get_victims()
-        self.hazards: list[HazardMap] = self._get_hazards()
         self.targets: list[CognitiveTarget] = self._get_targets()
 
     def _get_victims(self) -> list[Victim]:
@@ -315,42 +302,6 @@ class VictimManager(ErebusObject):
             victims.append(victim)
         
         return victims
-
-    def _get_hazards(self) -> list[HazardMap]:
-        """Gets and initialises all Hazards as HazardMap objects from nodes in 
-        the simulation world
-
-        Returns:
-            list[HazardMap]: List of HazardMap Objects
-        """
-        
-        hazards: list[HazardMap] = []
-
-        self._num_hazards = (
-            self._erebus.getFromDef('HAZARDGROUP')
-            .getField("children")
-            .getCount()
-        )
-
-        hazard_nodes: Field = (
-            self._erebus.getFromDef('HAZARDGROUP')
-            .getField("children")
-        )
-
-        # Iterate for each hazard
-        for i in range(self._num_hazards):
-            # Get each hazard from children field in the hazard root node 
-            # HAZARDGROUP
-            hazard_node: Node = hazard_nodes.getMFNode(i) # type: ignore
-
-            hazard_type: str = hazard_node.getField('type').getSFString()
-            score_worth: int = hazard_node.getField('scoreWorth').getSFInt32()
-
-            # Create hazard Object from node info
-            hazard: HazardMap = HazardMap(hazard_node, hazard_type, score_worth)
-            hazards.append(hazard)
-
-        return hazards
 
     def _get_targets(self) -> list[CognitiveTarget]:
         """Gets and initialises all targets as CognitiveTarget objects from nodes in 
@@ -391,10 +342,10 @@ class VictimManager(ErebusObject):
         return targets
 
     def reset_victim_textures(self) -> None:
-        """Resets all Victim and Hazard textures to unidentified
+        """Resets all Victim and Target textures to unidentified
         """
         # Iterate for each victim
         for i in range(self._num_victims):
             self.victims[i].identified = False
-        for i in range(self._num_hazards):
-            self.hazards[i].identified = False
+        for i in range(self._num_targets):
+            self.targets[i].identified = False

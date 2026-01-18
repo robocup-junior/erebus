@@ -546,7 +546,7 @@ class Erebus(Supervisor):
             name = 'Target'
             correct_type_bonus = 20
 
-        # Get nearby victim/hazards that are within range (as per the rules)
+        # Get nearby victim/targets that are within range (as per the rules)
         nearby_map_issues: Sequence[VictimObject] = [
             h for h in iterator
             if h.check_position(self.robot_obj.position) and
@@ -932,7 +932,7 @@ class Erebus(Supervisor):
             # Automatic camera movement
             if self.config.automatic_camera and self._camera.wb_viewpoint_node:
                 all_hazards: Sequence[VictimObject] = (
-                    self.victim_manager.victims + self.victim_manager.hazards
+                    self.victim_manager.victims + self.victim_manager.targets
                 )
                 self._camera.rotate_to_victim(self.robot_obj, all_hazards)
 
