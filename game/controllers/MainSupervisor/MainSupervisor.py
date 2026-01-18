@@ -118,6 +118,9 @@ class Erebus(Supervisor):
         self._max_real_world_time: int = int(max(self.max_time + 60,
                                                 self.max_time * 1.25))
 
+        # Load targets (we need to do this BEFORE initializing victim manager)
+        self.load_cognitive_targets()
+
         # Init tile and victim managers
         self.tile_manager: TileManager = TileManager(self)
         self.victim_manager: VictimManager = VictimManager(self)
@@ -140,8 +143,6 @@ class Erebus(Supervisor):
         self.robot_obj.update_config(self.config)
         self.robot_obj.controller.reset_file()
         self.robot_obj.reset_proto()
-
-        self.load_cognitive_targets()
         
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer.from_supervisor(self)
@@ -203,11 +204,11 @@ class Erebus(Supervisor):
 
         # Generate the target texture for each valid type
         colors = {
-            "K": (-2, (0, 0, 0, 255)),
-            "R": (-1, (0, 0, 255, 255)),
-            "Y": ( 0, (0, 255, 255, 255)),
-            "G": ( 1, (0, 255, 0, 255)),
-            "B": ( 2, (255, 0, 0, 255))
+            "K": (0, 0, 0, 255),
+            "R": (0, 0, 255, 255),
+            "Y": (0, 255, 255, 255),
+            "G": (0, 255, 0, 255),
+            "B": (255, 0, 0, 255)
         }
         for type in types:
             size = 1024
@@ -215,24 +216,31 @@ class Erebus(Supervisor):
             radius = size//2
             ring_width = radius//5
             for i in range(5):
-                _, color = colors[type[i]]
+                color = colors[type[i]]
                 cv2.circle(img, (size//2, size//2), radius, color, -1)
                 radius -= ring_width
             
             path = os.path.join(textures_path, type + ".png")
             cv2.imwrite(path, img)
 
-        # Update each target's texture and score
+            img = np.zeros((size, size, 4), dtype=np.uint8)
+            radius = size//2
+            ring_width = radius//5
+            for i in range(5):
+                color = colors[type[i]]
+                color = tuple(map(lambda n: n + 50 if n == 0 else n - 25, color))
+                cv2.circle(img, (size//2, size//2), radius, color, -1)
+                radius -= ring_width
+            
+            path = os.path.join(textures_path, type + "_found.png")
+            cv2.imwrite(path, img)
+
+        # Update each target's texture
         for i in range(targets.getCount()):
             target = targets.getMFNode(i)
             type = target.getField("type").getSFString()
             if type == "blank": continue
-            score_sum = 0
-            for i in range(5):
-                score, _ = colors[type[i]]
-                score_sum += score
             target.getField("texture").setSFString(type)
-            target.getField("scoreWorth").setSFInt32(score_sum)
 
     def wwiReceiveText(self) -> Optional[str]:
         """
@@ -533,9 +541,9 @@ class Erebus(Supervisor):
         correct_type_bonus: int = 10
         misidentification: bool = True
 
-        if est_vic_type.lower() in list(map(to_lower, HazardMap.HAZARD_TYPES)):
-            iterator = self.victim_manager.hazards
-            name = 'Hazard'
+        if est_vic_type.lower() in list(map(to_lower, CognitiveTarget.TARGET_TYPES)):
+            iterator = self.victim_manager.targets
+            name = 'Target'
             correct_type_bonus = 20
 
         # Get nearby victim/hazards that are within range (as per the rules)
@@ -544,14 +552,15 @@ class Erebus(Supervisor):
             if h.check_position(self.robot_obj.position) and
             h.check_position(est_vic_pos) and
             h.on_same_side(self.robot_obj) and
-            not h.identified
+            not h.identified and
+            len(h.simple_victim_type) > 0 # Discard invalid targets
         ]
 
         Console.log_debug(f"--- Victim Data ---")
         for h in iterator:
             Console.log_debug("===")
             Console.log_debug(
-                f"Position {self.robot_obj.position}")
+                f"Robot Position {self.robot_obj.position}")
             Console.log_debug(
                 f"Distance {h.get_distance(self.robot_obj.position)}/0.09")
             Console.log_debug(
@@ -564,6 +573,9 @@ class Erebus(Supervisor):
             Console.log_debug(
                 f"On same side: {h.on_same_side(self.robot_obj)}")
             Console.log_debug(f"Identified: {h.identified}")
+            Console.log_debug(f"Type: {h.get_simple_type()}")
+            Console.log_debug(f"Score: {h.score_worth}")
+            
             Console.log_debug("===")
         Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
         Console.log_debug(f"--- ----------- ---")
@@ -594,6 +606,7 @@ class Erebus(Supervisor):
                 .getField("room")
                 .getSFInt32() - 1
             )
+            Console.log_debug(f"Room: {room_num} ({self.tile_manager.ROOM_MULT[room_num]})")
 
             Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs "
                               f"{nearby_issue.simple_victim_type.lower()}")

@@ -234,6 +234,28 @@ class HazardMap(VictimObject):
     @override
     def get_simple_type(self) -> str:
         return self._victim_type
+    
+
+class CognitiveTarget(VictimObject):
+    """CognitiveTarget object holding data about a target within the world
+    """
+
+    TARGET_TYPES: list[str] = ['F', 'P', 'C', 'O']
+
+    @override
+    def get_simple_type(self) -> str:
+        scores = {
+            "K": -2,
+            "R": -1,
+            "Y": 0,
+            "G": 1,
+            "B": 2
+        }
+        score_sum = 0
+        for i in range(len(self._victim_type)):
+            score_sum += scores[self._victim_type[i]]
+        if score_sum < 0 or score_sum > 3: return ''
+        return CognitiveTarget.TARGET_TYPES[score_sum]
 
 
 class VictimManager(ErebusObject):
@@ -253,9 +275,11 @@ class VictimManager(ErebusObject):
         
         self._num_victims: int = 0
         self._num_hazards: int = 0
+        self._num_targets: int = 0
 
         self.victims: list[Victim] = self._get_victims()
         self.hazards: list[HazardMap] = self._get_hazards()
+        self.targets: list[CognitiveTarget] = self._get_targets()
 
     def _get_victims(self) -> list[Victim]:
         """Gets and initialises all Victims as Victim objects from nodes in the
@@ -327,6 +351,44 @@ class VictimManager(ErebusObject):
             hazards.append(hazard)
 
         return hazards
+
+    def _get_targets(self) -> list[CognitiveTarget]:
+        """Gets and initialises all targets as CognitiveTarget objects from nodes in 
+        the simulation world
+
+        Returns:
+            list[CognitiveTarget]: List of CognitiveTarget Objects
+        """
+        
+        targets: list[CognitiveTarget] = []
+
+        self._num_targets = (
+            self._erebus.getFromDef('TARGETGROUP')
+            .getField("children")
+            .getCount()
+        )
+
+        target_nodes: Field = (
+            self._erebus.getFromDef('TARGETGROUP')
+            .getField("children")
+        )
+
+        # Iterate for each target
+        for i in range(self._num_targets):
+            # Get each target from children field in the target root node 
+            # TARGETGROUP
+            target_node: Node = target_nodes.getMFNode(i) # type: ignore
+
+            target_type: str = target_node.getField('type').getSFString()
+            score_worth: int = target_node.getField('scoreWorth').getSFInt32()
+
+            if target_type == "blank": continue # Ignore invalid targets
+
+            # Create target Object from node info
+            target: CognitiveTarget = CognitiveTarget(target_node, target_type, score_worth)
+            targets.append(target)
+
+        return targets
 
     def reset_victim_textures(self) -> None:
         """Resets all Victim and Hazard textures to unidentified

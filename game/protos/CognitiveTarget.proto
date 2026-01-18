@@ -11,7 +11,11 @@ PROTO CognitiveTarget [
 ]
 {
     %{
-        filename = fields.texture.value
+        if fields.found.value then
+            filename = fields.texture.value .. "_found"
+        else
+            filename = fields.texture.value
+        end
     }%
     Pose {
         translation IS translation
