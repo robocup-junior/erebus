@@ -17,5 +17,3 @@ game/protos/custom_robot.proto
 game/protos/textures/targets/
 
 game/controllers/robot0Controller/robot0Controller.py
-game/worlds/Area 2 sencilla (rotada) - fakes.wbt
-game/worlds/Area 2 sencilla - fakes.wbt
