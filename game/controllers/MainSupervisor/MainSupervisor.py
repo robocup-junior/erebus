@@ -183,9 +183,11 @@ class Erebus(Supervisor):
         
         # First, remove existing target textures
         textures_path = get_file_path("protos/textures/targets", "../../protos/textures/targets")
+        if not os.path.exists(textures_path):
+            os.mkdir(textures_path)
         files = os.listdir(textures_path)
+
         for file in files:
-            if file == "blank.png": continue # DO NOT remove this file!
             try:
                 os.remove(os.path.join(textures_path, file))
             except:
@@ -244,7 +246,7 @@ class Erebus(Supervisor):
             target = targets.getMFNode(i)
             type = target.getField("type").getSFString()
             if type == "blank": continue
-            target.getField("texture").setSFString(type)
+            target.getField("texture").setSFString("targets/" + type)
 
     def wwiReceiveText(self) -> Optional[str]:
         """

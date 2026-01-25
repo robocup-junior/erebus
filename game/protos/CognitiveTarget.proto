@@ -29,7 +29,7 @@ PROTO CognitiveTarget [
                     Shape {
                         appearance Appearance {
                             texture DEF human0texture ImageTexture {
-                                url [ "./textures/targets/%{= filename}%.png" ]
+                                url [ "./textures/%{= filename}%.png" ]
                                 repeatS FALSE
                                 repeatT FALSE
                                 filtering 0
