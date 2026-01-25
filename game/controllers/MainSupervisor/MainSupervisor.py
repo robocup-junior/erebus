@@ -153,6 +153,10 @@ class Erebus(Supervisor):
 
         if False: # HACK(Richo): Write the map and the expected solution to disk (just for testing)
             self._map_ans.writeJSON(self._get_current_world() + "_map.json")
+            with open("map.txt", "w") as f:
+                for row in self._map_sol:
+                    f.write(",".join(row))
+                    f.write("\n")
             with open(f"{self._get_current_world()}_expected.txt", "w") as f:
                 for row in self._map_sol:
                     for col in row:
