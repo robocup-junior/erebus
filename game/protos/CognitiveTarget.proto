@@ -6,7 +6,7 @@ PROTO CognitiveTarget [
     field SFBool     found             FALSE
     field SFString   name              "Cognitive Target"
     field SFString   type              "KRYGB"
-    field SFInt32    scoreWorth        0
+    field SFInt32    scoreWorth        10
     field SFString   texture           "blank"
 ]
 {
