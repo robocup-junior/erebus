@@ -423,7 +423,7 @@ class Erebus(Supervisor):
     def _add_map_multiplier(self) -> None:
         """Apply the map multiplier from the robot's map score to the score
         """
-        score_change: float = self.robot_obj.get_score() * self.robot_obj.map_score_percent
+        score_change: float = self.robot_obj.get_score() * self.robot_obj.map_score_percent * 1.2
         self.robot_obj.increase_score("Map Bonus", score_change)
 
     def _process_robot_json(self, json_data: str) -> None:
