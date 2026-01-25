@@ -557,7 +557,6 @@ class MapAnswer:
                 z = obstacle.translation[2] - self.zStart
                 col = 4*int(x / 0.12)
                 row = 4*int(z / 0.12)
-                print([col, row])
                 self.answerMatrix[row+1][col+1] = 'x'
                 self.answerMatrix[row+1][col+3] = 'x'
                 self.answerMatrix[row+3][col+1] = 'x'
