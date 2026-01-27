@@ -1,3 +1,10 @@
+'''
+This script will update all the maps in the given folder to the 2026 version.
+The update consists basically on replacing hazmats with cognitive targets.
+
+Example:
+> python update_maps_to_2026.py ../game/worlds
+'''
 import random
 import re
 import sys
@@ -25,11 +32,12 @@ def transform_world_file(world):
         wbt = re.sub(r"\bHAZARDGROUP\b", "TARGETGROUP", wbt)
         wbt = re.sub(r"type\s+\"([FPCO])\"", coderepl, wbt)
     
-    with open(world, "w") as file:
+    filename, _ = os.path.splitext(world)
+    with open(filename + " - 2026.wbt", "w") as file:
         file.write(wbt)
 
 if len(sys.argv) > 1:
-    maps_folder = sys.argv[1]
+    maps_folder = os.path.normpath(sys.argv[1])
     for filename in os.listdir(maps_folder):
         _, extension = os.path.splitext(filename)
         if extension == ".wbt":
