@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Release v26.0.0](https://github.com/robocup-junior/erebus/releases/tag/v26.0.0) - 2026-01-27
+
+### Changed
+
+- Replaced Hazmats with CognitiveTargets
+- Replaced Victim symbols
+- Added GPS noise
+- Added progressive swamp multipliers
+- Added fake victims
+- Changed mapping to incorporate obstacles
+- Incremented mapping score multiplier
+- Updated test worlds
+
 ## [Release v25.0.0](https://github.com/robocup-junior/erebus/releases/tag/v25.0.0) - 2025-04-12
 
 ### Changed
