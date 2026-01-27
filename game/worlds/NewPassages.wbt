@@ -3,7 +3,7 @@
         EXTERNPROTO "../protos/TexturedBackground.proto"
         EXTERNPROTO "../protos/curvedWall.proto"
         EXTERNPROTO "../protos/halfTile.proto"
-        EXTERNPROTO "../protos/HazardMap.proto"
+        EXTERNPROTO "../protos/CognitiveTarget.proto"
         EXTERNPROTO "../protos/obstacle.proto"
         EXTERNPROTO "../protos/Victim.proto"
         EXTERNPROTO "../protos/worldTile.proto"
@@ -1967,7 +1967,7 @@ name "curved0"
             ]
         }
         
-        DEF HAZARDGROUP Group {
+        DEF TARGETGROUP Group {
             children [
               
             ]

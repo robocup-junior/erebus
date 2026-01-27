@@ -364,7 +364,7 @@ def generate_robot_proto(robot_json: dict) -> bool:
             ]
             }}"""
 
-        if robot_json[component]["name"] in ["Gyro", "GPS", "InertialUnit"]:
+        if robot_json[component]["name"] in ["Gyro", "InertialUnit"]:
             proto_code += f"""
             Transform {{
             translation {x} {y} {z}
@@ -373,6 +373,27 @@ def generate_robot_proto(robot_json: dict) -> bool:
             {robot_json[component]["name"]} {{
             rotation 0.577 -0.577 -0.577 2.09
             name "{robot_json[component]["customName"]}"
+            physics Physics {{
+            }}
+            boundingObject Sphere {{
+                radius 0.003
+            }}
+            }}
+            ]
+            }}
+            """
+
+        
+        if robot_json[component]["name"] in ["GPS"]:
+            proto_code += f"""
+            Transform {{
+            translation {x} {y} {z}
+            rotation {robot_json[component]["rx"]} {robot_json[component]["rz"]} {robot_json[component]["ry"]} {robot_json[component]["a"]}
+            children [
+            {robot_json[component]["name"]} {{
+            rotation 0.577 -0.577 -0.577 2.09
+            name "{robot_json[component]["customName"]}"
+            accuracy 0.0025
             physics Physics {{
             }}
             boundingObject Sphere {{

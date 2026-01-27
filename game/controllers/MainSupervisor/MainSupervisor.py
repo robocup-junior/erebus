@@ -15,6 +15,8 @@ import json
 import time
 import subprocess
 import requests as req
+import re
+import cv2
 
 from controller import Supervisor
 from controller import Emitter
@@ -116,6 +118,9 @@ class Erebus(Supervisor):
         self._max_real_world_time: int = int(max(self.max_time + 60,
                                                 self.max_time * 1.25))
 
+        # Load targets (we need to do this BEFORE initializing victim manager)
+        self.load_cognitive_targets()
+
         # Init tile and victim managers
         self.tile_manager: TileManager = TileManager(self)
         self.victim_manager: VictimManager = VictimManager(self)
@@ -138,13 +143,25 @@ class Erebus(Supervisor):
         self.robot_obj.update_config(self.config)
         self.robot_obj.controller.reset_file()
         self.robot_obj.reset_proto()
-
+        
         # Calculate the solution arrays for the map layout
         self._map_ans = MapAnswer.from_supervisor(self)
         map_ans: Optional[list[list]] = self._map_ans.generateAnswer()
         if map_ans is None:
             raise Exception("Critical error: Could not generate answer matrix")
         self._map_sol: list[list] = map_ans
+
+        if False: # HACK(Richo): Write the map and the expected solution to disk (just for testing)
+            self._map_ans.writeJSON(self._get_current_world() + "_map.json")
+            with open("map.txt", "w") as f:
+                for row in self._map_sol:
+                    f.write(",".join(row))
+                    f.write("\n")
+            with open(f"{self._get_current_world()}_expected.txt", "w") as f:
+                for row in self._map_sol:
+                    for col in row:
+                        f.write(col)
+                    f.write("\n")
 
         # Init test runner to run (unit) tests
         self._test_runner: TestRunner = TestRunner(self)
@@ -160,6 +177,76 @@ class Erebus(Supervisor):
         self.rws.send("currentWorld", self._get_current_world())
 
         self.rws.send("update", f"0,0,{self.max_time},0")
+
+    def load_cognitive_targets(self):
+        targets = self.getFromDef('TARGETGROUP').getField("children")
+        
+        # First, remove existing target textures
+        textures_path = get_file_path("protos/textures/targets", "../../protos/textures/targets")
+        if not os.path.exists(textures_path):
+            os.mkdir(textures_path)
+        files = os.listdir(textures_path)
+
+        for file in files:
+            try:
+                os.remove(os.path.join(textures_path, file))
+            except:
+                pass
+
+        # Collect all the valid target types in the map
+        types = set()
+        valid_pattern = r"^[KRYGB]{5}$"
+        for i in range(targets.getCount()):
+            target = targets.getMFNode(i)
+            type = target.getField("type").getSFString()
+            if re.match(valid_pattern, type):
+                types.add(type)
+            else:
+                # If the type is invalid, make sure the sign is invisible and 
+                # its score is 0
+                target.getField("type").setSFString("blank")
+                target.getField("texture").setSFString("blank")
+                target.getField("scoreWorth").setSFInt32(0)
+
+        # Generate the target texture for each valid type
+        colors = {
+            "K": (0, 0, 0, 255),
+            "R": (0, 0, 255, 255),
+            "Y": (0, 255, 255, 255),
+            "G": (0, 255, 0, 255),
+            "B": (255, 0, 0, 255)
+        }
+        for type in types:
+            size = 1024
+            img = np.zeros((size, size, 4), dtype=np.uint8)
+            radius = size//2
+            ring_width = radius//5
+            for i in range(5):
+                color = colors[type[i]]
+                cv2.circle(img, (size//2, size//2), radius, color, -1)
+                radius -= ring_width
+            
+            path = os.path.join(textures_path, type + ".png")
+            cv2.imwrite(path, img)
+
+            img = np.zeros((size, size, 4), dtype=np.uint8)
+            radius = size//2
+            ring_width = radius//5
+            for i in range(5):
+                color = colors[type[i]]
+                color = tuple(map(lambda n: n + 50 if n == 0 else n - 25, color))
+                cv2.circle(img, (size//2, size//2), radius, color, -1)
+                radius -= ring_width
+            
+            path = os.path.join(textures_path, type + "_found.png")
+            cv2.imwrite(path, img)
+
+        # Update each target's texture
+        for i in range(targets.getCount()):
+            target = targets.getMFNode(i)
+            type = target.getField("type").getSFString()
+            if type == "blank": continue
+            target.getField("texture").setSFString("targets/" + type)
 
     def wwiReceiveText(self) -> Optional[str]:
         """
@@ -338,7 +425,7 @@ class Erebus(Supervisor):
     def _add_map_multiplier(self) -> None:
         """Apply the map multiplier from the robot's map score to the score
         """
-        score_change: float = self.robot_obj.get_score() * self.robot_obj.map_score_percent
+        score_change: float = self.robot_obj.get_score() * self.robot_obj.map_score_percent * 1.2
         self.robot_obj.increase_score("Map Bonus", score_change)
 
     def _process_robot_json(self, json_data: str) -> None:
@@ -460,25 +547,26 @@ class Erebus(Supervisor):
         correct_type_bonus: int = 10
         misidentification: bool = True
 
-        if est_vic_type.lower() in list(map(to_lower, HazardMap.HAZARD_TYPES)):
-            iterator = self.victim_manager.hazards
-            name = 'Hazard'
+        if est_vic_type.lower() in list(map(to_lower, CognitiveTarget.TARGET_TYPES)):
+            iterator = self.victim_manager.targets
+            name = 'Target'
             correct_type_bonus = 20
 
-        # Get nearby victim/hazards that are within range (as per the rules)
+        # Get nearby victim/targets that are within range (as per the rules)
         nearby_map_issues: Sequence[VictimObject] = [
             h for h in iterator
             if h.check_position(self.robot_obj.position) and
             h.check_position(est_vic_pos) and
             h.on_same_side(self.robot_obj) and
-            not h.identified
+            not h.identified and
+            len(h.simple_victim_type) > 0 # Discard invalid targets
         ]
 
         Console.log_debug(f"--- Victim Data ---")
         for h in iterator:
             Console.log_debug("===")
             Console.log_debug(
-                f"Position {self.robot_obj.position}")
+                f"Robot Position {self.robot_obj.position}")
             Console.log_debug(
                 f"Distance {h.get_distance(self.robot_obj.position)}/0.09")
             Console.log_debug(
@@ -491,6 +579,9 @@ class Erebus(Supervisor):
             Console.log_debug(
                 f"On same side: {h.on_same_side(self.robot_obj)}")
             Console.log_debug(f"Identified: {h.identified}")
+            Console.log_debug(f"Type: {h.get_simple_type()}")
+            Console.log_debug(f"Score: {h.score_worth}")
+            
             Console.log_debug("===")
         Console.log_debug(f"Nearby issues: {len(nearby_map_issues)}")
         Console.log_debug(f"--- ----------- ---")
@@ -521,6 +612,7 @@ class Erebus(Supervisor):
                 .getField("room")
                 .getSFInt32() - 1
             )
+            Console.log_debug(f"Room: {room_num} ({self.tile_manager.ROOM_MULT[room_num]})")
 
             Console.log_debug(f"Victim type est. {est_vic_type.lower()} vs "
                               f"{nearby_issue.simple_victim_type.lower()}")
@@ -846,7 +938,7 @@ class Erebus(Supervisor):
             # Automatic camera movement
             if self.config.automatic_camera and self._camera.wb_viewpoint_node:
                 all_hazards: Sequence[VictimObject] = (
-                    self.victim_manager.victims + self.victim_manager.hazards
+                    self.victim_manager.victims + self.victim_manager.targets
                 )
                 self._camera.rotate_to_victim(self.robot_obj, all_hazards)
 

@@ -74,14 +74,22 @@ class Checkpoint(Tile):
 
 class Swamp(Tile):
     """Swamp Tile object holding boundary data"""
+    MAX_MULTIPLIER : float = 10.0
 
     def __init__(
         self,
         min: tuple[float, float],
         max: tuple[float, float],
-        center: tuple[float, float, float]
+        center: tuple[float, float, float],
+        multiplier: float
     ) -> None:
         super().__init__(min, max, center)
+        self.multiplier = multiplier
+
+    def increment_multiplier(self):
+        self.multiplier += 1
+        if self.multiplier > Swamp.MAX_MULTIPLIER:
+            self.multiplier = Swamp.MAX_MULTIPLIER
 
 
 class StartTile(Tile):
@@ -183,7 +191,8 @@ class TileManager(ErebusObject):
             # Create a swamp object using the min and max (x,z)
             swamp: Swamp = Swamp((min_pos[0], min_pos[2]),
                                  (max_pos[0], max_pos[2]),
-                                 center_pos)
+                                 center_pos,
+                                 TileManager.SWAMP_TIME_MULT)
 
             swamps.append(swamp)
             
@@ -300,11 +309,14 @@ class TileManager(ErebusObject):
         """Check if the simulation robot is in any swamps. Slows down the robot
         accordingly
         """
-        # Check if the robot is in a swamps
-        in_swamp: bool = any([s.check_position(self._erebus.robot_obj.position) 
-                              for s in self.swamps])
-        self._erebus.robot_obj.update_in_swamp(in_swamp, 
-                                               self._erebus.DEFAULT_MAX_MULT)
+        # Check if the robot is in a swamp
+        swamp = None
+        for s in self.swamps:
+            if s.check_position(self._erebus.robot_obj.position):
+                swamp = s
+                break
+
+        self._erebus.robot_obj.update_in_swamp(swamp, self._erebus.DEFAULT_MAX_MULT)
     
     def check_checkpoints(self) -> None: 
         """Check if the simulation robot is in any checkpoints. Awards points

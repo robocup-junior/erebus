@@ -15,7 +15,7 @@ from controller import Field
 
 from Controller import Controller
 from ConsoleLog import Console
-from Tile import Checkpoint, StartTile, TileManager
+from Tile import Checkpoint, StartTile, TileManager, Swamp
 from Config import Config
 from ErebusObject import ErebusObject
 
@@ -126,7 +126,7 @@ class Robot(ErebusObject):
         self.history: RobotHistory = RobotHistory(self._erebus)
         self.controller: Controller = Controller(self._erebus)
 
-        self.in_swamp: bool = False
+        self.in_swamp: Swamp = None
 
         self._score: float = 0
 
@@ -464,21 +464,23 @@ class Robot(ErebusObject):
             self.increase_score("Found checkpoint", 10, 
                                 multiplier=TileManager.ROOM_MULT[room_num])
 
-    def update_in_swamp(self, in_swamp: bool, default_multiplier: float) -> None:
+    def update_in_swamp(self, in_swamp: Swamp, default_multiplier: float) -> None:
         """Updates the game's timer countdown multiplier when in a swamp.
 
         Args:
-            in_swamp (bool): Whether the robot has entered a swamp
+            in_swamp (Swamp): A Swamp object if the robot has entered a swamp, None otherwise
             default_multiplier (float): Default time multiplier
         """
         # Check if robot is in swamp
         if self.in_swamp != in_swamp:
             self.in_swamp = in_swamp
-            if self.in_swamp:
+            if self.in_swamp is not None:
                 # Update time multiplier 
-                self._erebus.set_time_multiplier(TileManager.SWAMP_TIME_MULT)
+                self._erebus.set_time_multiplier(in_swamp.multiplier)
                 # Update history
-                self.history.enqueue("Entered swamp")
+                self.history.enqueue(f"Entered swamp (multiplier: {in_swamp.multiplier})")
+                # Increment swamp multiplier
+                in_swamp.increment_multiplier()
             else:
                 # Reset time multiplier
                 self._erebus.set_time_multiplier(default_multiplier)

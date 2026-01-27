@@ -1,0 +1,69 @@
+#VRML_SIM R2023b utf8
+# tags: static
+PROTO Fake [
+    field SFVec3f    translation       0 0 0
+    field SFRotation rotation          0 0 0 0
+    field SFString   name              "Fake"
+    field SFString   type              "omega"
+    field SFInt32    scoreWorth        10
+]
+{
+    %{
+        if fields.type.value == "omega" then
+			filename = "\"./stl/omega.stl\""   
+        end
+        if fields.type.value == "phi" then
+			filename = "\"./stl/phi.stl\""   
+        end
+        if fields.type.value == "psi" then
+			filename = "\"./stl/psi.stl\""   
+        end
+
+    }%
+	
+	Pose {
+		translation IS translation
+		rotation IS rotation
+		children [
+			Solid {
+				translation 0.0 0.0 0
+				rotation 0 1 0 3.14159
+				children [
+					Solid {
+						translation 0 0 0
+						children [
+							Shape {
+								appearance PBRAppearance {
+									metalness 0
+									emissiveColor 1 1 1
+								}
+								geometry Box {
+									size 0.016 0.016 0.0002
+								}
+							}
+						]
+					}
+					Transform {
+						scale 0.0008 0.0008 0.0008
+						translation -0.0036 0.0058 0
+						children [
+							Shape {
+								appearance PBRAppearance {
+									IBLStrength 0
+									emissiveIntensity 0
+								}
+								geometry Mesh {
+									url [ %{= filename}% ]
+								}
+							}
+						]
+					}
+				]
+				name IS name
+				
+			}
+		]
+	}
+	
+}
+

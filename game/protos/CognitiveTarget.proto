@@ -1,0 +1,49 @@
+#VRML_SIM R2022b utf8
+# tags: static
+PROTO CognitiveTarget [
+    field SFVec3f    translation       0 0 0
+    field SFRotation rotation          0 0 0 0
+    field SFBool     found             FALSE
+    field SFString   name              "Cognitive Target"
+    field SFString   type              "KRYGB"
+    field SFInt32    scoreWorth        10
+    field SFString   texture           "blank"
+]
+{
+    %{
+        if fields.found.value then
+            filename = fields.texture.value .. "_found"
+        else
+            filename = fields.texture.value
+        end
+    }%
+    Pose {
+        translation IS translation
+        rotation IS rotation
+        children [
+            Solid {
+               
+                translation 0 0 0
+                rotation 0 1 0 3.14159
+                children [
+                    Shape {
+                        appearance Appearance {
+                            texture DEF human0texture ImageTexture {
+                                url [ "./textures/%{= filename}%.png" ]
+                                repeatS FALSE
+                                repeatT FALSE
+                                filtering 0
+                            }
+                        }
+                        geometry DEF VICTIMPLANE Plane {
+                            size 0.04 0.04
+                        }
+                        isPickable  FALSE
+                    }
+                ]
+                name IS name
+            }
+        ]
+    }
+}
+

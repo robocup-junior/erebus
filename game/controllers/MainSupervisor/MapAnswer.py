@@ -64,7 +64,7 @@ class MapAnswer:
         numberTiles = supervisor.getFromDef('WALLTILES').getField("children").getCount()
         #Retrieve the node containing the tiles
         tileNodes = supervisor.getFromDef('WALLTILES').getField("children")
-        
+
         # TODO(Richo): I don't understand this. If the last node is not a TILE or START_TILE we just ignore it? When could that happen?
         if tileNodes.getMFNode(numberTiles - 1).getDef() != "TILE" and tileNodes.getMFNode(numberTiles - 1).getDef() != "START_TILE":
             numberTiles -= 1
@@ -80,14 +80,21 @@ class MapAnswer:
             node = victimNodes.getMFNode(i)
             victims.append(Sign.from_node(node))
 
-        #Retrieve the node containing the victims
-        hazardNodes = supervisor.getFromDef('HAZARDGROUP').getField("children")
-        hazards = []
-        for i in range(hazardNodes.getCount()):
-            node = hazardNodes.getMFNode(i)
-            hazards.append(Sign.from_node(node))
+        #Retrieve the node containing the targets
+        targetNodes = supervisor.getFromDef('TARGETGROUP').getField("children")
+        targets = []
+        for i in range(targetNodes.getCount()):
+            node = targetNodes.getMFNode(i)
+            targets.append(Sign.from_node(node))
 
-        return cls(tiles, victims, hazards)
+        # Retrieve the node containing obstacles    
+        obstacleNodes = supervisor.getFromDef('OBSTACLES').getField("children")
+        obstacles = []
+        for i in range(obstacleNodes.getCount()):
+            node = obstacleNodes.getMFNode(i)
+            obstacles.append(Obstacle.from_node(node))
+
+        return cls(tiles, victims, targets, obstacles)
     
     @classmethod
     def from_dict(cls, dict):
@@ -99,15 +106,21 @@ class MapAnswer:
         for v in dict["victims"]:
             victims.append(Sign.from_dict(v))
 
-        hazards = []
-        for h in dict["hazards"]:
-            hazards.append(Sign.from_dict(h))
-        return cls(tiles, victims, hazards)
+        targets = []
+        for h in dict["targets"]:
+            targets.append(Sign.from_dict(h))
+            
+        obstacles = []
+        for o in dict["obstacles"]:
+            obstacles.append(Obstacle.from_dict(o))
+
+        return cls(tiles, victims, targets, obstacles)
     
-    def __init__(self, tiles, victims, hazards):
+    def __init__(self, tiles, victims, targets, obstacles):
         self.tiles = tiles
         self.victims = victims
-        self.hazards = hazards
+        self.targets = targets
+        self.obstacles = obstacles
         
         xPos = [t.xPos for t in tiles]
         zPos = [t.zPos for t in tiles]
@@ -127,14 +140,19 @@ class MapAnswer:
         for victim in self.victims:
             victims.append(victim.to_dict())
         
-        hazards = []
-        for hazard in self.hazards:
-            hazards.append(hazard.to_dict())
+        targets = []
+        for target in self.targets:
+            targets.append(target.to_dict())
+
+        obstacles = []
+        for obstacle in self.obstacles:
+            obstacles.append(obstacle.to_dict())
         
         return {
             "tiles": tiles,
             "victims": victims,
-            "hazards": hazards
+            "targets": targets,
+            "obstacles": obstacles
         }
     
     def writeJSON(self, path):
@@ -422,20 +440,41 @@ class MapAnswer:
                     self.answerMatrix[z+3][x+1] = 'y'
                     self.answerMatrix[z+3][x+3] = 'y'
             
-            # Victims & Hazards
-            signs = self.victims + self.hazards
+            # Victims & Targets
+            signs = self.victims + self.targets
 
             # Sort signs top to bottom, left to right
             signs.sort(key=lambda s: (s.translation[2], s.translation[0]))
 
             for victim in signs:                               
                 victimType = victim.type
+                
                 if victimType == "harmed":
                     victimType = "H"
                 elif victimType == "unharmed":
                     victimType = "U"
                 elif victimType == "stable":
                     victimType = "S"
+                else:
+                    targetTypes = ['F', 'P', 'C', 'O']
+                    scores = {
+                        "K": -2,
+                        "R": -1,
+                        "Y": 0,
+                        "G": 1,
+                        "B": 2
+                    }
+                    score_sum = 0
+                    for i in range(len(victimType)):
+                        score_sum += scores.get(victimType[i], -1000)
+
+                    if score_sum < 0 or score_sum > 3:
+                        victimType = ""
+                    else:
+                        victimType = targetTypes[score_sum]
+                
+                # Ignore invalid targets
+                if len(victimType) == 0: continue
 
                 # NOTE(Richo): First we take the victim's translation and transform it relative
                 # to the map's start coordinate (which should be the top left corner). Then, we
@@ -512,7 +551,16 @@ class MapAnswer:
                         self.answerMatrix[row_temp][col_temp] += victimType
                     else:
                         self.answerMatrix[row_temp][col_temp] = victimType
-                    
+
+            for obstacle in self.obstacles:
+                x = obstacle.translation[0] - self.xStart
+                z = obstacle.translation[2] - self.zStart
+                col = 4*int(x / 0.12)
+                row = 4*int(z / 0.12)
+                self.answerMatrix[row+1][col+1] = 'x'
+                self.answerMatrix[row+1][col+3] = 'x'
+                self.answerMatrix[row+3][col+1] = 'x'
+                self.answerMatrix[row+3][col+3] = 'x'
             
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
@@ -738,4 +786,23 @@ class Sign:
             "translation": self.translation,
             "rotation": self.rotation,
             "orientation": self.orientation,
+        }
+    
+class Obstacle:
+    @classmethod
+    def from_node(cls, node):
+        t = node.getField("translation").getSFVec3f()
+        translation = [t[0], t[1], t[2]]
+        return cls(translation)
+    
+    @classmethod
+    def from_dict(cls, dict):
+        return cls(dict["translation"])
+    
+    def __init__(self, translation):
+        self.translation = translation
+
+    def to_dict(self):
+        return {
+            "translation": self.translation
         }
