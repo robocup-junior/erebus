@@ -62,8 +62,8 @@ class Erebus(Supervisor):
         super().__init__()
 
         # Version info
-        self._stream = 24
-        self.version = "25.0.1"
+        self._stream = 26
+        self.version = "26.0.1"
 
         # Start controller uploader
         uploader: Thread = Thread(target=ControllerUploader.start, daemon=True)
