@@ -557,10 +557,11 @@ class MapAnswer:
                 z = obstacle.translation[2] - self.zStart
                 col = 4*int(x / 0.12)
                 row = 4*int(z / 0.12)
-                self.answerMatrix[row+1][col+1] = 'x'
-                self.answerMatrix[row+1][col+3] = 'x'
-                self.answerMatrix[row+3][col+1] = 'x'
-                self.answerMatrix[row+3][col+3] = 'x'
+                if self.answerMatrix[row+1][col+1] != '*':
+                    self.answerMatrix[row+1][col+1] = 'x'
+                    self.answerMatrix[row+1][col+3] = 'x'
+                    self.answerMatrix[row+3][col+1] = 'x'
+                    self.answerMatrix[row+3][col+3] = 'x'
             
             for i in range(len(self.answerMatrix)):
                 self.answerMatrix[i] = list(map(str, self.answerMatrix[i]))
