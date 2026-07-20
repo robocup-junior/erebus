@@ -5,6 +5,7 @@ AutoInstall._import("cl", "termcolor")
 AutoInstall._import("req", "requests")
 AutoInstall._import("overrides", "overrides")
 AutoInstall._import("PIL", "PIL", "pillow")
+AutoInstall._import("cv2", "cv2", "opencv-python")
 
 import os
 import shutil
