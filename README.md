@@ -9,7 +9,7 @@ Erebus is under constant development and will continue to serve as the basis for
 
 ## Quick Start
 
-1. Download and install [Python 3.9+](https://www.python.org/). Don't forget to add a path to the "Python".
+1. Download and install [Python 3.9+](https://www.python.org/). Don't forget to add Python to PATH.
 2. Download and install [Webots 2023b](https://cyberbotics.com/).
 3. Download our [latest release](https://github.com/robocup-junior/erebus/releases) and extract the zip file. Old releases can be found [here](https://github.com/robocup-junior/erebus/tags).
 4. Open world1.wbt in the [/game/worlds folder](https://github.com/robocup-junior/erebus/tree/master/game/worlds). Load the example program in the [/player_controllers folders](https://github.com/robocup-junior/erebus/blob/master/player_controllers/ExamplePlayerController_updated.py).
