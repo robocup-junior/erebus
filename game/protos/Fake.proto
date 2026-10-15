@@ -13,10 +13,10 @@ PROTO Fake [
 			filename = "\"./stl/U.stl\""   
         end
         if fields.type.value == "phi" then
-			filename = "\"./stl/phi.stl\""   
+			filename = "\"./stl/S.stl\""   
         end
         if fields.type.value == "psi" then
-			filename = "\"./stl/psi.stl\""   
+			filename = "\"./stl/H.stl\""   
         end
 
     }%
