@@ -219,9 +219,9 @@ while robot.step(timeStep) != -1:
         if key_input == Keyboard.DOWN:
             wheel_velos = [-6, -6]
         if key_input == Keyboard.RIGHT:
-            wheel_velos = [-6,6]
-        if key_input == Keyboard.LEFT:
             wheel_velos = [6,-6]
+        if key_input == Keyboard.LEFT:
+            wheel_velos = [-6,6]
             
         wheel1.setVelocity(wheel_velos[0])              
         wheel2.setVelocity(wheel_velos[1])
