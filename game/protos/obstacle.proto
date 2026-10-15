@@ -1,4 +1,5 @@
-#VRML_SIM R2022b utf8
+#VRML_SIM R2025a utf8
+
 PROTO obstacle[
     field SFVec3f    translation       0 0 0
     field SFRotation rotation          0 0 0 0
@@ -19,14 +20,14 @@ PROTO obstacle[
 {
     DEF OBSTACLE Pose {
 
-        %{
-            w = fields.width.value
-            h = fields.height.value
-            d = fields.depth.value
-            r = (((d / 2) ^ 2) + ((w / 2) ^ 2)) ^ 0.5
-            id = fields.id.value
-            offset = fields.clearanceSize.value * fields.scale.value
-        }%
+        %<
+            const w = fields.width.value;
+            const h = fields.height.value;
+            const d = fields.depth.value;
+            const r = Math.sqrt(((d / 2) ** 2) + ((w / 2) ** 2));
+            const id = fields.id.value;
+            const offset = fields.clearanceSize.value * fields.scale.value;
+        >%
 
         translation IS translation
         rotation IS rotation
@@ -35,7 +36,7 @@ PROTO obstacle[
             Transform {
                 rotation 1 0 0 -1.56826
                 children [
-                    %{if fields.rectangular.value == true then}%
+                    %< if (fields.rectangular.value === true) { >%
                         DEF CUBE Solid {
                             translation 0 0 0
                             children[
@@ -48,24 +49,24 @@ PROTO obstacle[
                                     }
 
                                     geometry DEF CUBESHAPE Box {
-                                        size %{=w}% %{=h}% %{=d}%
+                                        size %<= w >% %<= h >% %<= d >%
                                     }
 
                                 }
                             ]
 
-                            %{if fields.physics.value == true then}%
+                            %< if (fields.physics.value === true) { >%
                                 physics Physics {
-                        
-                                }
-                            %{end}%
 
-                            name "rectangleObstacle%{=id}%"
+                                }
+                            %< } >%
+
+                            name "rectangleObstacle%<= id >%"
                             boundingObject USE CUBESHAPE
                         }
-                    %{end}%
-                    
-                    %{if fields.cylindrical.value == true then}%
+                    %< } >%
+
+                    %< if (fields.cylindrical.value === true) { >%
                         DEF CYLINDER Solid{
                             translation 0 0 0
                             children[
@@ -78,25 +79,25 @@ PROTO obstacle[
                                     }
 
                                     geometry DEF CYLINDERSHAPE Cylinder {
-                                        height %{=h}%
-                                        radius %{=r}%
+                                        height %<= h >%
+                                        radius %<= r >%
                                     }
 
                                 }
                             ]
 
-                            %{if fields.physics.value == true then}%
+                            %< if (fields.physics.value === true) { >%
                                 physics Physics {
-                        
-                                }
-                            %{end}%
 
-                            name "cylinderObstacle%{=id}%"
+                                }
+                            %< } >%
+
+                            name "cylinderObstacle%<= id >%"
                             boundingObject USE CYLINDERSHAPE
                         }
-                    %{end}%
+                    %< } >%
 
-                    %{if fields.conical.value == true then}%
+                    %< if (fields.conical.value === true) { >%
                         DEF CONE Solid{
                             translation 0 0 0
                             children[
@@ -109,28 +110,28 @@ PROTO obstacle[
                                     }
 
                                     geometry DEF CONESHAPE Cone {
-                                        height %{=h}%
-                                        bottomRadius %{=r}%
+                                        height %<= h >%
+                                        bottomRadius %<= r >%
                                     }
 
                                 }
                             ]
 
-                            %{if fields.physics.value == true then}%
+                            %< if (fields.physics.value === true) { >%
                                 physics Physics {
-                        
-                                }
-                            %{end}%
 
-                            name "coneObstacle%{=id}%"
+                                }
+                            %< } >%
+
+                            name "coneObstacle%<= id >%"
                             boundingObject DEF CYLINDERBOUNDS Cylinder {
-                                height %{=h}%
-                                radius %{=r}%
+                                height %<= h >%
+                                radius %<= r >%
                             }
                         }
-                    %{end}%
+                    %< } >%
 
-                    %{if fields.spherical.value == true then}%
+                    %< if (fields.spherical.value === true) { >%
                         DEF SPHERE Solid{
                             translation 0 0 0
                             children[
@@ -143,25 +144,25 @@ PROTO obstacle[
                                     }
 
                                     geometry DEF SPHERESHAPE Sphere {
-                                        radius %{=h/2}%
+                                        radius %<= h / 2 >%
                                         subdivision 5
                                     }
 
                                 }
                             ]
 
-                            %{if fields.physics.value == true then}%
+                            %< if (fields.physics.value === true) { >%
                                 physics Physics {
-                        
-                                }
-                            %{end}%
 
-                            name "obstacleSphere%{=id}%"
+                                }
+                            %< } >%
+
+                            name "obstacleSphere%<= id >%"
                             boundingObject USE SPHERESHAPE
                         }
-                    %{end}%
+                    %< } >%
 
-                    %{if fields.displayClearance.value == true and (fields.rectangular.value == true or fields.cylindrical.value == true or fields.conical.value == true or fields.spherical.value == true) then}%
+                    %< if (fields.displayClearance.value === true && (fields.rectangular.value === true || fields.cylindrical.value === true || fields.conical.value === true || fields.spherical.value === true)) { >%
                         DEF CLEARANCE Shape {
                             appearance Appearance {
                                 material Material {
@@ -171,11 +172,11 @@ PROTO obstacle[
                             }
 
                             geometry DEF CYLINDERSHAPE Cylinder {
-                                height %{=h + 0.005}%
-                                radius %{=r + offset}%
+                                height %<= h + 0.005 >%
+                                radius %<= r + offset >%
                             }
                         }
-                    %{end}%
+                    %< } >%
                 ]
             }
         ]

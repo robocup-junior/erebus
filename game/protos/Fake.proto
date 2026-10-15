@@ -1,26 +1,25 @@
-#VRML_SIM R2023b utf8
+#VRML_SIM R2025a utf8
+
 # tags: static
 PROTO Fake [
-    field SFVec3f    translation       0 0 0
-    field SFRotation rotation          0 0 0 0
-    field SFString   name              "Fake"
-    field SFString   type              "omega"
-    field SFInt32    scoreWorth        10
+	field SFVec3f    translation       0 0 0
+	field SFRotation rotation          0 0 0 0
+	field SFString   name              "Fake"
+	field SFString   type              "omega"
+	field SFInt32    scoreWorth        10
 ]
 {
-    %{
-        if fields.type.value == "omega" then
-			filename = "\"./stl/U.stl\""   
-        end
-        if fields.type.value == "phi" then
-			filename = "\"./stl/S.stl\""   
-        end
-        if fields.type.value == "psi" then
-			filename = "\"./stl/H.stl\""   
-        end
+	%<
+		let filename = "";
+		if (fields.type.value === "omega") {
+			filename = "./stl/U.stl";
+		} else if (fields.type.value === "phi") {
+			filename = "./stl/S.stl";
+		} else if (fields.type.value === "psi") {
+			filename = "./stl/H.stl";
+		}
+	>%
 
-    }%
-	
 	Pose {
 		translation IS translation
 		rotation IS rotation
@@ -53,7 +52,7 @@ PROTO Fake [
 									emissiveIntensity 0
 								}
 								geometry Mesh {
-									url [ %{= filename}% ]
+									url [ "%<= filename >%" ]
 								}
 							}
 						]

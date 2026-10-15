@@ -1,4 +1,4 @@
-#VRML_SIM R2022b utf8
+#VRML_SIM R2025a utf8
 
 EXTERNPROTO "worldTile.proto"
 
@@ -37,123 +37,123 @@ PROTO halfTile [
 {
 DEF TILE Pose {
 
-	  %{
-	  scaleX = fields.xScale.value
-	  scaleY = fields.yScale.value
-	  scaleZ = fields.zScale.value
-	  xStart = -(fields.width.value * (0.3 * scaleX) / 2.0)
-	  zStart = -(fields.height.value * (0.3 * scaleZ) / 2.0)
-	  x = fields.xPos.value * (0.3 * scaleX) + xStart
-	  z = fields.zPos.value * (0.3 * scaleZ) + zStart
-	  }%
+	  %<
+    const scaleX = fields.xScale.value;
+    const scaleY = fields.yScale.value;
+    const scaleZ = fields.zScale.value;
+    const xStart = -(fields.width.value * (0.3 * scaleX) / 2.0);
+    const zStart = -(fields.height.value * (0.3 * scaleZ) / 2.0);
+    const x = fields.xPos.value * (0.3 * scaleX) + xStart;
+    const z = fields.zPos.value * (0.3 * scaleZ) + zStart;
+  >%
 
-	  translation %{=x}% 0 %{=z}%
+  translation %<= x >% 0 %<= z >%
 
       children[
           DEF TILE worldTile {
-            xScale %{=scaleX}%
-            yScale %{=scaleY}%
-            zScale %{=scaleZ}%
+            xScale %<= scaleX >%
+            yScale %<= scaleY >%
+            zScale %<= scaleZ >%
             xPos 0 
             zPos 0  
             topWall IS topWall
 						rightWall IS rightWall
 						bottomWall IS bottomWall
 						leftWall IS leftWall
-            floor %{=fields.floor.value and "TRUE" or "FALSE"}% # ternary operator!
-            trap %{=fields.trap.value and "TRUE" or "FALSE" }%
-            start %{=fields.start.value and "TRUE" or "FALSE" }%
-            checkpoint %{=fields.checkpoint.value and "TRUE" or "FALSE" }%
-            swamp %{=fields.swamp.value and "TRUE" or "FALSE" }%
-            contact %{=fields.contact.value and "TRUE" or "FALSE" }%
-            id %{= "\"" .. fields.id.value .. ".0" .. "\"" }%
+            floor %<= fields.floor.value ? "TRUE" : "FALSE" >% # ternary operator!
+            trap %<= fields.trap.value ? "TRUE" : "FALSE" >%
+            start %<= fields.start.value ? "TRUE" : "FALSE" >%
+            checkpoint %<= fields.checkpoint.value ? "TRUE" : "FALSE" >%
+            swamp %<= fields.swamp.value ? "TRUE" : "FALSE" >%
+            contact %<= fields.contact.value ? "TRUE" : "FALSE" >%
+            id %<= "\"" + fields.id.value + ".0" + "\"" >%
             tileColor IS tileColor
-            topExternal %{= (fields.tile1External.value[1] and fields.tile2External.value[1]) and "TRUE" or "FALSE" }%
-            rightExternal %{= (fields.tile2External.value[2] and fields.tile4External.value[2]) and "TRUE" or "FALSE" }%
-            bottomExternal %{= (fields.tile3External.value[3] and fields.tile4External.value[3]) and "TRUE" or "FALSE" }%
-            leftExternal %{= (fields.tile1External.value[4] and fields.tile3External.value[4]) and "TRUE" or "FALSE" }%
+            topExternal %<= (fields.tile1External.value[0] && fields.tile2External.value[0]) ? "TRUE" : "FALSE" >%
+            rightExternal %<= (fields.tile2External.value[1] && fields.tile4External.value[1]) ? "TRUE" : "FALSE" >%
+            bottomExternal %<= (fields.tile3External.value[2] && fields.tile4External.value[2]) ? "TRUE" : "FALSE" >%
+            leftExternal %<= (fields.tile1External.value[3] && fields.tile3External.value[3]) ? "TRUE" : "FALSE" >%
           }
           DEF TILE worldTile {
             xPos 0 
             zPos 0 
-            xScale %{=scaleX * .5}%
-            yScale %{=scaleY * .5}%
-            zScale %{=scaleZ * .5}%
+            xScale %<= scaleX * 0.5 >%
+            yScale %<= scaleY * 0.5 >%
+            zScale %<= scaleZ * 0.5 >%
             width 1 
             height 1
-            topWall %{= fields.tile1Walls.value[1] }%
-            rightWall %{= fields.tile1Walls.value[2] }%
-            bottomWall %{= fields.tile1Walls.value[3] }%
-            leftWall %{= fields.tile1Walls.value[4] }%
-            topExternal %{= fields.tile1External.value[1] and "TRUE" or "FALSE" }%
-            rightExternal %{= fields.tile1External.value[2] and "TRUE" or "FALSE" }%
-            bottomExternal %{= fields.tile1External.value[3] and "TRUE" or "FALSE" }%
-            leftExternal %{= fields.tile1External.value[4] and "TRUE" or "FALSE"}%
-            id %{= "\"" .. fields.id.value .. ".1" .. "\"" }%
+            topWall %<= fields.tile1Walls.value[0] >%
+            rightWall %<= fields.tile1Walls.value[1] >%
+            bottomWall %<= fields.tile1Walls.value[2] >%
+            leftWall %<= fields.tile1Walls.value[3] >%
+            topExternal %<= fields.tile1External.value[0] ? "TRUE" : "FALSE" >%
+            rightExternal %<= fields.tile1External.value[1] ? "TRUE" : "FALSE" >%
+            bottomExternal %<= fields.tile1External.value[2] ? "TRUE" : "FALSE" >%
+            leftExternal %<= fields.tile1External.value[3] ? "TRUE" : "FALSE" >%
+            id %<= "\"" + fields.id.value + ".1" + "\"" >%
             isHalf TRUE
-            curveDir %{= fields.curve.value[1]}% 
+            curveDir %<= fields.curve.value[0] >% 
           }
           DEF TILE worldTile {
             xPos 1
             zPos 0
-            xScale %{=scaleX * .5}%
-            yScale %{=scaleY * .5}%
-            zScale %{=scaleZ * .5}% 
+            xScale %<= scaleX * 0.5 >%
+            yScale %<= scaleY * 0.5 >%
+            zScale %<= scaleZ * 0.5 >% 
             width 1
             height 1
-            topWall %{= fields.tile2Walls.value[1] }%
-            rightWall %{= fields.tile2Walls.value[2] }%
-            bottomWall %{= fields.tile2Walls.value[3] }%
-            leftWall %{= fields.tile2Walls.value[4] }%
-            topExternal %{= fields.tile2External.value[1] and "TRUE" or "FALSE" }%
-            rightExternal %{= fields.tile2External.value[2] and "TRUE" or "FALSE" }%
-            bottomExternal %{= fields.tile2External.value[3] and "TRUE" or "FALSE" }%
-            leftExternal %{= fields.tile2External.value[4] and "TRUE" or "FALSE"}%
-            id %{= "\"" .. fields.id.value .. ".2" .. "\"" }%
+            topWall %<= fields.tile2Walls.value[0] >%
+            rightWall %<= fields.tile2Walls.value[1] >%
+            bottomWall %<= fields.tile2Walls.value[2] >%
+            leftWall %<= fields.tile2Walls.value[3] >%
+            topExternal %<= fields.tile2External.value[0] ? "TRUE" : "FALSE" >%
+            rightExternal %<= fields.tile2External.value[1] ? "TRUE" : "FALSE" >%
+            bottomExternal %<= fields.tile2External.value[2] ? "TRUE" : "FALSE" >%
+            leftExternal %<= fields.tile2External.value[3] ? "TRUE" : "FALSE" >%
+            id %<= "\"" + fields.id.value + ".2" + "\"" >%
             isHalf TRUE
-            curveDir %{= fields.curve.value[2]}% 
+            curveDir %<= fields.curve.value[1] >% 
               
           }
           DEF TILE worldTile {
             xPos 0 
             zPos 1
-            xScale %{=scaleX * .5}%
-            yScale %{=scaleY * .5}%
-            zScale %{=scaleZ * .5}% 
+            xScale %<= scaleX * 0.5 >%
+            yScale %<= scaleY * 0.5 >%
+            zScale %<= scaleZ * 0.5 >% 
             width 1
             height 1
-            topWall %{= fields.tile3Walls.value[1] }%
-            rightWall %{= fields.tile3Walls.value[2] }%
-            bottomWall %{= fields.tile3Walls.value[3] }%
-            leftWall %{= fields.tile3Walls.value[4] }%
-            topExternal %{= fields.tile3External.value[1] and "TRUE" or "FALSE" }%
-            rightExternal %{= fields.tile3External.value[2] and "TRUE" or "FALSE" }%
-            bottomExternal %{= fields.tile3External.value[3] and "TRUE" or "FALSE" }%
-            leftExternal %{= fields.tile3External.value[4] and "TRUE" or "FALSE"}%
-            id %{= "\"" .. fields.id.value .. ".3" .. "\"" }%
+            topWall %<= fields.tile3Walls.value[0] >%
+            rightWall %<= fields.tile3Walls.value[1] >%
+            bottomWall %<= fields.tile3Walls.value[2] >%
+            leftWall %<= fields.tile3Walls.value[3] >%
+            topExternal %<= fields.tile3External.value[0] ? "TRUE" : "FALSE" >%
+            rightExternal %<= fields.tile3External.value[1] ? "TRUE" : "FALSE" >%
+            bottomExternal %<= fields.tile3External.value[2] ? "TRUE" : "FALSE" >%
+            leftExternal %<= fields.tile3External.value[3] ? "TRUE" : "FALSE" >%
+            id %<= "\"" + fields.id.value + ".3" + "\"" >%
             isHalf TRUE
-            curveDir %{= fields.curve.value[3]}% 
+            curveDir %<= fields.curve.value[2] >% 
               
           }
           DEF TILE worldTile {
             xPos 1
             zPos 1
-            xScale %{=scaleX * .5}%
-            yScale %{=scaleY * .5}%
-            zScale %{=scaleZ * .5}%
+            xScale %<= scaleX * 0.5 >%
+            yScale %<= scaleY * 0.5 >%
+            zScale %<= scaleZ * 0.5 >%
             width 1
             height 1
-            topWall %{= fields.tile4Walls.value[1] }%
-            rightWall %{= fields.tile4Walls.value[2] }%
-            bottomWall %{= fields.tile4Walls.value[3] }%
-            leftWall %{= fields.tile4Walls.value[4] }%
-            topExternal %{= fields.tile4External.value[1] and "TRUE" or "FALSE" }%
-            rightExternal %{= fields.tile4External.value[2] and "TRUE" or "FALSE" }%
-            bottomExternal %{= fields.tile4External.value[3] and "TRUE" or "FALSE" }%
-            leftExternal %{= fields.tile4External.value[4] and "TRUE" or "FALSE"}%
-            id %{= "\"" .. fields.id.value .. ".4" .. "\"" }%
+            topWall %<= fields.tile4Walls.value[0] >%
+            rightWall %<= fields.tile4Walls.value[1] >%
+            bottomWall %<= fields.tile4Walls.value[2] >%
+            leftWall %<= fields.tile4Walls.value[3] >%
+            topExternal %<= fields.tile4External.value[0] ? "TRUE" : "FALSE" >%
+            rightExternal %<= fields.tile4External.value[1] ? "TRUE" : "FALSE" >%
+            bottomExternal %<= fields.tile4External.value[2] ? "TRUE" : "FALSE" >%
+            leftExternal %<= fields.tile4External.value[3] ? "TRUE" : "FALSE" >%
+            id %<= "\"" + fields.id.value + ".4" + "\"" >%
             isHalf TRUE
-            curveDir %{= fields.curve.value[4]}% 
+            curveDir %<= fields.curve.value[3] >% 
               
           }
       ]

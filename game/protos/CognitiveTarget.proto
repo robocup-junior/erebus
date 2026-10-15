@@ -1,4 +1,4 @@
-#VRML_SIM R2022b utf8
+#VRML_SIM R2025a utf8
 # tags: static
 PROTO CognitiveTarget [
     field SFVec3f    translation       0 0 0
@@ -10,13 +10,14 @@ PROTO CognitiveTarget [
     field SFString   texture           "blank"
 ]
 {
-    %{
-        if fields.found.value then
-            filename = fields.texture.value .. "_found"
-        else
-            filename = fields.texture.value
-        end
-    }%
+    %<
+        let filename;
+        if (fields.found.value) {
+            filename = fields.texture.value + "_found";
+        } else {
+            filename = fields.texture.value;
+        }
+    >%
     Pose {
         translation IS translation
         rotation IS rotation
@@ -29,7 +30,7 @@ PROTO CognitiveTarget [
                     Shape {
                         appearance Appearance {
                             texture DEF human0texture ImageTexture {
-                                url [ "./textures/%{= filename}%.png" ]
+                                url [ "./textures/%<= filename >%.png" ]
                                 repeatS FALSE
                                 repeatT FALSE
                                 filtering 0
