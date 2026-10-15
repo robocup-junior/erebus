@@ -554,3 +554,69 @@ hr {
 #dev-tests {
   display: none;
 }
+
+/* ==========================================================================
+   Battery Progress Bar Styles
+   ========================================================================== */
+.battery-card {
+  margin: 6px 14px 10px 14px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.battery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.battery-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2d3748;
+}
+
+.battery-title span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.battery-icon {
+  font-size: 16px;
+  transition: color 0.4s ease;
+}
+
+.battery-pct {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  transition: color 0.4s ease;
+}
+
+.battery-bar-track {
+  width: 100%;
+  height: 12px;
+  background-color: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.battery-bar-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background-color: #2ecc71;
+  transition: width 0.3s ease, background-color 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+}

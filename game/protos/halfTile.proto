@@ -29,6 +29,7 @@ PROTO halfTile [
 	  field SFBool trap FALSE
 	  field SFBool checkpoint FALSE
 	  field SFBool swamp FALSE
+	  field SFBool contact FALSE
     field MFInt32 curve [0, 0, 0, 0]
     field SFColor tileColor 0 0 0
 		field SFInt32 room 0
@@ -64,6 +65,7 @@ DEF TILE Pose {
             start %{=fields.start.value and "TRUE" or "FALSE" }%
             checkpoint %{=fields.checkpoint.value and "TRUE" or "FALSE" }%
             swamp %{=fields.swamp.value and "TRUE" or "FALSE" }%
+            contact %{=fields.contact.value and "TRUE" or "FALSE" }%
             id %{= "\"" .. fields.id.value .. ".0" .. "\"" }%
             tileColor IS tileColor
             topExternal %{= (fields.tile1External.value[1] and fields.tile2External.value[1]) and "TRUE" or "FALSE" }%

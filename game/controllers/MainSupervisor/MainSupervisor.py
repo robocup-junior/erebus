@@ -62,9 +62,10 @@ class Erebus(Supervisor):
         super().__init__()
 
         # Version info
-        self._stream = 26
-        self.version = "26.1"
-
+        self._stream = 27
+        self.version = "27.0.0"
+        
+        
         # Start controller uploader
         uploader: Thread = Thread(target=ControllerUploader.start, daemon=True)
         uploader.start()
@@ -114,6 +115,8 @@ class Erebus(Supervisor):
             self.max_time = int(custom_world_data[0])
 
         # Max real world time is max_time + 1 min or 125% of max_time
+        #Probar luego descomentar esto: 
+        #self.max_time= 1*60
         # which ever is greater
         self._max_real_world_time: int = int(max(self.max_time + 60,
                                                 self.max_time * 1.25))
@@ -410,8 +413,6 @@ class Erebus(Supervisor):
                                     name "{Erebus.ROBOT_NAME}"
                                     controller "{controller}"
                                     camera_fieldOfView 1 
-                                    camera_width 64 
-                                    camera_height 40 
                                 }}
                             """
 
@@ -437,6 +438,20 @@ class Erebus(Supervisor):
         robot_json: dict = json.loads(json_data)
         if generate_robot_proto(robot_json):
             self.rws.send("loaded1")
+
+        # Detectar componente Battery en el JSON y configurar la batería del robot
+        # Si tiene componente Battery -> dura el doble (baja a la mitad de velocidad)
+        # Si no tiene componente -> recibe una batería estándar de regalo
+        battery_component = next(
+            (v for v in robot_json.values()
+             if isinstance(v, dict) and v.get("name", "").lower() == "battery"),
+            None
+        )
+        if battery_component is not None:
+            max_energy: float = float(battery_component.get("maxEnergy", 100.0))
+            self.robot_obj.battery.configure(has_component=True, max_energy=max_energy, robot_json=robot_json)
+        else:
+            self.robot_obj.battery.configure(has_component=False, robot_json=robot_json)
 
     def wait(self, sec: float) -> None:
         """Waits for x amount of seconds, while still stepping the Webots
@@ -706,14 +721,20 @@ class Erebus(Supervisor):
         # Process game info commands
         elif robot_message[0] == 'G':
             # Send game info in format:
-            # (G, score, game time left, real time left)
+            # (G, score, game time left, real time left, battery_level)
+            battery_level = round(float(self.robot_obj.battery.level), 2)
+            time_remaining = int(max(0, self.max_time - int(self.time_elapsed)))
+            real_time_remaining = max(0, self._max_real_world_time - int(self._real_time_elapsed))
+            score = round(self.robot_obj.get_score(), 2)
+
             self.emitter.send(
                 struct.pack(
-                    "c f i i",
+                    "c f i i f",
                     bytes("G", "utf-8"),
-                    round(self.robot_obj.get_score(), 2),
-                    self.max_time - int(self.time_elapsed),
-                    self._max_real_world_time - int(self._real_time_elapsed)
+                    score,
+                    time_remaining,
+                    real_time_remaining,
+                    battery_level
                 )
             )
 
@@ -944,6 +965,7 @@ class Erebus(Supervisor):
 
             self.tile_manager.check_checkpoints()
             self.tile_manager.check_swamps()
+            self.tile_manager.check_contacts()
 
             # If receiver has got a message
             if self._receiver.getQueueLength() > 0:
@@ -1004,8 +1026,23 @@ class Erebus(Supervisor):
                 if self.config.recording:
                     Recorder.update(self)
 
+            # If the battery is depleted
+            if (self.robot_obj.battery.is_depleted and
+                    self._game_state == GameState.MATCH_RUNNING):
+                Console.log_warn(f"[Robot 0] ¡Batería agotada! Finalizando la simulación.")
+                self.robot_obj.history.enqueue("Battery depleted")
+                self._add_map_multiplier()
+                # Opción B (activa): _robot_quit(True) retira el nodo del robot de la escena (desaparece igual que por tiempo).
+                # Opción A (alternativa futura): si se deseara que quede visible e inmóvil en la pista,
+                # se llamaría a _robot_quit sin remover el nodo con remove_node().
+                self._robot_quit(True)
+                self._game_state = GameState.MATCH_FINISHED
+                self._last_frame = True
+                self.rws.send("batteryDepleted")
+                self.rws.send("ended")
+
             # If the time is up
-            if ((self.time_elapsed >= self.max_time or
+            elif ((self.time_elapsed >= self.max_time or
                  self._real_time_elapsed >= self._max_real_world_time) and
                     self._last_frame != None):
                 self._add_map_multiplier()

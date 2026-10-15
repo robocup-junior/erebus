@@ -27,8 +27,12 @@ while robot.step(timeStep) != -1:
         receivedData = receiver.getBytes()
         # Get length of bytes
         rDataLen = len(receivedData)
-        if rDataLen == 16:
+        if rDataLen == 20:
+            tup = struct.unpack('c f i i f', receivedData)
+            if tup[0].decode("utf-8") == 'G':
+                print(f'Game Score: {tup[1]}  Remaining time: {tup[2]}  Remaining real-world time: {tup[3]} Battery : {tup[4]:.2f}%')
+        elif rDataLen == 16:
             tup = struct.unpack('c f i i', receivedData)
             if tup[0].decode("utf-8") == 'G':
-                print(f'Game Score: {tup[1]}  Remaining time: {tup[2]}  Remaining real-world time: {tup[3]}')
+                print(f'Game Score: {tup[1]} | Remaining time: {tup[2]}s | Real-world time: {tup[3]}s')
         receiver.nextPacket() # Discard the current data packet

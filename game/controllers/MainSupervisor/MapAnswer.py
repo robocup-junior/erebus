@@ -33,6 +33,9 @@ def pretty_print_map(map: Union[list, npt.NDArray]) -> None:
             elif mm == '5': #Stating tile
                 color = Color.GREEN
                 bkg = Color.BG_DEFAULT
+            elif mm == 'k': #Contact tile
+                color = Color.CYAN
+                bkg = Color.BG_DEFAULT
             elif mm == 'b': #1 to 2
                 color = Color.BLUE
                 bkg = Color.BG_DEFAULT
@@ -402,6 +405,11 @@ class MapAnswer:
                     self.answerMatrix[z+1][x+3] = 5
                     self.answerMatrix[z+3][x+1] = 5
                     self.answerMatrix[z+3][x+3] = 5
+                if tile.contact:
+                    self.answerMatrix[z+1][x+1] = 'k'
+                    self.answerMatrix[z+1][x+3] = 'k'
+                    self.answerMatrix[z+3][x+1] = 'k'
+                    self.answerMatrix[z+3][x+3] = 'k'
                 
                 if tile.tileColor == [0.0, 0.8, 0.0]: # Green
                     # 1 to 4
@@ -619,6 +627,8 @@ class Tile:
         swamp = tile.getField("swamp").getSFBool()
         checkpoint = tile.getField("checkpoint").getSFBool()
         start = tile.getField("start").getSFBool()
+        contact_field = tile.getField("contact")
+        contact = contact_field.getSFBool() if contact_field is not None else False
         
         colour = tile.getField("tileColor").getSFColor()
         tileColor = [round(colour[0], 1), round(colour[1], 1), round(colour[2], 1)]
@@ -664,7 +674,7 @@ class Tile:
 
         return cls(type, xPos, zPos, room, width, height, xScale, zScale, \
                    topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
-                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve)
+                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve, contact)
     
     @classmethod
     def from_dict(cls, dict):
@@ -683,6 +693,7 @@ class Tile:
         swamp = dict["swamp"]
         checkpoint = dict["checkpoint"]
         start = dict["start"]
+        contact = dict.get("contact", False)
         tileColor = dict["tileColor"]
         type = dict["type"]
         tile1Walls = dict.get("tile1Walls")
@@ -693,11 +704,11 @@ class Tile:
 
         return cls(type, xPos, zPos, room, width, height, xScale, zScale, \
                    topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
-                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve)
+                   tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve, contact)
 
     def __init__(self, type, xPos, zPos, room, width, height, xScale, zScale, \
                 topWall, bottomWall, leftWall, rightWall, trap, swamp, checkpoint, start, \
-                tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve):
+                tileColor, tile1Walls, tile2Walls, tile3Walls, tile4Walls, curve, contact=False):
         self.type = type
         self.xPos = xPos
         self.zPos = zPos
@@ -714,6 +725,7 @@ class Tile:
         self.swamp = swamp
         self.checkpoint = checkpoint
         self.start = start
+        self.contact = contact
         self.tileColor = tileColor
         self.tile1Walls = tile1Walls
         self.tile2Walls = tile2Walls
@@ -738,6 +750,7 @@ class Tile:
             "swamp": self.swamp,
             "checkpoint": self.checkpoint,
             "start": self.start,
+            "contact": self.contact,
             "tileColor": self.tileColor,
             "type": self.type
         }

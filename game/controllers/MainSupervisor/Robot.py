@@ -18,7 +18,7 @@ from ConsoleLog import Console
 from Tile import Checkpoint, StartTile, TileManager, Swamp
 from Config import Config
 from ErebusObject import ErebusObject
-
+from battery import Battery
 
 
 if TYPE_CHECKING:
@@ -115,7 +115,7 @@ class Robot(ErebusObject):
             erebus (Erebus): Erebus supervisor game object
         """
         super().__init__(erebus)
-        
+        self.battery = Battery(robot_num=0, rws=self._erebus.rws)
         self._wb_node: Node
         self.wb_translationField: Field
         self.wb_rotationField: Field
@@ -133,6 +133,11 @@ class Robot(ErebusObject):
         self._stopped: bool = False
         self._robot_time_stopped: float = 0
         self._stopped_time: Optional[float] = None
+
+        # Contact tile tracking (recharges battery after ChangeBatteryTime)
+        self._in_contact: bool = False
+        self._contact_entry_time: Optional[float] = None
+        self._contact_recharged: bool = False
 
         self.message: list[Any] = []
         self.map_data = np.array([])
@@ -386,6 +391,61 @@ class Robot(ErebusObject):
             Console.log_err("Incorrect data format sent")
             Console.log_err(str(e))
 
+    def _getWheelVelocities(self) -> tuple:
+        """
+        Obtiene las velocidades de las ruedas (velLeft, velRight) en rad/s.
+        Primero intenta leerlas del campo customData del robot (velocidad real comandada a los motores).
+        Si no estan disponibles, calcula la velocidad equivalente a partir de la fisica del chasis.
+        """
+        velLeft: float = 0.0
+        velRight: float = 0.0
+        try:
+            if hasattr(self, '_wb_node') and self._wb_node is not None:
+                # 1. Intentar leer del campo customData (precisión exacta de motores incluso al topar paredes)
+                custom_data_field = self._wb_node.getField('customData')
+                if custom_data_field is not None:
+                    custom_data = custom_data_field.getSFString()
+                    if custom_data and ',' in custom_data:
+                        parts = custom_data.split(',')
+                        if len(parts) >= 2:
+                            try:
+                                vL = float(parts[0])
+                                vR = float(parts[1])
+                                return (abs(vL), abs(vR))
+                            except ValueError:
+                                pass
+
+                # 2. Respaldo por fisica de Webots (si el controlador no usa customData)
+                velocity: list = self._wb_node.getVelocity()
+                if velocity and len(velocity) >= 6:
+                    vx, vy, vz = velocity[0], velocity[1], velocity[2]
+                    linearSpeed: float = (vx * vx + vz * vz) ** 0.5
+                    wy: float = abs(velocity[4])
+                    wheelRadius: float = 0.0205
+                    wheelDistHalf: float = 0.026
+                    linearWheelRad: float = linearSpeed / wheelRadius
+                    rotationalWheelRad: float = wy * (wheelDistHalf / wheelRadius)
+                    totalWheelRad: float = min(6.28, linearWheelRad + rotationalWheelRad)
+                    velLeft = totalWheelRad
+                    velRight = totalWheelRad
+        except Exception:
+            pass
+        return (velLeft, velRight)
+
+    def freezeRobot(self) -> None:
+        """
+        Congela y detiene al robot en su posicion actual cuando la bateria llega a 0%.
+        """
+        try:
+            if hasattr(self, '_wb_node') and self._wb_node is not None:
+                self._wb_node.setVelocity([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+                wheelMultField = self._wb_node.getField('wheel_mult')
+                if wheelMultField is not None:
+                    wheelMultField.setSFFloat(0.0001)
+                self._wb_node.resetPhysics()
+        except Exception as freezeError:
+            Console.log_err(f"[Robot {self._num}] Error al congelar robot: {freezeError}")
+
     def update_time_elapsed(self, time_elapsed: float) -> None:
         """Updates the robot's history with the current time elapsed. Used to
         keep the history's record timestamps up to date.
@@ -394,6 +454,21 @@ class Robot(ErebusObject):
             time_elapsed (float): Current time elapsed (in seconds)
         """
         self.history.time_elapsed = time_elapsed
+        vel_left, vel_right = self._getWheelVelocities()
+        self.battery.update(time_elapsed, vel_left, vel_right)
+        
+        # Opción B (ACTIVA): No congelamos físicamente el robot antes de removerlo.
+        # El robot se retira de la simulación mediante _robot_quit(True) en MainSupervisor.py,
+        # teniendo exactamente el mismo comportamiento que al acabarse el tiempo reglamentario.
+        #
+        # Opción A (PARA PROBAR A FUTURO EN PALABRAS):
+        # Si se desea que el robot se quede quieto y visible en la pista donde murió:
+        # 1) Descomentar la llamada a self.freezeRobot() aquí abajo.
+        # 2) En MainSupervisor.py (_robot_quit), evitar llamar a remove_node() para que el
+        #    chasis no desaparezca de la pista, pero manteniendo in_simulation = False y el guardado de logs.
+        #
+        # if self.battery.is_depleted:
+        #     self.freezeRobot()
 
     def update_config(self, config: Config) -> None:
         """Update the robot with new config data. Used to sure settings if
@@ -486,3 +561,26 @@ class Robot(ErebusObject):
                 self._erebus.set_time_multiplier(default_multiplier)
                 # Update history
                 self.history.enqueue("Exited swamp,")
+
+    def update_in_contact(self, in_contact: bool) -> None:
+        """Updates the robot's contact tile status. If the robot has remained
+        on a contact tile for `Battery.change_battery_time` seconds, its
+        battery is recharged to 100%.
+
+        Args:
+            in_contact (bool): True if the robot is currently on a contact
+            tile, False otherwise
+        """
+        if not in_contact:
+            self._contact_recharged = False
+            self._in_contact = False
+            return
+
+        self._in_contact = True
+        stopped_time: float = self.time_stopped()
+        
+        if not self._contact_recharged:
+            if stopped_time >= self.battery.change_battery_time:
+                self.battery.recharge_full()
+                self._contact_recharged = True
+                self.history.enqueue("Battery Changed")

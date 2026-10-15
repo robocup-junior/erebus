@@ -20,6 +20,7 @@ PROTO worldTile [
 	  field SFBool trap FALSE
 	  field SFBool checkpoint FALSE
 	  field SFBool swamp FALSE
+	  field SFBool contact FALSE
 	  field SFBool obstacle FALSE
 	  field SFRotation obstacleRotation 0 1 0 2.477
 	  field SFVec2f obstacleOffset 0 0
@@ -90,7 +91,7 @@ PROTO worldTile [
 
 				
 				}%
-					%{if fields.checkpoint.value == false and fields.swamp.value == false and fields.start.value == false then}%
+					%{if fields.checkpoint.value == false and fields.swamp.value == false and fields.start.value == false and fields.contact.value == false then}%
 						DEF FLOOR Transform {
 							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
 							children [
@@ -131,6 +132,24 @@ PROTO worldTile [
 											appearance Appearance {
 												material Material {
 													diffuseColor 0.517647 0.392157 0.192157
+												}
+											}
+											geometry Box {
+												size %{=x_size * scaleX}% %{=tileThickness * scaleY}% %{=z_size * scaleZ}%
+											}
+											isPickable  FALSE
+										}
+									]
+						}
+					%{end}%
+					%{if fields.contact.value == true then}%
+						DEF FLOOR Transform {
+							translation %{=x_shift * scaleX}% %{=-0.085 * scaleY}% %{=z_shift * scaleZ}%
+									children [
+										Shape {
+											appearance Appearance {
+												material Material {
+													diffuseColor 0 0.635 0.635
 												}
 											}
 											geometry Box {

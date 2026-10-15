@@ -2,26 +2,26 @@ import RobotWindow from 'https://cyberbotics.com/wwi/R2023a/RobotWindow.js';
 
 let historyHtml = "";
 
-function receive (message){
+function receive(message) {
 	//Receive message from the python supervisor
 	//Split on comma
 	var parts = message.split(",");
 	console.log(parts);
 
 	//If there is a message
-	if (parts.length > 0){			
-		switch (parts[0]){
+	if (parts.length > 0) {
+		switch (parts[0]) {
 			case "startup":
 				//Call for set up the robot window
 				startup();
 				break;
 			case "update":
 				//Update the information on the robot window every frame (of game time)
-				update(parts.slice(1,parts.length + 1));
+				update(parts.slice(1, parts.length + 1));
 				break;
 			case "config":
 				//Load config data
-				updateConfig(parts.slice(1,parts.length + 1));
+				updateConfig(parts.slice(1, parts.length + 1));
 				break;
 			case "unloaded0":
 				//Robot 0's controller has been unloaded
@@ -44,7 +44,7 @@ function receive (message){
 				endGame();
 				break;
 			case "historyUpdate":
-				let history0 = message.split(",").slice(1,message.length-1)
+				let history0 = message.split(",").slice(1, message.length - 1)
 				updateHistory(history0)
 				break;
 			case "latest":
@@ -63,7 +63,7 @@ function receive (message){
 				document.getElementById("versionInfo").style.color = "#e67e22";
 				document.getElementById("versionInfo").innerHTML = `Ver. ${parts[1]} (Unreleased)`;
 				break;
-				
+
 			case "worlds":
 				updateWorld(parts.slice(1));
 				break;
@@ -95,51 +95,112 @@ function receive (message){
 			case "currentWorld":
 				enableTestButton(parts[1]);
 				break;
+			case "batteryUpdate":
+				// parts[1] = robot num (0 or 1), parts[2] = battery % as string
+				var bNum = parseInt(parts[1]);
+				var bPct = Math.max(0, Math.min(100, parseFloat(parts[2])));
+				updateBatteryDisplay(bNum, bPct);
+				break;
+			case "batteryDepleted":
+				endGame();
+				break;
 		}
 	}
 }
 
-function updateWorld(worlds_str){
+function updateBatteryDisplay(bNum, bPct) {
+	var container = document.getElementById("batteryContainer" + bNum);
+	var fill = document.getElementById("batteryFill" + bNum);
+	var pctText = document.getElementById("batteryPercent" + bNum);
+	var icon = document.getElementById("batteryIcon" + bNum);
+
+	if (!container) return;
+
+	container.style.display = "block";
+
+	// Calculo de tono continuo en HSL: 100% -> Verde (Hue 120), 50% -> Amarillo (Hue 60), 0% -> Rojo (Hue 0)
+	var hue = Math.max(0, Math.min(120, bPct * 1.2));
+	var color = "hsl(" + Math.round(hue) + ", 85%, 42%)";
+	var shadowColor = "hsla(" + Math.round(hue) + ", 85%, 45%, 0.4)";
+
+	if (fill) {
+		fill.style.width = bPct.toFixed(2) + "%";
+		fill.style.backgroundColor = color;
+		fill.style.boxShadow = "0 0 8px " + shadowColor;
+	}
+
+	if (pctText) {
+		pctText.textContent = bPct.toFixed(2) + "%";
+		pctText.style.color = color;
+	}
+
+	if (icon) {
+		icon.style.color = color;
+		icon.className = "fa battery-icon";
+		if (bPct > 80) {
+			icon.className += " fa-battery-full";
+		} else if (bPct > 55) {
+			icon.className += " fa-battery-three-quarters";
+		} else if (bPct > 30) {
+			icon.className += " fa-battery-half";
+		} else if (bPct > 10) {
+			icon.className += " fa-battery-quarter";
+		} else {
+			icon.className += " fa-battery-empty";
+		}
+	}
+}
+
+function resetBatteryDisplay() {
+	for (var i = 0; i <= 1; i++) {
+		var container = document.getElementById("batteryContainer" + i);
+		if (container) {
+			container.style.display = "none";
+		}
+	}
+}
+
+function updateWorld(worlds_str) {
 	//reset worlds
 	document.getElementById("worlds_div").innerHTML = "";
 
 	var worlds_array_str = String(worlds_str)
 	let worlds = worlds_array_str.split(",");
-	for (let i = 0; i < worlds.length; i ++){
+	for (let i = 0; i < worlds.length; i++) {
 		let button = document.createElement("button");
 		button.innerHTML = worlds[i];
-		button.onclick = function(){
+		button.onclick = function () {
 			window.robotWindow.send(`loadWorld,${worlds[i]}`);
 		};
-		button.setAttribute("class","btn-world");
+		button.setAttribute("class", "btn-world");
 
 		// Add thumbnail to button
 		let thumbnail = document.createElement("img");
 		// Strip .wbt from name
-		thumbnail.src = "./thumbnails/"+worlds[i].replace(/\.[^/.]+$/, "")+".png";
+		thumbnail.src = "./thumbnails/" + worlds[i].replace(/\.[^/.]+$/, "") + ".png";
 		thumbnail.height = 20;
 		thumbnail.style = "vertical-align: middle;margin: 5px;";
 		thumbnail.onerror = () => thumbnail.src = "./thumbnails/missing.png";
 		button.appendChild(thumbnail)
 
 		document.getElementById("worlds_div").appendChild(button);
-		
+
 	}
 }
 
 
-function updateHistory(history0){
+function updateHistory(history0) {
 	let html = "<tr>";
-	if(history0[0].indexOf(":") != -1){
-		if(history0[1].indexOf("+") != -1){
+	if (history0[0].indexOf(":") != -1) {
+		if (history0[1].indexOf("+") != -1) {
 			html += `<td style='font-size:18px;color:#2980b9;width:'>${history0[0]}</td><td style='font-size:18px;color:#2980b9;'>${history0[1]}</td>`;
-		}else if(history0[1].indexOf("-") != -1){
+		} else if (history0[1].indexOf("-") != -1) {
 			html += `<td style='font-size:18px;color:#c0392b;'>${history0[0]}</td><td style='font-size:18px;color:#c0392b;'>${history0[1]}</td>`;
 		}
-		else if(history0[1].indexOf("WARNING") != -1) {
+		else if (history0[1].indexOf("WARNING") != -1) {
 			html += `<td style='font-size:18px;color:#d98236;'>${history0[0]}</td><td style='font-size:18px;color:#d98236;'>${history0[1]}</td>`;
 		}
-		else{
+		else {
 			html += `<td style='font-size:18px;color:#2c3e50;'>${history0[0]}</td><td style='font-size:18px;color:#2c3e50;'>${history0[1]}</td>`;
 		}
 	}
@@ -151,24 +212,25 @@ function updateHistory(history0){
 function resetHistory() {
 	historyHtml = "";
 	document.getElementById("history").innerHTML = "";
+	resetBatteryDisplay();
 }
 
-function loadedController(id){
+function loadedController(id) {
 	//A controller has been loaded into a robot id is 0 or 1 and name is the name of the robot
 	//Set name and toggle to unload button for robot 0
 	if (document.getElementById("keepRemote").checked && id == 0) return
-	document.getElementById("load"+ id).style.display = "none";
-	document.getElementById("unload"+ id).style.display = "inline-block";
+	document.getElementById("load" + id).style.display = "none";
+	document.getElementById("unload" + id).style.display = "inline-block";
 	if (id == 0)
 		disableWhileSending(false);
 }
 
-function unloadedController(id){
+function unloadedController(id) {
 	//A controller has been unloaded for robot of the given id
 	//Reset name and toggle to load button for robot 0
-	document.getElementById("robot"+ id +"Controller").value = "";
-	document.getElementById("unload"+ id).style.display = "none";
-	document.getElementById("load"+ id).style.display = "inline-block";
+	document.getElementById("robot" + id + "Controller").value = "";
+	document.getElementById("unload" + id).style.display = "none";
+	document.getElementById("load" + id).style.display = "inline-block";
 }
 
 function setEnableRemoteBtn() {
@@ -180,7 +242,7 @@ function setDisableRemoteBtn() {
 	document.getElementById("disableRemote").style.display = "inline-block";
 }
 
-function startup (){
+function startup() {
 	resetHistory();
 	unloadedController(0);
 	unloadedController(1);
@@ -204,18 +266,18 @@ function startup (){
 	getWorlds();
 }
 
-window.getWorlds = function() {
+window.getWorlds = function () {
 	console.log("Getting worlds...")
 	window.robotWindow.send('getWorlds');
 }
 
-function update (data){
+function update(data) {
 	//Update the ui each frame of the simulation
 	//Sets the the timer
 	document.getElementById("score0").innerHTML = String(data[0]);
 
 	//The total time at the start
-	let maxTime = 8 * 60; 
+	let maxTime = 8 * 60;
 	if (data[2]) { // is this necessary?
 		maxTime = data[2]
 	}
@@ -226,10 +288,10 @@ function update (data){
 }
 
 function updateTestBtnState(state) {
-	setEnableButton("test",!state);
+	setEnableButton("test", !state);
 }
 
-function updateConfig (data){
+function updateConfig(data) {
 	//Update the config ui
 	document.getElementById("autoRemoveFiles").checked = Boolean(Number(data[0]));
 	document.getElementById("autoLoP").checked = Boolean(Number(data[1]));
@@ -246,8 +308,8 @@ function updateConfig (data){
 	updateTestBtnState(Boolean(Number(data[0])))
 }
 
-window.configChanged = function(){
-	let data = [0,0,0,0,0,0,""];
+window.configChanged = function () {
+	let data = [0, 0, 0, 0, 0, 0, ""];
 	data[0] = String(Number(document.getElementById("autoRemoveFiles").checked));
 	data[1] = String(Number(document.getElementById("autoLoP").checked));
 	data[2] = String(Number(document.getElementById("recording").checked));
@@ -262,7 +324,7 @@ window.configChanged = function(){
 	window.robotWindow.send(`config,${data.join(',')}`);
 }
 
-function calculateTimeRemaining(done, maxTime){
+function calculateTimeRemaining(done, maxTime) {
 	//Create the string for the time remaining (mm:ss) given the amount of time elapsed
 	//Convert to an integer
 	done = Math.floor(done);
@@ -277,11 +339,11 @@ function calculateTimeRemaining(done, maxTime){
 	seconds = String(seconds)
 
 	//Add leading 0s if necessary
-	for (var i = 0; i < 2 - seconds.length; i++){
+	for (var i = 0; i < 2 - seconds.length; i++) {
 		seconds = "0" + seconds;
 	}
 
-	for (var i = 0; i < 2 - mins.length ; i++){
+	for (var i = 0; i < 2 - mins.length; i++) {
 		mins = "0" + mins;
 	}
 
@@ -293,7 +355,7 @@ function preRun() {
 	//Disable all the loading buttons (cannot change loaded controllers once simulation starts)
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
-	
+
 	setEnableButton("load1", false);
 	setEnableButton("unload1", false);
 	//When the run button is pressed
@@ -303,7 +365,7 @@ function preRun() {
 	//Send a run command
 	//Enable the pause button
 	setEnableButton("pauseButton", true);
-	
+
 	// setEnableButton('quit0', true)
 	setEnableButton('lopButton', true)
 
@@ -315,17 +377,17 @@ function preRun() {
 	setEnableButton("dockerPath", false);
 }
 
-window.runPressed = function(){
+window.runPressed = function () {
 	preRun();
 	window.robotWindow.send("run");
 }
 
-window.runDockerPressed = function(){
+window.runDockerPressed = function () {
 	let docker_input = document.getElementById("dockerPath");
-	window.robotWindow.send("runDocker,"+docker_input.value);
+	window.robotWindow.send("runDocker," + docker_input.value);
 }
 
-window.pausePressed = function(){
+window.pausePressed = function () {
 	//When the pause button is pressed
 	//Turn off pause button, on run button and send signal to pause
 	setEnableButton("pauseButton", false);
@@ -334,7 +396,7 @@ window.pausePressed = function(){
 	window.robotWindow.send("pause");
 }
 
-window.resetPressed = function(){
+window.resetPressed = function () {
 	//When the reset button is pressed
 	//Disable all buttons
 	setEnableButton("runButton", false);
@@ -344,14 +406,14 @@ window.resetPressed = function(){
 	window.robotWindow.send("reset");
 }
 
-window.testPressed = function() {
+window.testPressed = function () {
 	preRun();
 	window.robotWindow.send("loadTest");
 	window.robotWindow.send("runTest");
 }
 
-window.giveupPressed = function(){
-	if(document.getElementById("giveupB").className == "btn-giveup"){
+window.giveupPressed = function () {
+	if (document.getElementById("giveupB").className == "btn-giveup") {
 		window.robotWindow.send("quit,0");
 		setEnableButton("runButton", false)
 		setEnableButton("pauseButton", false);
@@ -360,23 +422,23 @@ window.giveupPressed = function(){
 	}
 }
 
-window.openLoadController = function(id){
+window.openLoadController = function (id) {
 	//When a load button is pressed - opens the file explorer window
-	document.getElementById("robot"+id+"Controller").click();
-	window.robotWindow.send("loadControllerPressed,"+id);
+	document.getElementById("robot" + id + "Controller").click();
+	window.robotWindow.send("loadControllerPressed," + id);
 }
 
-function setEnableButton(name, state){
+function setEnableButton(name, state) {
 	//Set the disabled state of a button (state is if it is enabled as a boolean)
 	document.getElementById(name).disabled = !state;
-	if(name == "giveupB"){
-		if(state) document.getElementById(name).className = "btn-giveup"
+	if (name == "giveupB") {
+		if (state) document.getElementById(name).className = "btn-giveup"
 		else document.getElementById(name).className = "btn-giveupD"
 	}
 }
 
 //Set the onload command for the window
-window.onload = function(){
+window.onload = function () {
 	//Connect the window
 	window.robotWindow = new RobotWindow();
 	//Set the title
@@ -388,51 +450,57 @@ window.onload = function(){
 	window.robotWindow.send("rw_reload");
 };
 
-function endGame(){
+function endGame() {
 	//Once the game is over turn off both the run and pause buttons
 	setEnableButton("runButton", false)
 	setEnableButton("pauseButton", false);
 	setEnableButton('lopButton', false)
 }
 
-window.unloadPressed = function(id){
+window.unloadPressed = function (id) {
 	//Unload button pressed
 	//Send the signal for an unload for the correct robot
-	window.robotWindow.send("robot"+id+"Unload");
-	window.robotWindow.send("unloadControllerPressed,"+id);
+	window.robotWindow.send("robot" + id + "Unload");
+	window.robotWindow.send("unloadControllerPressed," + id);
 }
 
 function disableWhileSending(disabled) {
 	setEnableButton("load0", !disabled);
 	setEnableButton("unload0", !disabled);
-	
+
 	setEnableButton("load1", !disabled);
 	setEnableButton("unload1", !disabled);
-	
+
 	setEnableButton("runButton", !disabled);
 }
 
 
-window.fileOpened = function(filesId, acceptTypes, location, id){
+window.fileOpened = function (filesId, acceptTypes, location, id) {
 	//When file 0 value is changed
 	//Get the files
 	var files = document.getElementById(filesId).files;
 
 	//If there are files
-	if (files.length > 0){
+	if (files.length > 0) {
 		//Get the first file only
 		var file = files[0];
 		//Split at the .
 		var nameParts = file.name.split(".");
 
 		//If there are parts to the name
-		if (nameParts.length >= 1){
+		if (nameParts.length >= 1) {
+			// Validacion estricta: solo archivos .py
+			var fileExtension = nameParts[nameParts.length - 1].toLowerCase();
+			if (nameParts.length > 1 && fileExtension !== 'py') {
+				alert("Extension del archivo incorrecta: '." + fileExtension + "'. Solo se aceptan archivos .py");
+				return;
+			}
 			//If the file extension is valid
-			if(nameParts.length == 1 || acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1 ){
+			if (nameParts.length == 1 || acceptTypes.indexOf(nameParts[nameParts.length - 1]) != -1) {
 				const fd = new FormData();
 				for (let i = 0; i < files.length; i++) {
 					const f = files[i];
-					fd.append(`file${(i+1)}`, f, f.name);
+					fd.append(`file${(i + 1)}`, f, f.name);
 				}
 
 				let xmlhttp = new XMLHttpRequest();
@@ -446,13 +514,13 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 					}
 				};
 				disableWhileSending(true);
-				xmlhttp.open("POST", "http://127.0.0.1:60520/"+location+"/", true);
+				xmlhttp.open("POST", "http://127.0.0.1:60520/" + location + "/", true);
 				xmlhttp.send(fd);
-			}else{
+			} else {
 				//Tell the user to select a program
 				alert("Please select a controller with a valid file type from: .py, .exe, .class, .jar, .bsg, .m or no extension (for Linux/Mac users)");
 			}
-		}else{
+		} else {
 			//Tell the user to select a program
 			alert("Please select a controller program");
 		}
@@ -460,63 +528,63 @@ window.fileOpened = function(filesId, acceptTypes, location, id){
 	}
 }
 
-window.openJsonFile = function(){
+window.openJsonFile = function () {
 	//When file 0 value is changed
 	//Get the files
 	var files = document.getElementById("robot1Controller").files;
-	
+
 	//If there are files
-	if (files.length > 0){
+	if (files.length > 0) {
 		//Get the first file only
 		var file = files.item(0);
 		//Split at the .
 		var nameParts = file.name.split(".");
-		
+
 		//If there are parts to the name
-		if (nameParts.length > 1){
+		if (nameParts.length > 1) {
 			//If the last part is "json" - a json file
-			if(nameParts[nameParts.length - 1] == "json"){
+			if (nameParts[nameParts.length - 1] == "json") {
 				//Create a file reader
 				var reader = new FileReader();
-				
+
 				//Set the function of the reader when it finishes loading
-				reader.onload = (function(reader){
-					return function(){
+				reader.onload = (function (reader) {
+					return function () {
 						//Send the signal to the supervisor with the data from the file
 						window.robotWindow.send("robotJson," + reader.result);
 					}
 				})(reader);
-				
+
 				//Read the file as udf-8 text
 				reader.readAsText(file);
-			}else{
+			} else {
 				//Tell the user to select a json file
 				alert("Please select a json file.");
 			}
-		}else{
+		} else {
 			//Tell the user to select a json file
 			alert("Please select a json file.");
 		}
-		
+
 	}
 }
 
-window.relocate = function(id){
-	window.robotWindow.send("relocate,"+id.toString());
+window.relocate = function (id) {
+	window.robotWindow.send("relocate," + id.toString());
 }
 
-window.quit = function(id){
+window.quit = function (id) {
 	unloadPressed(id);
-	window.robotWindow.send("quit,"+id.toString());
+	window.robotWindow.send("quit," + id.toString());
 }
 
-window.enableRemotePressed = function() {
+window.enableRemotePressed = function () {
 	setEnableButton("load0", false);
 	setEnableButton("unload0", false);
 	setDisableRemoteBtn();
 	window.robotWindow.send("remoteEnable");
 }
-window.disableRemotePressed = function() {
+window.disableRemotePressed = function () {
 	setEnableButton("load0", true);
 	setEnableButton("unload0", true);
 	setEnableRemoteBtn();
@@ -527,7 +595,7 @@ window.disableRemotePressed = function() {
 }
 
 function enableTestButton(world_name) {
-	if (world_name != ".Tests"){ 
+	if (world_name != ".Tests") {
 		document.getElementById("dev-tests").style.display = "none";
 		return;
 	}

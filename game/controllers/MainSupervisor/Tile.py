@@ -92,6 +92,18 @@ class Swamp(Tile):
             self.multiplier = Swamp.MAX_MULTIPLIER
 
 
+class ContactTile(Tile):
+    """Contact Tile object holding boundary data"""
+
+    def __init__(
+        self,
+        min: tuple[float, float],
+        max: tuple[float, float],
+        center: tuple[float, float, float]
+    ) -> None:
+        super().__init__(min, max, center)
+
+
 class StartTile(Tile):
     """StartTile Tile object holding boundary data"""
 
@@ -153,6 +165,7 @@ class TileManager(ErebusObject):
         self.start_tile: StartTile = self._get_start_tile()
         self.checkpoints: list[Checkpoint] = self._get_checkpoints()
         self.swamps: list[Swamp] = self._get_swamps()
+        self.contacts: list[ContactTile] = self._get_contacts()
 
     def _get_swamps(self) -> list[Swamp]:
         """Get all swamps in simulation. Stores boundary information
@@ -197,6 +210,48 @@ class TileManager(ErebusObject):
             swamps.append(swamp)
             
         return swamps
+
+    def _get_contacts(self) -> list[ContactTile]:
+        """Get all contact tiles in simulation. Stores boundary information
+        within a list of ContactTile objects, by scanning every tile in the
+        WALLTILES node for a `contact` field set to TRUE
+
+        Returns:
+            list[ContactTile]: List of contact tile objects
+        """
+
+        contacts: list[ContactTile] = []
+
+        tile_nodes = self._erebus.getFromDef('WALLTILES').getField('children')
+        num_tiles: int = tile_nodes.getCount()
+
+        for i in range(num_tiles):
+            node: Node = tile_nodes.getMFNode(i)
+            contact_field = node.getField("contact")
+            if contact_field is None or not contact_field.getSFBool():
+                continue
+
+            x_pos: int = node.getField("xPos").getSFInt32()
+            z_pos: int = node.getField("zPos").getSFInt32()
+            width: float = node.getField("width").getSFFloat()
+            height: float = node.getField("height").getSFFloat()
+            x_scale: float = node.getField("xScale").getSFFloat()
+            z_scale: float = node.getField("zScale").getSFFloat()
+
+            # Same formula worldTile/halfTile protos use to compute their translation
+            x_start: float = -(width * (0.3 * x_scale) / 2.0)
+            z_start: float = -(height * (0.3 * z_scale) / 2.0)
+            x: float = x_pos * (0.3 * x_scale) + x_start
+            z: float = z_pos * (0.3 * z_scale) + z_start
+
+            half_x: float = 0.15 * x_scale
+            half_z: float = 0.15 * z_scale
+
+            contacts.append(ContactTile((x - half_x, z - half_z),
+                                        (x + half_x, z + half_z),
+                                        (x, 0, z)))
+
+        return contacts
 
     def _get_checkpoints(self) -> list[Checkpoint]:
         """Get all checkpoints in simulation. Stores boundary information
@@ -317,7 +372,20 @@ class TileManager(ErebusObject):
                 break
 
         self._erebus.robot_obj.update_in_swamp(swamp, self._erebus.DEFAULT_MAX_MULT)
-    
+
+    def check_contacts(self) -> None:
+        """Check if the simulation robot is in any contact tiles. Recharges
+        the robot's battery to full once it has remained on a contact tile
+        for the configured `ChangeBatteryTime` duration
+        """
+        # Check if the robot is in a contact tile
+        contact: bool = any(
+            c.check_position(self._erebus.robot_obj.position)
+            for c in self.contacts
+        )
+
+        self._erebus.robot_obj.update_in_contact(contact)
+
     def check_checkpoints(self) -> None: 
         """Check if the simulation robot is in any checkpoints. Awards points
         accordingly

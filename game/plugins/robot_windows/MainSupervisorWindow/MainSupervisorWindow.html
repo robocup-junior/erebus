@@ -1,238 +1,290 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<script type="module" src="MainSupervisorWindow.js"></script>
-		<link rel="icon" type="image/png" href="https://cyberbotics.com/assets/images/webots.png">
-		<link rel="stylesheet" type="text/css" href="MainSupervisorWindow.css">
-		<link rel="stylesheet" type="text/css" href="simple-grid.css">
-		<link rel="icon" type="image/x-icon" href="erebus.png">
-	</head>
-	<body>
-		<div class="wrapper">
-			<div class = "smallSection rowType1">
-				<div class="row center">
-					<div class="col-12">
-						<img src="robocup.png" style="max-width:100%;max-height:50px;"/>
-						<p><b>Erebus Rescue Simulator 2026</b></p>
-						<span id="versionInfo"></span><br>
-						<span id="newVersion"></span>
+
+<head>
+	<script type="module" src="MainSupervisorWindow.js"></script>
+	<link rel="icon" type="image/png" href="https://cyberbotics.com/assets/images/webots.png">
+	<link rel="stylesheet" type="text/css" href="MainSupervisorWindow.css">
+	<link rel="stylesheet" type="text/css" href="simple-grid.css">
+	<link rel="icon" type="image/x-icon" href="erebus.png">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+	<div class="wrapper">
+		<div class="smallSection rowType1">
+			<div class="row center">
+				<div class="col-12">
+					<img src="robocup.png" style="max-width:100%;max-height:50px;" />
+					<p><b>Erebus Rescue Simulator 27 Beta</b></p>
+					<span id="versionInfo"></span><br>
+					<span id="newVersion"></span>
+				</div>
+				<div class="col-6">
+					<div class="row-6">
+						<form id="robot0Form" enctype="multipart/form-data" method="post"
+							action="http://127.0.0.1:60520/controllers/robot0Controller/" style="margin:0;">
+							<input type="file" class="hidden"
+								onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)"
+								id="robot0Controller" />
+						</form>
+						<img src="program.png" style="max-width:100%;height:40px;" /><br>
+						<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;"
+							id="load0">Load</button>
+						<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;"
+							id="unload0">Remove</button>
 					</div>
-					<div class="col-6">
-						<div class="row-6">
-							<form id="robot0Form" enctype="multipart/form-data" method="post" action="http://127.0.0.1:60520/controllers/robot0Controller/" style="margin:0;">
-								<input type="file" class="hidden" onchange="fileOpened('robot0Controller', '[\'py\', \'exe\', \'class\', \'jar\', \'bsg\', \'m\']', 'controllers/robot0Controller', 0)" id="robot0Controller" />
-							</form>
-							<img src="program.png" style="max-width:100%;height:40px;"/><br>
-							<button class="button buttonLoad" onclick="openLoadController(0)" style="display:inline-block;" id="load0">Load</button>
-							<button class="button buttonUnload" onclick="unloadPressed(0)" style="display:none;" id="unload0">Remove</button>
-						</div>
-						<div class="col-12 remoteWrapper">
-							<div>
-								<button class="button buttonLoad" onclick="enableRemotePressed()" style="display:inline-block;" id="enableRemote">Toggle Remote</button>
-								<button class="button buttonUnload" onclick="disableRemotePressed()" style="display:none;" id="disableRemote">Toggle Remote</button>
-							</div>
-							<div>
-								<div class="tooltip">
-									<div class="tooltipmark">?</div>
-									<span class="tooltiptext">Enable webots remote extern controllers. See console for extra instructions.
-										Find out more <a href="https://erebus.rcj.cloud/docs/tutorials/remotecontroller/" target="_blank">here</a>
-										<br>NOTE: Webots will wait for a controller to connect, and will halt the program until one is found.
-										 Failing to do so will cause you to have to manually reset the Webots world (CTRL+SHIFT+R) to use Erebus again.</span>
-								</div>
-							</div>
+					<div class="col-12 remoteWrapper">
+						<div>
+							<button class="button buttonLoad" onclick="enableRemotePressed()"
+								style="display:inline-block;" id="enableRemote">Toggle Remote</button>
+							<button class="button buttonUnload" onclick="disableRemotePressed()" style="display:none;"
+								id="disableRemote">Toggle Remote</button>
 						</div>
 						<div>
-							<span style="line-height: 2em;">Docker path:</span>
-							<input class="dockerInput" id="dockerPath" onchange="configChanged()"/>
+							<div class="tooltip">
+								<div class="tooltipmark">?</div>
+								<span class="tooltiptext">Enable webots remote extern controllers. See console for extra
+									instructions.
+									Find out more <a href="https://erebus.rcj.cloud/docs/tutorials/remotecontroller/"
+										target="_blank">here</a>
+									<br>NOTE: Webots will wait for a controller to connect, and will halt the program
+									until one is found.
+									Failing to do so will cause you to have to manually reset the Webots world
+									(CTRL+SHIFT+R) to use Erebus again.</span>
+							</div>
 						</div>
 					</div>
-					<div class="col-6">
-						<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
-						<img src="robot.png" style="max-width:100%;height:40px;"/><br>
-						<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;" id="load1">Load</button>
-						<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;" id="unload1">Unload</button>
+					<div>
+						<span style="line-height: 2em;">Docker path:</span>
+						<input class="dockerInput" id="dockerPath" onchange="configChanged()" />
 					</div>
 				</div>
-				<div class="row center" style="background-color: #7f8fa6;">
-					<div class="col-4" style="margin: 0.5em 0;width: 25%;">
-						<label class="btn-settings tab" for="settings">Settings</label>
-					</div>
-					<div class="col-4" style="margin: 0.5em 0;width: 25%;">
-						<label class="btn-worlds tab" for="worlds">Worlds</label>
-					</div>
-					<div class="col-4" style="margin: 0.5em 0;width: 25%;">
-						<label class="btn-reset tab" for="reset">Reset</label>
-    					<input type="button" onclick="resetPressed()" style="display:none;" id="reset"/>
-					</div>
-					<div class="col-4" style="margin: 0.5em 0;width: 25%;">
-						<label class="btn-giveupD tab" for="quit0" id="giveupB">Give up!</label>
-    					<input type="button" onclick="giveupPressed()" style="display:none;" id="quit0"/>
-					</div>
+				<div class="col-6">
+					<input type="file" class="hidden" onchange="openJsonFile()" id="robot1Controller" />
+					<img src="robot.png" style="max-width:100%;height:40px;" /><br>
+					<button class="button buttonLoad" onclick="openLoadController(1)" style="display:inline-block;"
+						id="load1">Load</button>
+					<button class="button buttonUnload" onclick="unloadPressed(1)" style="display:none;"
+						id="unload1">Unload</button>
 				</div>
-				<div class="hidden_box row center">
-					<input type="checkbox" id="settings"/>
-					<div class="hidden_show">
+			</div>
+			<div class="row center" style="background-color: #7f8fa6;">
+				<div class="col-4" style="margin: 0.5em 0;width: 25%;">
+					<label class="btn-settings tab" for="settings">Settings</label>
+				</div>
+				<div class="col-4" style="margin: 0.5em 0;width: 25%;">
+					<label class="btn-worlds tab" for="worlds">Worlds</label>
+				</div>
+				<div class="col-4" style="margin: 0.5em 0;width: 25%;">
+					<label class="btn-reset tab" for="reset">Reset</label>
+					<input type="button" onclick="resetPressed()" style="display:none;" id="reset" />
+				</div>
+				<div class="col-4" style="margin: 0.5em 0;width: 25%;">
+					<label class="btn-giveupD tab" for="quit0" id="giveupB">Give up!</label>
+					<input type="button" onclick="giveupPressed()" style="display:none;" id="quit0" />
+				</div>
+			</div>
+			<div class="hidden_box row center">
+				<input type="checkbox" id="settings" />
+				<div class="hidden_show">
+					<div class="col-12">
+						<span>Changelog <a href="https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md"
+								target="_blank">link</a></span><br>
+						<span>World Generator <a href="http://rescuesim.uai.edu.ar/home"
+								target="_blank">link</a></span><br>
+						<span>Robot Customiser <a href="https://v25.robot.erebus.rcj.cloud/"
+								target="_blank">link</a></span>
+					</div>
+					<hr>
+					<div class="col-2"></div>
+					<div class="col-4">
 						<div class="col-12">
-							<span>Changelog <a href="https://github.com/robocup-junior/erebus/blob/master/CHANGELOG.md" target="_blank">link</a></span><br>
-							<span>World Generator <a href="http://rescuesim.uai.edu.ar/home" target="_blank">link</a></span><br>
-							<span>Robot Customiser <a href="https://v25.robot.erebus.rcj.cloud/" target="_blank">link</a></span>
+							<span>Keep controller/robot files</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="autoRemoveFiles"
+										onchange="configChanged()" />
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
+							</div>
 						</div>
-						<hr>
-						<div class="col-2"></div>
-						<div class="col-4">
-							<div class="col-12">
-								<span>Keep controller/robot files</span>
-								<div class="switch">
-									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="autoRemoveFiles" onchange="configChanged()"/>
-										<span class="switch__content"></span>
-										<span class="switch__circle"></span>
-									</label>
-								</div>
+						<div class="col-12">
+							<span>Disable automatic LoP (For debugging purposes)</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="autoLoP"
+										onchange="configChanged()" />
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
 							</div>
-							<div class="col-12">
-									<span>Disable automatic LoP (For debugging purposes)</span>
-									<div class="switch">
-										<label class="switch__label">
-											<input type="checkbox" class="switch__input" id="autoLoP" onchange="configChanged()"/>
-											<span class="switch__content"></span>
-											<span class="switch__circle"></span>
-										</label>
-									</div>
+						</div>
+						<div class="col-12">
+							<span>Automatic camera</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="autoCam"
+										onchange="configChanged()" />
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
 							</div>
-							<div class="col-12">
-								<span>Automatic camera</span>
-								<div class="switch">
-									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="autoCam" onchange="configChanged()"/>
-										<span class="switch__content"></span>
-										<span class="switch__circle"></span>
-									</label>
-								</div>
-							</div>
-							
+						</div>
 
-						</div>
-						<div class="col-4">
-							<div class="col-12">
-								<div class="col-12">
-									<span>Recording</span>
-									<div class="switch">
-										<label class="switch__label">
-											<input type="checkbox" class="switch__input" id="recording" onchange="configChanged()"/>
-											<span class="switch__content"></span>
-											<span class="switch__circle"></span>
-										</label>
-									</div>
-								</div>
-								<span>Keep remote controller on</span>
-								<div class="switch">
-									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="keepRemote" onchange="configChanged()"/>
-										<span class="switch__content"></span>
-										<span class="switch__circle"></span>
-									</label>
-								</div>
-							</div>
-						</div>
+
+					</div>
+					<div class="col-4">
 						<div class="col-12">
-							<hr><br>
-							<div id="dev-tests">
-								<span>Dev - Tests</span>
-								<div>
-									<button class="btn-test" type="button" onclick="testPressed()" id="test">Run Tests (must disable 'Keep controller')</button>
-								</div>
-							</div>
 							<div class="col-12">
-								<span>Enable debugging</span>
+								<span>Recording</span>
 								<div class="switch">
 									<label class="switch__label">
-										<input type="checkbox" class="switch__input" id="enableDebugging" onchange="configChanged()"/>
+										<input type="checkbox" class="switch__input" id="recording"
+											onchange="configChanged()" />
 										<span class="switch__content"></span>
 										<span class="switch__circle"></span>
 									</label>
 								</div>
+							</div>
+							<span>Keep remote controller on</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="keepRemote"
+										onchange="configChanged()" />
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
 							</div>
 						</div>
 					</div>
-					
+					<div class="col-12">
+						<hr><br>
+						<div id="dev-tests">
+							<span>Dev - Tests</span>
+							<div>
+								<button class="btn-test" type="button" onclick="testPressed()" id="test">Run Tests (must
+									disable 'Keep controller')</button>
+							</div>
+						</div>
+						<div class="col-12">
+							<span>Enable debugging</span>
+							<div class="switch">
+								<label class="switch__label">
+									<input type="checkbox" class="switch__input" id="enableDebugging"
+										onchange="configChanged()" />
+									<span class="switch__content"></span>
+									<span class="switch__circle"></span>
+								</label>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div class="hidden_box_worlds row center">
-					<input type="checkbox" id="worlds"/>
-					<div class="hidden_show_worlds">
-						<div class="worlds_container">
-							<div id="worlds_div" class="col-10">
-								<div id="worldloader">
-									LOADING WORLDS
-								</div>
+
+			</div>
+			<div class="hidden_box_worlds row center">
+				<input type="checkbox" id="worlds" />
+				<div class="hidden_show_worlds">
+					<div class="worlds_container">
+						<div id="worlds_div" class="col-10">
+							<div id="worldloader">
+								LOADING WORLDS
 							</div>
-							<div class="col-2 refreshContainer">
-								<label class="btn-refresh" for="worldRefresh"></label>
-								<input type="button" onclick="getWorlds()" style="display:none;" id="worldRefresh"/>
-							</div>
+						</div>
+						<div class="col-2 refreshContainer">
+							<label class="btn-refresh" for="worldRefresh"></label>
+							<input type="button" onclick="getWorlds()" style="display:none;" id="worldRefresh" />
 						</div>
 					</div>
 				</div>
 			</div>
-			
-			<div class = "smallSection rowType2">
-				<br>
-				<table id="controlTable">
+		</div>
+
+		<div class="smallSection rowType2">
+			<br>
+			<table id="controlTable">
 				<tr>
 
-					<th class = "buttonRow">
-						
+					<th class="buttonRow">
+
 						<button id="runButton" class="simulationStateButton" onclick="runPressed()" disabled>
 							<svg class="svg-button" width="30" height="30" viewBox="0 0 20 18">
-								<polygon points="6.33 3.69 6.33 16.39 16.39 10.33 6.33 3.69"/>
+								<polygon points="6.33 3.69 6.33 16.39 16.39 10.33 6.33 3.69" />
 							</svg>
 						</button>
-						
-						<button id="runDockerButton" class="simulationStateButton" onclick="runDockerPressed()" disabled>
-							<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#000000}</style><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+
+						<button id="runDockerButton" class="simulationStateButton" onclick="runDockerPressed()"
+							disabled>
+							<svg xmlns="http://www.w3.org/2000/svg" height="18px"
+								viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+								<style>
+									svg {
+										fill: #000000
+									}
+								</style>
+								<path
+									d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z" />
+							</svg>
 						</button>
 					</th>
-					
 
-					<th class = "buttonRow">
+
+					<th class="buttonRow">
 						<button id="pauseButton" class="simulationStateButton" onclick="pausePressed()" disabled>
 							<svg class="svg-button" width="40" height="40" viewBox="0 0 20 20">
-							<rect width="2" height="10" x="12.5" y="6"/>
-							<rect width="2" height="10" x="5.5" y="6"/>
+								<rect width="2" height="10" x="12.5" y="6" />
+								<rect width="2" height="10" x="5.5" y="6" />
 							</svg>
 						</button>
 					</th>
 
-					<th class = "buttonRow">
+					<th class="buttonRow">
 						<button id="lopButton" class="simulationStateButton" onclick="relocate('0')" disabled>
 							<svg class="svg-icon" width="30" height="30" viewBox="0 0 19 18">
-								<path d="M3.254,6.572c0.008,0.072,0.048,0.123,0.082,0.187c0.036,0.07,0.06,0.137,0.12,0.187C3.47,6.957,3.47,6.978,3.484,6.988c0.048,0.034,0.108,0.018,0.162,0.035c0.057,0.019,0.1,0.066,0.164,0.066c0.004,0,0.01,0,0.015,0l2.934-0.074c0.317-0.007,0.568-0.271,0.56-0.589C7.311,6.113,7.055,5.865,6.744,5.865c-0.005,0-0.01,0-0.015,0L5.074,5.907c2.146-2.118,5.604-2.634,7.971-1.007c2.775,1.912,3.48,5.726,1.57,8.501c-1.912,2.781-5.729,3.486-8.507,1.572c-0.259-0.18-0.618-0.119-0.799,0.146c-0.18,0.262-0.114,0.621,0.148,0.801c1.254,0.863,2.687,1.279,4.106,1.279c2.313,0,4.591-1.1,6.001-3.146c2.268-3.297,1.432-7.829-1.867-10.101c-2.781-1.913-6.816-1.36-9.351,1.058L4.309,3.567C4.303,3.252,4.036,3.069,3.72,3.007C3.402,3.015,3.151,3.279,3.16,3.597l0.075,2.932C3.234,6.547,3.251,6.556,3.254,6.572z"></path>
+								<path
+									d="M3.254,6.572c0.008,0.072,0.048,0.123,0.082,0.187c0.036,0.07,0.06,0.137,0.12,0.187C3.47,6.957,3.47,6.978,3.484,6.988c0.048,0.034,0.108,0.018,0.162,0.035c0.057,0.019,0.1,0.066,0.164,0.066c0.004,0,0.01,0,0.015,0l2.934-0.074c0.317-0.007,0.568-0.271,0.56-0.589C7.311,6.113,7.055,5.865,6.744,5.865c-0.005,0-0.01,0-0.015,0L5.074,5.907c2.146-2.118,5.604-2.634,7.971-1.007c2.775,1.912,3.48,5.726,1.57,8.501c-1.912,2.781-5.729,3.486-8.507,1.572c-0.259-0.18-0.618-0.119-0.799,0.146c-0.18,0.262-0.114,0.621,0.148,0.801c1.254,0.863,2.687,1.279,4.106,1.279c2.313,0,4.591-1.1,6.001-3.146c2.268-3.297,1.432-7.829-1.867-10.101c-2.781-1.913-6.816-1.36-9.351,1.058L4.309,3.567C4.303,3.252,4.036,3.069,3.72,3.007C3.402,3.015,3.151,3.279,3.16,3.597l0.075,2.932C3.234,6.547,3.251,6.556,3.254,6.572z">
+								</path>
 							</svg>
 						</button>
 					</th>
 
 				</tr>
-				</table>
-				<br>
-			</div>
-			<div class = "largeSection rowType1">
-				<div class="row center">
-					<div class="col-6">
-						<img src="stopwatch.png" style="max-width:100%;height:40px;"/>
-						<p id="timer">00:00</p>
-						<span>(<span id="realWorldTimer">00:00</span>)</span>
-					</div>
-					<div class="col-6">
-						<img src="calculator.png" style="max-width:100%;height:40px;"/>
-						<p id="score0">0</p>
-					</div>
+			</table>
+			<br>
+		</div>
+		<div class="largeSection rowType1">
+			<div class="row center">
+				<div class="col-6">
+					<img src="stopwatch.png" style="max-width:100%;height:40px;" />
+					<p id="timer">00:00</p>
+					<span>(<span id="realWorldTimer">00:00</span>)</span>
+				</div>
+				<div class="col-6">
+					<img src="calculator.png" style="max-width:100%;height:40px;" />
+					<p id="score0">0</p>
 				</div>
 			</div>
-			<img src="drip.png" width="100%">
-			<div class="historyArea">
-				<table id="history">
-				</table>
-			</div>
 		</div>
-	</body>
+		<img src="drip.png" width="100%">
+		<div class="historyArea">
+			<div id="batteryContainer0" class="battery-card" style="display:none;">
+				<div class="battery-header">
+					<div class="battery-title">
+						<i id="batteryIcon0" class="fa fa-battery-full battery-icon"></i>
+						<span>Battery</span>
+					</div>
+					<span id="batteryPercent0" class="battery-pct">100.00%</span>
+				</div>
+				<div class="battery-bar-track">
+					<div id="batteryFill0" class="battery-bar-fill" style="width: 100%;"></div>
+				</div>
+			</div>
+
+			<table id="history">
+			</table>
+		</div>
+	</div>
+</body>
+
 </html>

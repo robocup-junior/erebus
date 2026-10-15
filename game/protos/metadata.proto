@@ -1,0 +1,14 @@
+#VRML_SIM R2022b utf8
+# tags: static
+PROTO metadata [
+    field SFInt32    numSection        0
+]
+{
+	Pose {
+		children [
+			Solid {
+				name "metadata"
+			}
+		]
+	}
+}
