@@ -10,7 +10,7 @@ PROTO Fake [
 {
     %{
         if fields.type.value == "omega" then
-			filename = "\"./stl/omega.stl\""   
+			filename = "\"./stl/U.stl\""   
         end
         if fields.type.value == "phi" then
 			filename = "\"./stl/phi.stl\""   
